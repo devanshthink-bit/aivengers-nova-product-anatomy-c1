@@ -23,7 +23,7 @@ replaces it later in one line.
   (`Nova.accent` at ~6 %). Paper, not the reader's saturated gradient.
 - Top-left: NOVA mark (`sparkles`-style SF Symbol) + "NOVA" in `.subheadline` semibold,
   `.secondary`.
-- One text block in `Nova.display(.largeTitle)` — same size, same weight throughout.
+- One text block in `.system(.largeTitle, weight: .semibold)` — same size, same weight throughout.
   Key words `.primary`, the rest `.secondary`. No bold, no size change. Line spacing
   loose (~+6).
 - Copy (emphasis shown in bold; the rendered text is one weight, two colours):
@@ -46,8 +46,8 @@ argument list as a `[Float]`. Swift Testing covers these.
 **`Ripple.metal` (one `[[stitchable]]` layer effect).** Per pixel: `d = distance(pos,
 origin)`; `x = (d − radius) / bandWidth`; if `|x| < 1`: displace the sample toward
 `origin` by `amplitude × sin(x·π) × (1 − |x|)`; add white by `highlight × (1 − |x|)²`.
-Otherwise pass through. Applied with `.layerEffect(…, maxSampleOffset:)` on the text
-stack only — the button and the wordmark stay still.
+Otherwise pass through. Applied with `.layerEffect(…, maxSampleOffset:)` on the page
+layer — the button stays still.
 
 **Driver (inside `WelcomeView`).** Tap → record the button's centre in the view's
 coordinate space (via `onGeometryChange`) → `.sensoryFeedback(.impact(weight: .light))`

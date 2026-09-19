@@ -60,6 +60,21 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 - Only `.quizIntro`, `.quiz`, `.results` are routes. Use `replace(with:)` when moving forward
   through finished steps so they can't be swiped back into.
 
+**Welcome (`Features/Welcome/`)**
+- `WelcomeView` is overlaid by `RootView` while `@AppStorage("hasSeenWelcome")` is false.
+  Not a route. Launch with `-hasSeenWelcome NO` to see it again; `-welcomeAutoDrop YES`
+  (DEBUG only) taps the button for you after a second, for recordings.
+- Don't combine both flags in one launch: `-hasSeenWelcome NO` is a launch argument, which
+  sits in `NSArgumentDomain` and overrides `UserDefaults` reads for the whole process —
+  the button's write still happens, but every read after it keeps returning the override,
+  so the crossfade looks like it never fires. Test the drop on a fresh install (or after
+  `xcrun simctl uninstall`) with `-welcomeAutoDrop YES` alone.
+- The ripple is `RippleWave` (maths, tested) + `Ripple.metal` (a `layerEffect`) + a
+  `TimelineView` driver in the view. Tune the feel in the "Tuning" preview, then move
+  the numbers into `RippleWave.Tuning`.
+- The Metal Toolchain is a separate download on Xcode 26+: if a build fails with
+  `cannot execute tool 'metal'`, run `xcodebuild -downloadComponent MetalToolchain`.
+
 **Physics (`Features/Game/ShotCourt.swift`)**
 - `ShotCourt` is pure CoreGraphics math (layout, pull-back → velocity, trajectory simulation,
   rim/score/miss detection) with no SwiftUI, covered by `ShotCourtTests`. Tune feel here.
