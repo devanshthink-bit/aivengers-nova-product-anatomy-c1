@@ -19,6 +19,7 @@
 /* Begin PBXFileReference section */
 		AA0000000000000000000001 /* NOVATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NOVATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2722D80305DEF0B00F62DA8 /* NOVA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NOVA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000010 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = CLAUDE.md; path = ../CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -51,6 +52,7 @@
 		E2722D77305DEF0B00F62DA8 = {
 			isa = PBXGroup;
 			children = (
+				AA0000000000000000000010 /* CLAUDE.md */,
 				E2722D82305DEF0B00F62DA8 /* NOVA */,
 				AA0000000000000000000002 /* NOVATests */,
 				E2722D81305DEF0B00F62DA8 /* Products */,
