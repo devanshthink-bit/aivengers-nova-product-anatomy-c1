@@ -23,14 +23,11 @@ replaces it later in one line.
   (`Nova.accent` at ~6 %). Paper, not the reader's saturated gradient.
 - Top-left: NOVA mark (`sparkles`-style SF Symbol) + "NOVA" in `.subheadline` semibold,
   `.secondary`.
-- Two text blocks in `Nova.display(.largeTitle)` — same size, same weight throughout.
+- One text block in `Nova.display(.largeTitle)` — same size, same weight throughout.
   Key words `.primary`, the rest `.secondary`. No bold, no size change. Line spacing
   loose (~+6).
-- Copy (editable):
-  > **News**, all in one place.
-  >
-  > NOVA helps you **read** what matters today, **play** a quick round on what you read,
-  > and **remember** it tomorrow.
+- Copy (emphasis shown in bold; the rendered text is one weight, two colours):
+  > **Know** the world and **local** updates quick and smooth **like water**.
 - Bottom: pill button "Get started", `.glassProminent`, tinted `Nova.accent`, in a
   `safeAreaBar(edge: .bottom)` like the quiz screens. Text capped at
   `Nova.readingMaxWidth` on iPad, as the reader does.
