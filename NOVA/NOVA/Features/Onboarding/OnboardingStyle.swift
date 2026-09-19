@@ -5,73 +5,115 @@
 
 import SwiftUI
 
-/// The shared visual language of the onboarding pages.
+/// The onboarding's visual language: enormous type on a flat ground, and one black
+/// button that means "go".
 ///
-/// One type size at one weight across every page; colour carries the hierarchy, not
-/// weight or scale. Surfaces float on diffused shadow rather than sitting inside boxes,
-/// and nested surfaces keep their curves concentric. This is the clean system layer,
-/// deliberately set against the reader's warm editorial serif.
+/// Type carries everything. There are no cards, no bezels and no borders — a headline
+/// large enough to fill the width needs no container to give it weight, and every box
+/// removed is more air for the water to move through.
 enum Onboarding {
-    /// Outer radius of a nested surface.
-    static let shellRadius: CGFloat = 26
-    /// Gap between a shell and its core. The core's radius is the difference, which is
-    /// what keeps the two curves concentric instead of merely rounded.
-    static let shellInset: CGFloat = 6
-    static var coreRadius: CGFloat { shellRadius - shellInset }
+    /// Flat, slightly warm grey. Deliberately not white: the black type sits on it
+    /// without glaring, and the ripple's highlight has somewhere to lift from.
+    static var ground: Color { Color(.systemGroupedBackground) }
 
-    static let iconTileRadius: CGFloat = 13
-    static let iconTileSize: CGFloat = 42
+    /// The headline size. Big enough that three or four words fill a line, which is what
+    /// makes the pages read as statements rather than instructions.
+    static let displaySize: CGFloat = 36
+    /// The opening manifesto gets a little more, because it is the only thing on its
+    /// page. Not much more: past this the sentence starts leaving single words
+    /// stranded on the last line.
+    static let manifestoSize: CGFloat = 36
 
-    /// Air above the headline. The pages are mostly empty on purpose.
-    static let headlineTopSpace: CGFloat = 18
-    static let blockSpacing: CGFloat = 26
+    static func display(_ size: CGFloat = displaySize) -> Font {
+        .system(size: size, weight: .bold)
+    }
 
-    static func headline(_ style: Font.TextStyle = .largeTitle) -> Font {
-        .system(style, design: .default, weight: .semibold)
+    /// Large type needs negative tracking or it reads loose and soft.
+    static let tracking: CGFloat = -1.1
+    static let lineSpacing: CGFloat = 2
+
+    static let pagePadding: CGFloat = 24
+    static let blockSpacing: CGFloat = 28
+
+    /// A shade darker than the ground. Unselected tiles are meant to recede almost to
+    /// nothing, so that a chosen one reads as the only thing on the page.
+    static var surface: Color { Color(.tertiarySystemFill) }
+
+    static let tileRadius: CGFloat = 22
+    static let tileHeight: CGFloat = 112
+
+    static let ctaHeight: CGFloat = 56
+}
+
+// MARK: - Headline
+
+/// A headline at the page's scale, with its emphasis carried by colour alone.
+struct Headline: View {
+    let text: Text
+    var size: CGFloat = Onboarding.displaySize
+
+    var body: some View {
+        text
+            .font(Onboarding.display(size))
+            .tracking(Onboarding.tracking)
+            .lineSpacing(Onboarding.lineSpacing)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-// MARK: - Eyebrow
-
-/// The small tracked label above a headline. It names the step without competing with it.
-struct Eyebrow: View {
+/// The grey line under a headline. Never competes; always explains.
+struct Subhead: View {
     let text: String
 
     var body: some View {
-        Text(text.uppercased())
-            .font(.system(size: 11, weight: .semibold))
-            .tracking(1.6)
+        Text(text)
+            .font(.system(size: 17, weight: .regular))
             .foregroundStyle(.secondary)
-            .accessibilityAddTraits(.isHeader)
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-// MARK: - Surfaces
+// MARK: - The button
 
-extension View {
-    /// A floating surface: no border, no hard shadow, just a soft ambient one so the card
-    /// reads as sitting above the page rather than cut into it.
-    func onboardingCore(radius: CGFloat = Onboarding.coreRadius, tint: Color? = nil) -> some View {
-        background {
-            RoundedRectangle(cornerRadius: radius, style: .continuous)
-                .fill(tint ?? Color(.secondarySystemBackground))
-        }
-        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-    }
+/// The full-width pill that carries every page forward.
+///
+/// `.primary` rather than literal black, so it inverts to white on a dark ground instead
+/// of disappearing into it. Disabled, it goes quiet and grey — and its label changes to
+/// say what is still missing, rather than leaving a dead button with no explanation.
+struct OnboardingButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
 
-    /// The outer half of the double bezel: a barely-there tray the core sits inside, with
-    /// a hairline that catches the edge and a diffused shadow under the whole assembly.
-    func onboardingShell(radius: CGFloat = Onboarding.shellRadius) -> some View {
-        padding(Onboarding.shellInset)
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(isEnabled ? AnyShapeStyle(Color(.systemBackground)) : AnyShapeStyle(.tertiary))
+            .frame(maxWidth: .infinity)
+            .frame(height: Onboarding.ctaHeight)
             .background {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(.background.secondary)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .strokeBorder(.primary.opacity(0.06), lineWidth: 0.5)
-                    }
+                Capsule().fill(isEnabled ? AnyShapeStyle(.primary) : AnyShapeStyle(Color(.tertiarySystemFill)))
             }
-            .shadow(color: .black.opacity(0.06), radius: 22, y: 10)
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .animation(.snappy(duration: 0.22), value: configuration.isPressed)
+            .animation(.smooth(duration: 0.3), value: isEnabled)
+    }
+}
+
+// MARK: - Step marker
+
+/// "01 / 05" in the top corner. The only chrome on the page, and small enough to ignore.
+struct StepMarker: View {
+    let page: OnboardingPage
+
+    var body: some View {
+        Text("\(String(format: "%02d", page.number)) / \(String(format: "%02d", OnboardingPage.count))")
+            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+            .foregroundStyle(.tertiary)
+            .contentTransition(.numericText())
+            .animation(.smooth(duration: 0.35), value: page)
+            .accessibilityLabel("Step \(page.number) of \(OnboardingPage.count)")
     }
 }
 
@@ -90,14 +132,14 @@ private struct StaggeredAppear: ViewModifier {
     func body(content: Content) -> some View {
         content
             .opacity(shown ? 1 : 0)
-            .offset(y: shown ? 0 : 14)
-            .blur(radius: shown ? 0 : 4)
+            .offset(y: shown ? 0 : 18)
+            .blur(radius: shown ? 0 : 5)
             .onAppear {
                 guard !reduceMotion else {
                     shown = true
                     return
                 }
-                withAnimation(.smooth(duration: 0.55).delay(Double(index) * 0.07)) {
+                withAnimation(.smooth(duration: 0.6).delay(Double(index) * 0.075)) {
                     shown = true
                 }
             }
@@ -107,27 +149,5 @@ private struct StaggeredAppear: ViewModifier {
 extension View {
     func onboardingEntry(_ index: Int) -> some View {
         modifier(StaggeredAppear(index: index))
-    }
-}
-
-// MARK: - Progress
-
-/// One dot per page; the current one stretches into a pill. A bar would suggest work
-/// being completed — these are places, not progress through a task.
-struct OnboardingProgress: View {
-    let current: OnboardingPage
-
-    var body: some View {
-        HStack(spacing: 5) {
-            ForEach(OnboardingPage.allCases, id: \.self) { page in
-                let isCurrent = page == current
-                Capsule()
-                    .fill(isCurrent ? AnyShapeStyle(Nova.accent) : AnyShapeStyle(.tertiary))
-                    .frame(width: isCurrent ? 18 : 5, height: 5)
-            }
-        }
-        .animation(.smooth(duration: 0.4), value: current)
-        .accessibilityElement()
-        .accessibilityLabel("Step \(current.number) of \(OnboardingPage.count)")
     }
 }

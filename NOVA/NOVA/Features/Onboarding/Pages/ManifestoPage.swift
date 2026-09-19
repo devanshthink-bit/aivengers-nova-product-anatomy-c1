@@ -5,18 +5,18 @@
 
 import SwiftUI
 
-/// The opener. One sentence, one size, one weight, two colours.
+/// The opener: one sentence, centred in an otherwise empty screen.
 ///
-/// The page is deliberately still, so the ripple that follows the tap has something to
-/// disturb. Nothing is asked here and nothing is explained — it is a statement of intent.
+/// Nothing is asked and nothing is explained. The type is set larger here than anywhere
+/// else in the app and given the whole page to sit in, because the emptiness around it is
+/// what makes it read as a statement instead of a caption. It is also the stillest thing
+/// NOVA ever shows, which is precisely what the ripple needs in order to disturb it.
 struct ManifestoPage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            copy
-                .font(Onboarding.headline())
-                .tracking(-0.8)
-                .lineSpacing(6)
-                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+
+            Headline(text: copy, size: Onboarding.manifestoSize)
                 .onboardingEntry(0)
 
             Spacer(minLength: 0)
@@ -37,5 +37,7 @@ struct ManifestoPage: View {
 
 #Preview {
     ManifestoPage()
-        .padding(.horizontal, Nova.screenPadding)
+        .padding(.horizontal, Onboarding.pagePadding)
+        .frame(maxHeight: .infinity)
+        .background(Onboarding.ground)
 }

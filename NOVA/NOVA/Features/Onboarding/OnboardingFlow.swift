@@ -114,8 +114,9 @@ struct OnboardingFlow: View {
     }
 
     private func pageBody(topInset: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: Onboarding.headlineTopSpace) {
-            header
+        VStack(alignment: .leading, spacing: 22) {
+            StepMarker(page: page)
+                .frame(maxWidth: .infinity, alignment: .trailing)
 
             Group {
                 switch page {
@@ -134,39 +135,18 @@ struct OnboardingFlow: View {
             // A fresh identity per page so each one runs its own entry stagger.
             .id(page)
             .transition(.opacity)
-
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, Nova.screenPadding)
-        .padding(.top, topInset)
+        .padding(.horizontal, Onboarding.pagePadding)
+        .padding(.top, topInset + 8)
         .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private var header: some View {
-        HStack {
-            Label("NOVA", systemImage: "sparkles")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            Spacer(minLength: 0)
-
-            OnboardingProgress(current: page)
-        }
-        .padding(.top, 8)
-    }
-
-    /// Near-white with a breath of the accent at the top. Inside the rippled layer so the
-    /// shader always has an opaque pixel to sample.
+    /// Flat, and that is the point. No gradient and no tint behind these pages: the
+    /// headline is the only thing with weight on them, and the water has to bend
+    /// something legible to be worth watching.
     private var backdrop: some View {
-        ZStack {
-            Rectangle().fill(.background)
-            LinearGradient(
-                colors: [Nova.accent.opacity(0.07), .clear],
-                startPoint: .top,
-                endPoint: UnitPoint(x: 0.5, y: 0.45)
-            )
-        }
+        Onboarding.ground
     }
 
     // MARK: - Button
@@ -175,14 +155,22 @@ struct OnboardingFlow: View {
         Button(buttonTitle) {
             advance()
         }
-        .buttonStyle(.glassProminent)
-        .controlSize(.large)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, Nova.screenPadding)
-        .padding(.vertical, 10)
+        .buttonStyle(OnboardingButtonStyle())
+        .padding(.horizontal, Onboarding.pagePadding)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
         .onGeometryChange(for: CGPoint.self) { $0.frame(in: .global).center } action: { buttonCentre = $0 }
         .disabled(isAdvancing || !canAdvance)
-        .animation(.smooth(duration: 0.3), value: canAdvance)
+        // The grid on the topics page runs underneath, so the button needs something to
+        // dissolve into rather than a hard edge.
+        .background {
+            LinearGradient(
+                colors: [Onboarding.ground.opacity(0), Onboarding.ground],
+                startPoint: .top,
+                endPoint: .center
+            )
+            .ignoresSafeArea()
+        }
     }
 
     private var buttonTitle: String {
@@ -190,7 +178,8 @@ struct OnboardingFlow: View {
         case .manifesto: "Get started"
         case .ritual: "Sounds good"
         case .name: readerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Skip for now" : "Continue"
-        case .topics: "Continue"
+        case .topics:
+            selection.wrappedValue.isComplete ? "Continue" : "Pick \(selection.wrappedValue.remaining) more"
         case .ready: "Start reading"
         }
     }

@@ -63,7 +63,8 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 **Onboarding (`Features/Onboarding/`)**
 - Five pages — manifesto, ritual, name, topics, ready — overlaid by `RootView` while
   `@AppStorage("hasSeenWelcome")` is false. Not a route, and nothing may swipe back in.
-- **To restart it, use the Restart button** pinned bottom-left (DEBUG only). Do *not* add a
+- **To restart it, use the Restart button** pinned top-left (DEBUG only; the full-width
+  button owns the bottom edge). Do *not* add a
   `-hasSeenWelcome NO` launch argument: launch arguments live in `NSArgumentDomain`, which
   outranks the app's own defaults for the whole process, so the flow's write of `true` is
   real but every read after it still returns `false` and the hand-off looks broken.
@@ -75,6 +76,10 @@ almost all of the logic; the views are mostly rendering and gesture handling.
   **reorder** the deck via `[Story].leading(with:)` — they never filter it, because the
   round needs all five stories. `RootView` applies them on every launch, not just the one
   that finished onboarding.
+- Visual language lives in `OnboardingStyle.swift`: flat grey ground, 36 pt bold type in
+  two colours, surfaces a shade *darker* than the ground so chosen tiles are the only thing
+  on the page, and one full-width `.primary` button (not literal black — it has to invert
+  on a dark ground). Disabled, the button's label says what is missing.
 - The ripple is `RippleWave` (maths, tested) + `Ripple.metal` (a `layerEffect`) + a
   `TimelineView` driver in `OnboardingFlow`. Pages swap at 45 % of the ring so the water
   reveals the next one. Tune the feel in the "Ripple tuning" preview, then move the numbers
@@ -85,6 +90,10 @@ almost all of the logic; the views are mostly rendering and gesture handling.
   window blank — the tallest page hit this and nothing at all drew, with no crash.
 - `simctl io screenshot` redacts every `TextField` (a yellow bar), focused or not, so the
   name page can't be verified by screenshot. Use an Xcode preview or a device.
+- To force onboarding back on the simulator, **uninstall and reinstall**. `simctl spawn …
+  defaults write hasSeenWelcome -bool NO` and editing the container plist by hand both look
+  like they work and don't: cfprefsd keeps the cached value and rewrites the file when the
+  app launches.
 - The Metal Toolchain is a separate download on Xcode 26+: if a build fails with
   `cannot execute tool 'metal'`, run `xcodebuild -downloadComponent MetalToolchain`.
 

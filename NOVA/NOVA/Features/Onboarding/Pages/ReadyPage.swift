@@ -12,39 +12,23 @@ struct ReadyPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Onboarding.blockSpacing) {
-            VStack(alignment: .leading, spacing: 12) {
-                Eyebrow(text: "All set")
-                    .onboardingEntry(0)
+            Spacer(minLength: 0)
 
-                headline
-                    .font(Onboarding.headline())
-                    .tracking(-0.8)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .onboardingEntry(1)
-            }
+            Headline(text: headline)
+                .onboardingEntry(0)
 
             if !chosen.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Leading with")
-                        .font(.system(size: 11, weight: .semibold))
-                        .tracking(1.6)
-                        .foregroundStyle(.secondary)
-
-                    HStack(spacing: 7) {
-                        ForEach(chosen, id: \.self) { category in
-                            Label(category.title, systemImage: category.symbolName)
-                                .font(.system(.caption, weight: .semibold))
-                                .foregroundStyle(category.tint)
-                                .padding(.horizontal, 11)
-                                .padding(.vertical, 7)
-                                .background {
-                                    Capsule().fill(category.tint.opacity(0.13))
-                                }
-                        }
+                HStack(spacing: 8) {
+                    ForEach(chosen, id: \.self) { category in
+                        Label(category.title, systemImage: category.symbolName)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(category.tint)
+                            .padding(.horizontal, 13)
+                            .padding(.vertical, 9)
+                            .background { Capsule().fill(category.tint.opacity(0.14)) }
                     }
                 }
-                .onboardingEntry(2)
+                .onboardingEntry(1)
             }
 
             Spacer(minLength: 0)
@@ -64,11 +48,13 @@ struct ReadyPage: View {
             + Text("are waiting").foregroundStyle(.secondary)
             + (greeting.isEmpty
                 ? Text(".").foregroundStyle(.secondary)
-                : Text(", \(greeting).").foregroundStyle(.primary))
+                : Text(",\n\(greeting).").foregroundStyle(.primary))
     }
 }
 
 #Preview {
     ReadyPage(name: "Prakash", selection: TopicSelection(categories: [.india, .technology]))
-        .padding(.horizontal, Nova.screenPadding)
+        .padding(.horizontal, Onboarding.pagePadding)
+        .frame(maxHeight: .infinity)
+        .background(Onboarding.ground)
 }

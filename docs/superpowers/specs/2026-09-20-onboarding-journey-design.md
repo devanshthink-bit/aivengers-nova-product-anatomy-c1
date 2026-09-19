@@ -41,18 +41,32 @@ actually has. The journey below sells the loop first and personalises second.
 
 ## Visual language
 
-Soft Structuralism: near-white ground, one large type size at one weight, colour carrying
-the hierarchy, and components floating on diffused shadow rather than sitting inside
-boxes. Onboarding is the clean system layer, deliberately set against the reader's warm
-editorial serif.
+Type does everything. A headline large enough to fill the width needs no container to give
+it weight, so there are no cards, no bezels and no borders anywhere in the flow — every box
+removed is more air for the water to move through.
 
-- **Eyebrow** above each headline: 11 pt, semibold, uppercase, 1.6 tracking, secondary.
-- **Headline** `.system(.largeTitle, weight: .semibold)`, tracking −0.8, line spacing 6.
-- **Nested surfaces** use the double-bezel: an outer shell with a hairline and 6 pt of
-  padding, an inner core at `outer − 6` radius, so the curves stay concentric.
-- **Entry** is staggered — each element fades up 14 pt out of a 4 pt blur, 70 ms apart,
-  on a `.smooth` curve. Nothing appears statically. Skipped under Reduce Motion.
-- **Progress** is five dots under the wordmark; the current one widens to a pill.
+Direction taken from Neuecast and Brink: enormous bold type on a flat grey ground, colour
+rather than weight carrying emphasis, saturated fills for anything chosen, and one
+unmissable black button that means "go".
+
+- **Ground** `systemGroupedBackground` — flat, slightly warm, never white. Black type sits
+  on it without glaring, and the ripple's highlight has somewhere to lift from.
+- **Headline** 36 pt bold, tracking −1.1. Past that size the sentences start stranding
+  single words on the last line.
+- **Two colours only.** `.primary` for the words that carry the sentence, `.secondary` for
+  the connective tissue. No bold, no size change, no third colour.
+- **Surfaces recede.** Unselected tiles and the name field are `tertiarySystemFill`, a
+  shade *darker* than the ground, so a chosen tile is the only thing on the page.
+- **Chosen tiles flood** with the category's own colour, grow a white tick in a circle, and
+  lift on a shadow in that same colour.
+- **The button** is full width, `.primary`-filled — not literal black, so it inverts to
+  white on a dark ground instead of disappearing into it. Disabled it goes quiet and grey,
+  and its label says what is still missing ("Pick 2 more") rather than leaving a dead
+  control with no explanation.
+- **Chrome is one line:** "01 / 05" in the top corner, monospaced and tertiary. No
+  wordmark, no progress bar.
+- **Entry** is staggered — each element fades up 18 pt out of a 5 pt blur, 75 ms apart, on
+  a `.smooth` curve. Nothing appears statically. Skipped under Reduce Motion.
 
 ## Ripple between pages
 
@@ -67,8 +81,9 @@ no ring: pages crossfade.
 
 ## Restarting, for testing
 
-A DEBUG-only capsule pinned bottom-left of `RootView`, above everything including the
-onboarding overlay, that clears the name, the topics and the seen flag and returns to page
+A DEBUG-only capsule pinned top-left of `RootView`, above everything including the
+onboarding overlay — the full-width button now owns the bottom edge, so the corner opposite
+the step marker is the only one that never collides with content — that clears the name, the topics and the seen flag and returns to page
 one. It replaces the `-hasSeenWelcome NO` launch argument, which could never be combined
 with `-welcomeAutoDrop YES` because an argument-domain override masks the write.
 

@@ -52,7 +52,7 @@ struct RootView: View {
         // otherwise a stored preference silently stops applying the next morning.
         .task { session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw)) }
         #if DEBUG
-        .overlay(alignment: .bottomLeading) {
+        .overlay(alignment: .topLeading) {
             DebugRestartButton(action: restartOnboarding)
                 .zIndex(2)
         }

@@ -9,8 +9,10 @@ import SwiftUI
 ///
 /// Brink asks for a name and a birth year before it has earned either. NOVA asks for the
 /// name only, after showing what the app does, and treats an empty field as a valid
-/// answer rather than a dead end — the CTA changes to "Skip for now" instead of greying
-/// out.
+/// answer — the button says "Skip for now" rather than greying out. No dead end.
+///
+/// The field is set at headline scale so it belongs to the question above it rather than
+/// looking like a form control that wandered in.
 struct NamePage: View {
     @Binding var name: String
 
@@ -18,25 +20,16 @@ struct NamePage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Onboarding.blockSpacing) {
-            VStack(alignment: .leading, spacing: 12) {
-                Eyebrow(text: "Hello")
-                    .onboardingEntry(0)
-
-                headline
-                    .font(Onboarding.headline())
-                    .tracking(-0.8)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .onboardingEntry(1)
-            }
+            Headline(text: headline)
+                .onboardingEntry(0)
 
             field
-                .onboardingEntry(2)
+                .onboardingEntry(1)
 
             Text("Only used to greet you. It stays on this device.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .onboardingEntry(3)
+                .font(.system(size: 14))
+                .foregroundStyle(.tertiary)
+                .onboardingEntry(2)
 
             Spacer(minLength: 0)
         }
@@ -44,7 +37,7 @@ struct NamePage: View {
             // A beat after the page settles, so the keyboard doesn't race the entry
             // animation and shove everything up mid-fade.
             Task {
-                try? await Task.sleep(for: .seconds(0.45))
+                try? await Task.sleep(for: .seconds(0.5))
                 isFocused = true
             }
         }
@@ -56,24 +49,29 @@ struct NamePage: View {
     }
 
     private var field: some View {
-        TextField("Your name", text: $name)
-            .font(.system(.title3, weight: .medium))
+        TextField("", text: $name, prompt: Text("Your name").foregroundStyle(.tertiary))
+            .font(.system(size: 26, weight: .bold))
+            .tracking(-0.6)
             .textContentType(.givenName)
             .textInputAutocapitalization(.words)
             .autocorrectionDisabled()
             .submitLabel(.done)
             .focused($isFocused)
             .onSubmit { isFocused = false }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 18)
+            .padding(.horizontal, 22)
+            .frame(height: 68)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .onboardingCore()
-            .onboardingShell()
+            .background {
+                RoundedRectangle(cornerRadius: Onboarding.tileRadius, style: .continuous)
+                    .fill(Onboarding.surface)
+            }
     }
 }
 
 #Preview {
     @Previewable @State var name = ""
     NamePage(name: $name)
-        .padding(.horizontal, Nova.screenPadding)
+        .padding(.horizontal, Onboarding.pagePadding)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Onboarding.ground)
 }

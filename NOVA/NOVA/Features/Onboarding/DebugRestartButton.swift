@@ -35,8 +35,8 @@ struct DebugRestartButton: View {
         .buttonStyle(.plain)
         .foregroundStyle(.secondary)
         .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
-        .padding(.leading, 16)
-        .padding(.bottom, 10)
+        .padding(.leading, 20)
+        .padding(.top, 6)
         .accessibilityLabel("Restart onboarding")
         .accessibilityHint("Debug only. Clears your name and topics and returns to the first page.")
     }
