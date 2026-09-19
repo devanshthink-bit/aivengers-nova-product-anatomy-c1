@@ -13,11 +13,13 @@ import Observation
 /// `round` is the seam where the rest get added.
 @Observable
 final class DailySession {
-    let stories: [Story]
+    private(set) var stories: [Story]
     let questions: [Question]
 
     private(set) var readStoryIDs: Set<StoryID> = []
     private(set) var engine: RoundEngine
+    /// The categories the reader asked to lead with, from onboarding.
+    private(set) var topics = TopicSelection()
 
     init(
         stories: [Story] = MockNewsService.todayStories,
@@ -34,6 +36,18 @@ final class DailySession {
             ),
             questions: questions
         )
+    }
+
+    // MARK: - Topics
+
+    /// Reorders today's deck so the reader's chosen categories come first.
+    ///
+    /// Nothing is dropped: the round needs all five stories, and the onboarding copy
+    /// promises the reader still sees everything. Reading progress is left alone, since
+    /// a story that has been read stays read wherever it lands in the deck.
+    func applyTopics(_ selection: TopicSelection) {
+        topics = selection
+        stories = MockNewsService.todayStories.leading(with: selection)
     }
 
     // MARK: - Reading
