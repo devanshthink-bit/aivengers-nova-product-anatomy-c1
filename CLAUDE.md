@@ -60,18 +60,31 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 - Only `.quizIntro`, `.quiz`, `.results` are routes. Use `replace(with:)` when moving forward
   through finished steps so they can't be swiped back into.
 
-**Welcome (`Features/Welcome/`)**
-- `WelcomeView` is overlaid by `RootView` while `@AppStorage("hasSeenWelcome")` is false.
-  Not a route. Launch with `-hasSeenWelcome NO` to see it again; `-welcomeAutoDrop YES`
-  (DEBUG only) taps the button for you after a second, for recordings.
-- Don't combine both flags in one launch: `-hasSeenWelcome NO` is a launch argument, which
-  sits in `NSArgumentDomain` and overrides `UserDefaults` reads for the whole process —
-  the button's write still happens, but every read after it keeps returning the override,
-  so the crossfade looks like it never fires. Test the drop on a fresh install (or after
-  `xcrun simctl uninstall`) with `-welcomeAutoDrop YES` alone.
+**Onboarding (`Features/Onboarding/`)**
+- Five pages — manifesto, ritual, name, topics, ready — overlaid by `RootView` while
+  `@AppStorage("hasSeenWelcome")` is false. Not a route, and nothing may swipe back in.
+- **To restart it, use the Restart button** pinned bottom-left (DEBUG only). Do *not* add a
+  `-hasSeenWelcome NO` launch argument: launch arguments live in `NSArgumentDomain`, which
+  outranks the app's own defaults for the whole process, so the flow's write of `true` is
+  real but every read after it still returns `false` and the hand-off looks broken.
+- Other DEBUG launch arguments, both read-only so they don't hit that trap:
+  `-onboardingPage N` opens straight onto page N; `-onboardingAutoPlay YES` walks the whole
+  journey by itself, which is the only way to record the transitions (synthetic taps aren't
+  available from a shell, and `simctl` has no `tap`).
+- Answers are real: the name greets the reader on the last page, and chosen categories
+  **reorder** the deck via `[Story].leading(with:)` — they never filter it, because the
+  round needs all five stories. `RootView` applies them on every launch, not just the one
+  that finished onboarding.
 - The ripple is `RippleWave` (maths, tested) + `Ripple.metal` (a `layerEffect`) + a
-  `TimelineView` driver in the view. Tune the feel in the "Tuning" preview, then move
-  the numbers into `RippleWave.Tuning`.
+  `TimelineView` driver in `OnboardingFlow`. Pages swap at 45 % of the ring so the water
+  reveals the next one. Tune the feel in the "Ripple tuning" preview, then move the numbers
+  into `RippleWave.Tuning`.
+- **The rippled layer ignores the safe area**, so the page inside it is inset by hand from a
+  `GeometryReader`. Don't measure that inset into `@State`: it feeds the page's own layout
+  back into the measurement that produced it, and the resulting loop renders the entire
+  window blank — the tallest page hit this and nothing at all drew, with no crash.
+- `simctl io screenshot` redacts every `TextField` (a yellow bar), focused or not, so the
+  name page can't be verified by screenshot. Use an Xcode preview or a device.
 - The Metal Toolchain is a separate download on Xcode 26+: if a build fails with
   `cannot execute tool 'metal'`, run `xcodebuild -downloadComponent MetalToolchain`.
 

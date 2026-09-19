@@ -70,3 +70,11 @@ struct RippleWave: Equatable, Sendable {
         progress >= 1
     }
 }
+
+extension RippleWave.Tuning {
+    /// Between pages: quick enough to read as a page turn rather than a set piece.
+    static let page = Self(duration: 0.7, bandWidth: 96, amplitude: 22, highlight: 0.30)
+
+    /// The last drop, into the reader. Slower, with more weight behind it.
+    static let finale = Self(duration: 0.95, bandWidth: 120, amplitude: 28, highlight: 0.38)
+}
