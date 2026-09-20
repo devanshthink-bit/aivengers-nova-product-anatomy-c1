@@ -12,8 +12,24 @@ struct Story: Identifiable, Codable, Hashable, Sendable {
     let source: String
     let category: StoryCategory
     let publishedAt: Date
-    /// Asset catalog name. Mock photos for now; a real feed would supply this later.
-    let imageName: String
+    let artwork: Artwork
+}
+
+/// Where a card's picture comes from.
+///
+/// Two cases rather than one URL because the two sources are genuinely different: the
+/// demo content ships images in the asset catalog, while feeds give remote URLs that may
+/// be slow or absent. Plenty of real items carry no image at all — Economic Times and PIB
+/// return none, and even BBC drops it on some items — so `.none` is a normal state to
+/// render, not an error.
+enum Artwork: Codable, Hashable, Sendable {
+    case asset(String)
+    case remote(URL)
+    case none
+
+    init(url: URL?) {
+        self = url.map(Artwork.remote) ?? .none
+    }
 }
 
 enum StoryCategory: String, Codable, CaseIterable, Sendable {

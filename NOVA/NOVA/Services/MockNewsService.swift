@@ -31,7 +31,7 @@ enum MockNewsService {
             source: "NOVA India Desk",
             category: .india,
             publishedAt: Date.now.addingTimeInterval(-2 * 3600),
-            imageName: "story-metro"
+            artwork: .asset("story-metro")
         ),
         Story(
             id: StoryID("story-2"),
@@ -49,7 +49,7 @@ enum MockNewsService {
             source: "NOVA Tech Desk",
             category: .technology,
             publishedAt: Date.now.addingTimeInterval(-4 * 3600),
-            imageName: "story-chips"
+            artwork: .asset("story-chips")
         ),
         Story(
             id: StoryID("story-3"),
@@ -67,7 +67,7 @@ enum MockNewsService {
             source: "NOVA Business Desk",
             category: .business,
             publishedAt: Date.now.addingTimeInterval(-6 * 3600),
-            imageName: "story-funds"
+            artwork: .asset("story-funds")
         ),
         Story(
             id: StoryID("story-4"),
@@ -84,7 +84,7 @@ enum MockNewsService {
             source: "NOVA World Desk",
             category: .world,
             publishedAt: Date.now.addingTimeInterval(-9 * 3600),
-            imageName: "story-canal"
+            artwork: .asset("story-canal")
         ),
         Story(
             id: StoryID("story-5"),
@@ -101,7 +101,7 @@ enum MockNewsService {
             source: "NOVA Science Desk",
             category: .science,
             publishedAt: Date.now.addingTimeInterval(-12 * 3600),
-            imageName: "story-seafloor"
+            artwork: .asset("story-seafloor")
         )
     ]
 

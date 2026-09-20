@@ -18,10 +18,11 @@ must be wrapped — see the `novaInlineTitle()` / `novaHiddenNavigationBar()` he
 
 All commands run from `NOVA/` (the directory containing `NOVA.xcodeproj`).
 
-**Toolchain requirement:** the project is saved in Xcode project format `objectVersion = 110`
-(created with tools 27.0) and every deployment target is 27.0. Xcode 26.x refuses to open it —
-`The project cannot be opened because it is in a future Xcode project file format (110)`. Xcode 27
-must be installed and selected (`xcode-select -p`) before any command below will work.
+**Toolchain:** the project is saved in Xcode project format `objectVersion = 77` with a
+deployment target of 26.0, and builds and tests on Xcode 26.6. (An earlier note here claimed
+`objectVersion = 110`, tools 27.0 and a hard Xcode 27 requirement; the project has been re-saved
+since and that is no longer true.) Source files live in filesystem-synchronized groups, so a new
+`.swift` file is picked up automatically — there is no `project.pbxproj` to edit when adding one.
 
 ```bash
 # Build for simulator
@@ -49,6 +50,10 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 - `DailySession` — the single `@Observable` source of truth, injected via `.environment()` in
   `App/RootView.swift`. Owns today's stories, read-progress (`readStoryIDs`), and the round
   engine. Views read from it and send actions to it; they never compute scores.
+  `load(from:)` fetches the live deck and rebuilds the engine. `applyTopics` reorders
+  `loadedStories` (the deck as it arrived), never `MockNewsService.todayStories` — it used to do
+  the latter, which was invisible while the mock *was* the deck but silently replaced every live
+  story with demo content once one existed, because `RootView` applies topics on every launch.
 - `RoundEngine` — a plain `struct` with no SwiftUI import: answer validation, scoring,
   accuracy, progression. Answering sets `pendingResult`; `advance()` must be called to clear
   it before the next answer is accepted. This two-step exists so the view can show feedback.
@@ -117,9 +122,34 @@ corner radii, and two font ramps (`Nova.display` = SF for headlines, `Nova.readi
 body). Native materials and controls do the rest; don't add a parallel colour or glass system.
 `novaCard()` is opaque on purpose so body text never sits on translucency over the backdrop.
 
-**Content (`Services/MockNewsService.swift`)** — all stories and questions are invented demo
-content with fictional "NOVA desk" sources, guarded by `isDemoContent`. Keep sources fictional
-when adding content, and replace this service before showing anything to real readers.
+**Content (`Services/`)** — `NewsService` is the protocol the deck comes from.
+`LiveNewsService` is what ships; `PreviewNewsService` serves `MockNewsService`'s hand-authored
+content to previews and tests. `MockNewsService` itself is a case-less enum used as a namespace,
+which is why the preview conformance is a separate type rather than an extension on it.
+
+- **Feeds (`RSSFeed.swift`)** — nine publisher feeds, no API keys. A feed's category is pinned
+  per feed, not read from the item, because publishers' own `<category>` tags don't agree.
+  **A feed only earns a category if everything in it belongs there**: CNBC's top-stories feed
+  was pinned to `.business` and promptly labelled a Ukraine war story "Business". The comment
+  block at the bottom of that file lists feeds already checked and rejected (Reuters and AP have
+  no working free feed; Scroll.in, The Wire and Firstpost return HTML or 404) — read it before
+  adding a source, so the dead ones don't get re-added.
+- **Parsing (`RSSParser.swift`)** — pure, no networking, tested against samples of the real
+  feeds. Real feeds vary more than the spec suggests: CDATA on some publishers and not others
+  (both `foundCharacters` and `foundCDATA` must feed one buffer), images in three different tags
+  with Guardian sending three widths per item, `<p>`-wrapped HTML in descriptions, and four date
+  formats. Anything unparseable costs that item, never the whole deck.
+- **Questions (`QuestionGenerator.swift`)** — a feed gives a headline and a sentence, never
+  enough to ask a question with a provable answer, so the card summary and the quiz question are
+  generated from it via ZeroAPI's undocumented `/api/ai`, which proxies Groq and needs no key
+  (nothing secret ships in the binary). Use a non-reasoning model: the `openai/gpt-oss-*` models
+  that endpoint defaults to spend the whole `max_tokens` budget on a `reasoning` field and return
+  empty `content`, which reads like a parse failure and isn't.
+- ZeroAPI is one person's free project and can change or vanish without notice, so a failed
+  generation falls back to the feed's own summary trimmed to 50 words and no question. Keep that
+  path working — it is the only thing between an outage and a dead deck.
+- **Generated question text is machine-written and unchecked.** Like `MockNewsService.isDemoContent`,
+  it must not be presented to real readers as verified reporting.
 
 **Sound (`Services/SoundPlayer.swift`)** — preloaded `AVAudioPlayer`s on an `.ambient` session
 (respects the silent switch, never interrupts other audio). Failures are swallowed by design.

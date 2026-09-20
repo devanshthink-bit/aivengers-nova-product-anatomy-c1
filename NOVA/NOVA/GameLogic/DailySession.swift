@@ -13,13 +13,34 @@ import Observation
 /// `round` is the seam where the rest get added.
 @Observable
 final class DailySession {
+    /// How far the live load has got. The reader sees a different screen for each, so
+    /// this is what `StoryReaderView` switches on.
+    enum LoadState: Equatable {
+        case idle
+        case loading
+        case loaded
+        case failed
+
+        var isFailed: Bool { self == .failed }
+    }
+
     private(set) var stories: [Story]
-    let questions: [Question]
+    private(set) var questions: [Question]
 
     private(set) var readStoryIDs: Set<StoryID> = []
     private(set) var engine: RoundEngine
+    private(set) var loadState: LoadState = .idle
     /// The categories the reader asked to lead with, from onboarding.
     private(set) var topics = TopicSelection()
+
+    /// The deck as it arrived, before any topic reordering.
+    ///
+    /// Kept because `applyTopics` runs on every launch and needs a stable base to sort
+    /// from. Sorting the already-sorted `stories` would make the order depend on how many
+    /// times it had been applied.
+    private var loadedStories: [Story]
+
+    private let roundID: RoundID
 
     init(
         stories: [Story] = MockNewsService.todayStories,
@@ -27,11 +48,54 @@ final class DailySession {
         roundID: RoundID = RoundID("round-1")
     ) {
         self.stories = stories
+        self.loadedStories = stories
         self.questions = questions
+        self.roundID = roundID
         self.engine = RoundEngine(
             round: GameRound(
                 id: roundID,
                 storyIDs: stories.map(\.id),
+                questionIDs: questions.map(\.id)
+            ),
+            questions: questions
+        )
+    }
+
+    // MARK: - Loading
+
+    /// Replaces the deck with today's live stories.
+    ///
+    /// Keeps the existing deck on failure rather than emptying it — a reader who already
+    /// has stories on screen should not lose them because a refresh timed out.
+    func load(from service: NewsService) async {
+        guard loadState != .loading else { return }
+        loadState = .loading
+
+        do {
+            let deck = try await service.todayDeck()
+            guard !deck.isEmpty else {
+                loadState = .failed
+                return
+            }
+
+            loadedStories = deck.map(\.story)
+            questions = deck.compactMap(\.question)
+            readStoryIDs = []
+            stories = loadedStories.leading(with: topics)
+            rebuildEngine()
+            loadState = .loaded
+        } catch {
+            loadState = .failed
+        }
+    }
+
+    /// A round covers only the stories that actually got a question. A story whose
+    /// generation failed still reads in the deck, it just isn't asked about.
+    private func rebuildEngine() {
+        engine = RoundEngine(
+            round: GameRound(
+                id: roundID,
+                storyIDs: questions.map(\.storyID),
                 questionIDs: questions.map(\.id)
             ),
             questions: questions
@@ -47,7 +111,11 @@ final class DailySession {
     /// a story that has been read stays read wherever it lands in the deck.
     func applyTopics(_ selection: TopicSelection) {
         topics = selection
-        stories = MockNewsService.todayStories.leading(with: selection)
+        // Reorders the deck that was actually loaded. This used to sort
+        // `MockNewsService.todayStories`, which was invisible while the mock *was* the
+        // deck — but `RootView` calls this on every launch, so once stories came from a
+        // feed it would have thrown all five away and silently restored the demo content.
+        stories = loadedStories.leading(with: selection)
     }
 
     // MARK: - Reading

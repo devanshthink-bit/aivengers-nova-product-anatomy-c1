@@ -87,8 +87,11 @@ struct TodayView: View {
         }
     }
 
+    /// Stories are real now, but the summaries and questions are machine-written from the
+    /// feed's own blurb and nobody has checked them. The old copy here claimed the
+    /// stories themselves were invented, which stopped being true when the feeds landed.
     private var demoNotice: some View {
-        Text("Demo content. These stories are written for the NOVA prototype and do not report real events.")
+        Text("Summaries and questions are generated automatically and aren't editorially checked.")
             .font(.caption)
             .foregroundStyle(.tertiary)
             .fixedSize(horizontal: false, vertical: true)
