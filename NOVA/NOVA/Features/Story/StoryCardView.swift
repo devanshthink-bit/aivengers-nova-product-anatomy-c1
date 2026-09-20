@@ -123,7 +123,11 @@ struct StoryCardView: View {
             }
             .padding(.horizontal, 22)
             .padding(.top, 16)
-            .padding(.bottom, 40)
+            // Clears the floating tab bar. The card ignores the safe area on purpose so
+            // it can be thrown off-screen, which also means it never receives the inset
+            // the tab bar would otherwise contribute — at 40 the footer sat underneath
+            // the pill and "Swipe up" was half-hidden behind it.
+            .padding(.bottom, 108)
         }
     }
 
@@ -131,9 +135,26 @@ struct StoryCardView: View {
         Color.clear
             .aspectRatio(4 / 3, contentMode: .fit)
             .overlay {
-                Image(story.imageName)
-                    .resizable()
-                    .scaledToFill()
+                switch story.artwork {
+                case .asset(let name):
+                    Image(name)
+                        .resizable()
+                        .scaledToFill()
+                case .remote(let url):
+                    // A feed image can be slow or gone. The placeholder is the same shape
+                    // as the loaded photo so the card never resizes under the reader
+                    // mid-swipe, which would break the deck gesture.
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFill()
+                        default:
+                            artworkPlaceholder
+                        }
+                    }
+                case .none:
+                    artworkPlaceholder
+                }
             }
             .clipShape(
                 UnevenRoundedRectangle(
@@ -145,6 +166,24 @@ struct StoryCardView: View {
                 )
             )
             .accessibilityHidden(true)
+    }
+
+    /// Stands in for missing or still-loading art. Tinted by category so a deck of
+    /// imageless cards still reads as five distinct stories rather than five grey boxes.
+    private var artworkPlaceholder: some View {
+        LinearGradient(
+            colors: [
+                Nova.accent.opacity(0.35),
+                Nova.accent.opacity(0.08)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .overlay {
+            Image(systemName: story.category.symbolName)
+                .font(.system(size: 44, weight: .light))
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var header: some View {

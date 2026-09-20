@@ -34,12 +34,19 @@ struct StoryReaderView: View {
         ZStack {
             backdrop.ignoresSafeArea()
 
-            GeometryReader { proxy in
-                deck(in: proxy.size)
-            }
-            .ignoresSafeArea()
+            switch session.loadState {
+            case .loading:
+                loadingState
+            case .failed:
+                failedState
+            case .idle, .loaded:
+                GeometryReader { proxy in
+                    deck(in: proxy.size)
+                }
+                .ignoresSafeArea()
 
-            progressOverlay
+                progressOverlay
+            }
         }
         .novaHiddenNavigationBar()
         .sheet(isPresented: $showingIndex) {
@@ -50,6 +57,42 @@ struct StoryReaderView: View {
             markCurrentStoryRead()
         }
         .onChange(of: topIndex) { markCurrentStoryRead() }
+    }
+
+    // MARK: - Load states
+
+    private var loadingState: some View {
+        VStack(spacing: 18) {
+            ProgressView()
+                .controlSize(.large)
+            Text("Gathering today's stories")
+                .font(Nova.display(.headline))
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var failedState: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 44, weight: .light))
+                .foregroundStyle(.secondary)
+
+            Text("Today's stories didn't arrive")
+                .font(Nova.display(.title3))
+
+            Text("Check your connection and try again.")
+                .font(Nova.reading(.subheadline))
+                .foregroundStyle(.secondary)
+
+            Button("Try again") {
+                Task { await session.load(from: LiveNewsService()) }
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 4)
+        }
+        .multilineTextAlignment(.center)
+        .padding(40)
     }
 
     // MARK: - Deck

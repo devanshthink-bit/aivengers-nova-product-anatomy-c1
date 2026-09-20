@@ -43,6 +43,23 @@ extension StoryCategory {
     }
 }
 
+extension Nova {
+    /// Whether an image with this name exists in the asset catalog.
+    ///
+    /// Lets a view fall back when artwork hasn't been added yet, instead of rendering
+    /// SwiftUI's missing-image placeholder. Wrapped here rather than `#if os(iOS)` at the
+    /// call site, since macOS is a real destination for this target.
+    static func hasAsset(_ name: String) -> Bool {
+        #if canImport(UIKit)
+        UIImage(named: name) != nil
+        #elseif canImport(AppKit)
+        NSImage(named: name) != nil
+        #else
+        false
+        #endif
+    }
+}
+
 extension Story {
     /// "2 hours ago" — relative time reads faster than a timestamp in a feed.
     var publishedDescription: String {
