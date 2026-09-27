@@ -59,3 +59,12 @@ struct FallbackBriefingWriter: BriefingWriter {
         throw BriefingError.noValidItems
     }
 }
+
+extension FallbackBriefingWriter {
+    /// What the app uses. Tests build their own chains.
+    static let standard = FallbackBriefingWriter(writers: [
+        ZeroAPIBriefingWriter(),
+        OnDeviceBriefingWriter(),
+        RuleBriefingWriter()
+    ])
+}

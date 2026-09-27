@@ -161,3 +161,41 @@ struct RuleBriefingWriterTests {
         }
     }
 }
+
+@Suite("AI briefing tiers")
+struct AIBriefingTierTests {
+
+    /// A host that can't resolve: the closest stand-in for ZeroAPI being down, the same
+    /// trick `QuestionGeneratorTests` uses.
+    private var offlineZeroAPI: ZeroAPIBriefingWriter {
+        var writer = ZeroAPIBriefingWriter()
+        writer.endpoint = URL(string: "https://nova-tests.invalid/api/ai")!
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 2
+        configuration.timeoutIntervalForResource = 2
+        writer.session = URLSession(configuration: configuration)
+        return writer
+    }
+
+    @Test("ZeroAPI being down throws rather than inventing a briefing")
+    func zeroAPIOfflineThrows() async {
+        await #expect(throws: (any Error).self) {
+            try await offlineZeroAPI.brief(request: "tech", intent: intent, language: .english, candidates: pool)
+        }
+    }
+
+    @Test("With ZeroAPI down, the chain still briefs from the rules")
+    func chainSurvivesOutage() async throws {
+        let chain = FallbackBriefingWriter(writers: [offlineZeroAPI, RuleBriefingWriter(translator: FixedTranslator(result: nil))])
+        let briefing = try await chain.brief(request: "tech", intent: intent, language: .english, candidates: pool)
+        #expect(briefing.tier == .rules)
+        #expect(briefing.items.count == 3)
+    }
+
+    @Test("The on-device tier refuses an empty pool whether or not the model exists")
+    func onDeviceEmptyPool() async {
+        await #expect(throws: (any Error).self) {
+            try await OnDeviceBriefingWriter().brief(request: "tech", intent: intent, language: .english, candidates: [])
+        }
+    }
+}
