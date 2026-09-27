@@ -1,0 +1,524 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T13:13:20.144886+00:00",
+  "title": "Design System: NOVA",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "oklch(96.7% 0.008 91)",
+        "tonalRamp": [
+          "oklch(15% 0.008 91)",
+          "oklch(25% 0.008 91)",
+          "oklch(35% 0.008 91)",
+          "oklch(45% 0.008 91)",
+          "oklch(58% 0.008 91)",
+          "oklch(70% 0.008 91)",
+          "oklch(82% 0.008 91)",
+          "oklch(95% 0.008 91)"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Night Paper",
+        "canonical": "oklch(18.2% 0.000 90)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(35% 0.000 90)",
+          "oklch(45% 0.000 90)",
+          "oklch(58% 0.000 90)",
+          "oklch(70% 0.000 90)",
+          "oklch(82% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "Sheet White",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(35% 0.000 90)",
+          "oklch(45% 0.000 90)",
+          "oklch(58% 0.000 90)",
+          "oklch(70% 0.000 90)",
+          "oklch(82% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "sheet-dark": {
+        "role": "neutral",
+        "displayName": "Night Sheet",
+        "canonical": "oklch(23.2% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.004 286)",
+          "oklch(25% 0.004 286)",
+          "oklch(35% 0.004 286)",
+          "oklch(45% 0.004 286)",
+          "oklch(58% 0.004 286)",
+          "oklch(70% 0.004 286)",
+          "oklch(82% 0.004 286)",
+          "oklch(95% 0.004 286)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Warm Ink",
+        "canonical": "oklch(19.9% 0.013 101)",
+        "tonalRamp": [
+          "oklch(15% 0.013 101)",
+          "oklch(25% 0.013 101)",
+          "oklch(35% 0.013 101)",
+          "oklch(45% 0.013 101)",
+          "oklch(58% 0.013 101)",
+          "oklch(70% 0.013 101)",
+          "oklch(82% 0.013 101)",
+          "oklch(95% 0.013 101)"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "oklch(95.5% 0.008 91)",
+        "tonalRamp": [
+          "oklch(15% 0.008 91)",
+          "oklch(25% 0.008 91)",
+          "oklch(35% 0.008 91)",
+          "oklch(45% 0.008 91)",
+          "oklch(58% 0.008 91)",
+          "oklch(70% 0.008 91)",
+          "oklch(82% 0.008 91)",
+          "oklch(95% 0.008 91)"
+        ]
+      },
+      "charcoal": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "canonical": "oklch(22.7% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.004 286)",
+          "oklch(25% 0.004 286)",
+          "oklch(35% 0.004 286)",
+          "oklch(45% 0.004 286)",
+          "oklch(58% 0.004 286)",
+          "oklch(70% 0.004 286)",
+          "oklch(82% 0.004 286)",
+          "oklch(95% 0.004 286)"
+        ]
+      },
+      "charcoal-raised": {
+        "role": "neutral",
+        "displayName": "Charcoal Raised",
+        "canonical": "oklch(28.6% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.005 286)",
+          "oklch(25% 0.005 286)",
+          "oklch(35% 0.005 286)",
+          "oklch(45% 0.005 286)",
+          "oklch(58% 0.005 286)",
+          "oklch(70% 0.005 286)",
+          "oklch(82% 0.005 286)",
+          "oklch(95% 0.005 286)"
+        ]
+      },
+      "marigold": {
+        "role": "primary",
+        "displayName": "Marigold",
+        "canonical": "oklch(81.3% 0.150 79)",
+        "tonalRamp": [
+          "oklch(15% 0.150 79)",
+          "oklch(25% 0.150 79)",
+          "oklch(35% 0.150 79)",
+          "oklch(45% 0.150 79)",
+          "oklch(58% 0.150 79)",
+          "oklch(70% 0.150 79)",
+          "oklch(82% 0.150 79)",
+          "oklch(95% 0.150 79)"
+        ]
+      },
+      "marigold-ink": {
+        "role": "primary",
+        "displayName": "Marigold Ink",
+        "canonical": "oklch(27.7% 0.056 68)",
+        "tonalRamp": [
+          "oklch(15% 0.056 68)",
+          "oklch(25% 0.056 68)",
+          "oklch(35% 0.056 68)",
+          "oklch(45% 0.056 68)",
+          "oklch(58% 0.056 68)",
+          "oklch(70% 0.056 68)",
+          "oklch(82% 0.056 68)",
+          "oklch(95% 0.056 68)"
+        ]
+      },
+      "tint-india": {
+        "role": "secondary",
+        "displayName": "Vermilion",
+        "canonical": "oklch(63.3% 0.179 38)",
+        "tonalRamp": [
+          "oklch(15% 0.179 38)",
+          "oklch(25% 0.179 38)",
+          "oklch(35% 0.179 38)",
+          "oklch(45% 0.179 38)",
+          "oklch(58% 0.179 38)",
+          "oklch(70% 0.179 38)",
+          "oklch(82% 0.179 38)",
+          "oklch(95% 0.179 38)"
+        ]
+      },
+      "tint-technology": {
+        "role": "secondary",
+        "displayName": "Cobalt",
+        "canonical": "oklch(50.2% 0.212 269)",
+        "tonalRamp": [
+          "oklch(15% 0.212 269)",
+          "oklch(25% 0.212 269)",
+          "oklch(35% 0.212 269)",
+          "oklch(45% 0.212 269)",
+          "oklch(58% 0.212 269)",
+          "oklch(70% 0.212 269)",
+          "oklch(82% 0.212 269)",
+          "oklch(95% 0.200 269)"
+        ]
+      },
+      "tint-business": {
+        "role": "secondary",
+        "displayName": "Jade",
+        "canonical": "oklch(61.2% 0.120 165)",
+        "tonalRamp": [
+          "oklch(15% 0.120 165)",
+          "oklch(25% 0.120 165)",
+          "oklch(35% 0.120 165)",
+          "oklch(45% 0.120 165)",
+          "oklch(58% 0.120 165)",
+          "oklch(70% 0.120 165)",
+          "oklch(82% 0.120 165)",
+          "oklch(95% 0.120 165)"
+        ]
+      },
+      "tint-world": {
+        "role": "secondary",
+        "displayName": "Sky",
+        "canonical": "oklch(69.2% 0.131 246)",
+        "tonalRamp": [
+          "oklch(15% 0.131 246)",
+          "oklch(25% 0.131 246)",
+          "oklch(35% 0.131 246)",
+          "oklch(45% 0.131 246)",
+          "oklch(58% 0.131 246)",
+          "oklch(70% 0.131 246)",
+          "oklch(82% 0.131 246)",
+          "oklch(95% 0.131 246)"
+        ]
+      },
+      "tint-science": {
+        "role": "secondary",
+        "displayName": "Plum",
+        "canonical": "oklch(55.8% 0.156 332)",
+        "tonalRamp": [
+          "oklch(15% 0.156 332)",
+          "oklch(25% 0.156 332)",
+          "oklch(35% 0.156 332)",
+          "oklch(45% 0.156 332)",
+          "oklch(58% 0.156 332)",
+          "oklch(70% 0.156 332)",
+          "oklch(82% 0.156 332)",
+          "oklch(95% 0.156 332)"
+        ]
+      },
+      "mosaic-sky": {
+        "role": "secondary",
+        "displayName": "Mosaic Sky",
+        "canonical": "oklch(84.8% 0.065 243)",
+        "tonalRamp": [
+          "oklch(15% 0.065 243)",
+          "oklch(25% 0.065 243)",
+          "oklch(35% 0.065 243)",
+          "oklch(45% 0.065 243)",
+          "oklch(58% 0.065 243)",
+          "oklch(70% 0.065 243)",
+          "oklch(82% 0.065 243)",
+          "oklch(95% 0.065 243)"
+        ]
+      },
+      "mosaic-navy": {
+        "role": "secondary",
+        "displayName": "Mosaic Navy",
+        "canonical": "oklch(34.0% 0.174 273)",
+        "tonalRamp": [
+          "oklch(15% 0.174 273)",
+          "oklch(25% 0.174 273)",
+          "oklch(35% 0.174 273)",
+          "oklch(45% 0.174 273)",
+          "oklch(58% 0.174 273)",
+          "oklch(70% 0.174 273)",
+          "oklch(82% 0.174 273)",
+          "oklch(95% 0.174 273)"
+        ]
+      },
+      "feedback-right": {
+        "role": "tertiary",
+        "displayName": "Right",
+        "canonical": "oklch(79.7% 0.164 160)",
+        "tonalRamp": [
+          "oklch(15% 0.164 160)",
+          "oklch(25% 0.164 160)",
+          "oklch(35% 0.164 160)",
+          "oklch(45% 0.164 160)",
+          "oklch(58% 0.164 160)",
+          "oklch(70% 0.164 160)",
+          "oklch(82% 0.164 160)",
+          "oklch(95% 0.164 160)"
+        ]
+      },
+      "feedback-wrong": {
+        "role": "tertiary",
+        "displayName": "Wrong",
+        "canonical": "oklch(70.9% 0.183 28)",
+        "tonalRamp": [
+          "oklch(15% 0.183 28)",
+          "oklch(25% 0.183 28)",
+          "oklch(35% 0.183 28)",
+          "oklch(45% 0.183 28)",
+          "oklch(58% 0.183 28)",
+          "oklch(70% 0.183 28)",
+          "oklch(82% 0.183 28)",
+          "oklch(95% 0.183 28)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(23,22,15,0.10)"
+      },
+      "charcoal-line": {
+        "role": "neutral",
+        "displayName": "Charcoal Line",
+        "canonical": "rgba(255,255,255,0.12)"
+      }
+    },
+    "typographyMeta": {
+      "poster-hero": {
+        "displayName": "Poster Hero",
+        "purpose": "One statement per charcoal screen: onboarding headlines, quiz-intro title, results score, flood reward."
+      },
+      "poster": {
+        "displayName": "Poster",
+        "purpose": "NOVA wordmark and quiz feedback line."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "Headlines and section titles on paper; quiz prompt."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "River-row titles and paper button label."
+      },
+      "body": {
+        "displayName": "Reading",
+        "purpose": "New York serif body copy, held to a 620pt column."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Mono capitals for every count, date, age, step and charcoal label."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet-thrown",
+        "value": "color black 12%, radius 24pt, y 14pt",
+        "purpose": "The story sheet in the deck only, so the one underneath reads as underneath."
+      },
+      {
+        "name": "tile-chosen",
+        "value": "color black 35%, radius 14pt, y 8pt",
+        "purpose": "A selected onboarding topic tile lifting off charcoal; unselected tiles stay flat."
+      }
+    ],
+    "motion": [
+      {
+        "name": "press",
+        "value": "easeOut 0.14s, scale 0.97",
+        "purpose": "Every button and tappable row. Confirms, doesn't perform."
+      },
+      {
+        "name": "settle",
+        "value": "spring duration 0.45s bounce 0.18",
+        "purpose": "Things settling after the reader moved them."
+      },
+      {
+        "name": "enter",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1) 0.55s",
+        "purpose": "Entrances."
+      },
+      {
+        "name": "pop",
+        "value": "spring duration 0.38s bounce 0.34",
+        "purpose": "Rewards only: mosaic squares, pips, the +100."
+      },
+      {
+        "name": "stagger",
+        "value": "45ms (mosaic squares 18ms)",
+        "purpose": "Gap between staggered items."
+      },
+      {
+        "name": "flood-enter",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1) 0.6s",
+        "purpose": "Marigold flood growing from the event point."
+      },
+      {
+        "name": "flood-exit",
+        "value": "easeOut 0.28s",
+        "purpose": "Flood getting out of the way."
+      },
+      {
+        "name": "reduce-motion",
+        "value": "easeOut 0.2 to 0.3s crossfade, no movement",
+        "purpose": "Fallback for every animation above."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "reading-column",
+        "value": "620pt max width, centred"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Paper Button",
+      "kind": "button",
+      "refersTo": "button-paper",
+      "description": "The ink slab: one per paper card or empty state.",
+      "html": "<button class=\"ds-btn-paper\">See your round</button>",
+      "css": ".ds-btn-paper{background:#17160F;color:#F6F4EE;font:600 17px -apple-system,system-ui,sans-serif;height:56px;width:100%;border:none;border-radius:14px;transition: transform 0.14s ease-out;}.ds-btn-paper:hover{background:#2a2920}.ds-btn-paper:focus-visible{outline:2px solid #17160F;outline-offset:3px}.ds-btn-paper:active{transform:scale(.97)}.ds-btn-paper:disabled{opacity:.3}"
+    },
+    {
+      "name": "Chevron Button, Prominent",
+      "kind": "button",
+      "refersTo": "button-chevron-prominent",
+      "description": "White pointed-end capsule: the single way forward on charcoal.",
+      "html": "<div class=\"ds-charcoal\"><button class=\"ds-btn-chevron\">Back to the stories</button></div>",
+      "css": ".ds-charcoal{background:#1C1C1E;padding:24px}.ds-btn-chevron{background:#fff;color:#1C1C1E;font-family: ui-monospace, 'SF Mono', monospace; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; font-size: 15px;height:56px;padding:0 36px;border:none;clip-path: polygon(0 50%, 19px 0, calc(100% - 19px) 0, 100% 50%, calc(100% - 19px) 100%, 19px 100%);transition: transform 0.14s ease-out;}.ds-btn-chevron:hover{background:#ecebe8}.ds-btn-chevron:focus-visible{outline:2px solid #F5B53A;outline-offset:3px}.ds-btn-chevron:active{transform:scale(.97)}"
+    },
+    {
+      "name": "Chevron Button, Outline",
+      "kind": "button",
+      "refersTo": "button-chevron-outline",
+      "description": "1.5pt white-stroked chevron for secondary actions on charcoal.",
+      "html": "<div class=\"ds-charcoal-o\"><span class=\"ds-btn-outline\"><button>Share</button></span></div>",
+      "css": ".ds-charcoal-o{background:#1C1C1E;padding:24px}.ds-btn-outline{display:inline-block;padding:1.5px;background:rgba(255,255,255,.9);clip-path: polygon(0 50%, 19px 0, calc(100% - 19px) 0, 100% 50%, calc(100% - 19px) 100%, 19px 100%);transition: transform 0.14s ease-out;}.ds-btn-outline button{background:#1C1C1E;color:#fff;font-family: ui-monospace, 'SF Mono', monospace; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; font-size: 15px;height:53px;padding:0 36px;border:none;clip-path: polygon(0 50%, 19px 0, calc(100% - 19px) 0, 100% 50%, calc(100% - 19px) 100%, 19px 100%);}.ds-btn-outline:hover button{background:#2A2A2D}.ds-btn-outline:active{transform:scale(.97)}.ds-btn-outline button:focus-visible{outline:2px solid #F5B53A}"
+    },
+    {
+      "name": "Category Badge",
+      "kind": "chip",
+      "refersTo": "category-badge",
+      "description": "Tinted 8pt square plus mono ink label; colour never on the text.",
+      "html": "<span class=\"ds-cat\"><i></i>Technology</span>",
+      "css": ".ds-cat{display:inline-flex;align-items:center;gap:6px;font:600 11px ui-monospace,'SF Mono',monospace;text-transform:uppercase;letter-spacing:1.2px;color:rgba(23,22,15,.6)}.ds-cat i{width:8px;height:8px;border-radius:1.5px;background:#3550DA}"
+    },
+    {
+      "name": "Meta Line",
+      "kind": "custom",
+      "description": "Source mark, publisher, mono age: the line above every paper headline.",
+      "html": "<div class=\"ds-meta\"><span class=\"ds-mark\">BB</span><b>BBC News</b><span class=\"ds-age\">2H</span></div>",
+      "css": ".ds-meta{display:flex;align-items:center;gap:7px;background:#F6F4EE;padding:12px;font:600 13px -apple-system,system-ui,sans-serif;color:#17160F}.ds-mark{width:18px;height:18px;border-radius:4.7px;background:#4DA3E8;color:#fff;font:800 7.5px system-ui;display:grid;place-items:center}.ds-age{font:500 11px ui-monospace,monospace;color:rgba(23,22,15,.55)}"
+    },
+    {
+      "name": "Story Sheet",
+      "kind": "card",
+      "refersTo": "story-sheet",
+      "description": "Opaque white sheet on paper; hairline, 28pt corners, one soft deck shadow.",
+      "html": "<div class=\"ds-paper\"><article class=\"ds-sheet\"><div class=\"ds-ph\"></div><div class=\"ds-body\"><h3>Metro line opens to riders</h3><p>The first stretch carries commuters across the city in under twenty minutes.</p></div></article></div>",
+      "css": ".ds-paper{background:#F6F4EE;padding:24px}.ds-sheet{background:#fff;border:1px solid rgba(23,22,15,.1);border-radius:28px;overflow:hidden;box-shadow:0 14px 48px rgba(0,0,0,.12);transition:transform .14s ease-out}.ds-sheet:hover{transform:translateY(-2px)}.ds-ph{aspect-ratio:4/3;background:rgba(224,89,42,.14)}.ds-body{padding:18px 22px}.ds-body h3{font:700 22px -apple-system,system-ui;letter-spacing:-.5px;margin:0 0 10px;color:#17160F}.ds-body p{font:400 17px/1.4 'New York',Georgia,serif;color:#17160F;margin:0}"
+    },
+    {
+      "name": "Answer Board",
+      "kind": "card",
+      "refersTo": "answer-board",
+      "description": "Flat charcoal-raised backboard; letter pixel in the hoop colour; judged border.",
+      "html": "<div class=\"ds-court\"><div class=\"ds-board\"><span>A</span>Under 200 milliseconds</div><div class=\"ds-board ds-right\"><span style=\"background:#4DA3E8\">B</span>Under 30 milliseconds<em>&#10003; Correct</em></div></div>",
+      "css": ".ds-court{background:#1C1C1E;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.ds-board{background:#2A2A2D;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px;color:#fff;font:600 15px -apple-system,system-ui;min-height:90px;display:flex;flex-direction:column;gap:6px;transition:transform .14s ease-out}.ds-board:hover{border-color:rgba(255,255,255,.3)}.ds-board span{width:20px;height:20px;border-radius:4px;background:#E0592A;font:700 11px ui-monospace,monospace;display:grid;place-items:center}.ds-right{border:2px solid #3DDC97;background:#2d3a35}.ds-right em{font:700 11px ui-monospace,monospace;text-transform:uppercase;letter-spacing:1.2px;color:#3DDC97;font-style:normal;margin-top:auto}"
+    },
+    {
+      "name": "Ribbon Badge",
+      "kind": "custom",
+      "refersTo": "ribbon-badge",
+      "description": "Awarded label: flat marigold band with darker notched tails.",
+      "html": "<div class=\"ds-rib-wrap\"><span class=\"ds-rib\">Sharpshooter</span></div>",
+      "css": ".ds-rib-wrap{padding:30px 50px;background:#1C1C1E}.ds-rib{position:relative;display:inline-block;background:#F5B53A;color:#3A2204;font:700 13px ui-monospace,monospace;text-transform:uppercase;letter-spacing:1.2px;padding:9px 22px}.ds-rib::before,.ds-rib::after{content:'';position:absolute;top:28%;height:100%;width:34px;background:#b0822a;z-index:-1}.ds-rib::before{left:-24px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}.ds-rib::after{right:-24px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}"
+    },
+    {
+      "name": "Mosaic and Pips",
+      "kind": "custom",
+      "description": "Square pixels in story tints: unread, read (outline), missed, correct.",
+      "html": "<div class=\"ds-pips\"><i class=\"c\" style=\"background:#E0592A\"></i><i class=\"c\" style=\"background:#3550DA\"></i><i class=\"r\"></i><i class=\"m\"></i><i class=\"u\"></i></div>",
+      "css": ".ds-pips{display:flex;gap:4px;padding:16px;background:#F6F4EE}.ds-pips i{width:14px;height:14px;border-radius:2px;box-sizing:border-box;transition:transform .38s cubic-bezier(.34,1.56,.64,1)}.ds-pips .c:hover{transform:scale(1.12)}.ds-pips .r{background:rgba(30,154,114,.14);border:1.4px solid rgba(30,154,114,.7);transform:scale(.86)}.ds-pips .m{border:1.1px solid rgba(23,22,15,.22);transform:scale(.86)}.ds-pips .u{background:rgba(23,22,15,.07);transform:scale(.86)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Read on Paper, Play on Charcoal",
+    "overview": "NOVA has two grounds and one motif. **Paper** is where you read: a warm off-white ground, a white sheet lifting off it, near-black ink, hairlines instead of boxes, a publisher line above every headline and a New York serif for the body (the Artifact half). **Charcoal** is where you play: one focal object per screen, heavy compressed capitals, mono capitals for every label, chevron-ended buttons and a single marigold accent that only appears when the reader earned it (the (Not Boring) Habits half). The **pixel mosaic** and the drawn **asterisk** run through both and are what a day of reading builds.\n\nThe switch of ground is the mode change. A reader knows they have gone from reading to playing before they read a word, because the screen goes dark. Everything is flat and opaque: the frosted glass plates and gradient backdrops the app once had were removed on purpose, because body text swam on translucency.",
+    "keyCharacteristics": [
+      "Two surfaces, strictly assigned: paper for reading, charcoal for play.",
+      "Square pixels, not rounded tiles, carry progress everywhere (mosaic, pips, loader).",
+      "Marigold is a reward, never a decoration.",
+      "Mono capitals for anything that is a measurement: counts, dates, ages, steps, labels.",
+      "Motion is sized by frequency: presses near-instant, floods and mosaics allowed a moment."
+    ],
+    "rules": [
+      {
+        "name": "The Earned Marigold Rule",
+        "body": "Marigold appears only because the reader did something: a sunk shot, a finished round, a score above zero, today's marker. It is never text on paper (it fails contrast there), never a hoop colour (it is the reward, not a target) and never decoration on charcoal. A results screen with zero hits stays charcoal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Coloured Square Rule",
+        "body": "Category tints are fills and squares, never small text. None reach 4.5:1 as small type on paper, so a category label is always an 8pt tinted square next to mono ink text at secondary opacity.",
+        "section": "colors"
+      },
+      {
+        "name": "The Surface Follows Primary Rule",
+        "body": "Mosaic, pips and week strip draw in `.primary`, so one view reads as ink on paper and white on charcoal. Don't build a second variant per surface.",
+        "section": "colors"
+      },
+      {
+        "name": "The Measurement Rule",
+        "body": "Anything that counts, dates or labels is set in mono capitals, because digits that don't shift width are what make a counter feel like one. Prose is never set in mono, except the short how-to lines on charcoal.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Tone Headline Rule",
+        "body": "Onboarding headlines carry emphasis with colour alone: key words in `.primary`, the rest in `.secondary`, all in the same heavy compressed capitals. No weight or size changes inside a headline.",
+        "section": "typography"
+      },
+      {
+        "name": "The Opaque Ground Rule",
+        "body": "Body text never sits on translucency. There are no glass plates, frosted cards or gradient backdrops behind reading or play surfaces. Onboarding is flat charcoal so the ripple has something legible to bend.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every reading screen (Home, Source, Story detail, the story deck, the Today sheet) on paper with `novaPaperSurface()`, and every play screen (onboarding, quiz intro, quiz, results) on charcoal with `novaCharcoalSurface()`.",
+      "Do label categories with an 8pt tinted square plus mono ink text at secondary opacity.",
+      "Do show progress as square pixels in story tints (mosaic, pips, loader) rather than bars or spinners.",
+      "Do keep one prominent action per screen: the paper slab on paper, the white chevron on charcoal.",
+      "Do start floods from where the event happened, enter them slowly (0.6s) and leave fast (0.28s).",
+      "Do give every button and tappable row the 0.97 scale press on 0.14s ease-out.",
+      "Do give every animation a Reduce Motion fallback, and keep every gesture reachable by a button or accessibility action.",
+      "Do draw the asterisk with `AsteriskMark`, never a typed character."
+    ],
+    "donts": [
+      "Don't set marigold as text on paper, use it on a hoop, or show it when nothing was earned.",
+      "Don't set category tints as small text on paper.",
+      "Don't put glass, frosted material or gradient backdrops behind reading or play surfaces.",
+      "Don't round mosaic squares into tiles, or swap pixels for dots or bars.",
+      "Don't use `.preferredColorScheme` to make a charcoal screen dark. It flips the whole window, so the paper reader underneath goes dark mid-push. Use the surface modifier.",
+      "Don't add a second accent or a parallel colour system. New states take ink, charcoal tones or the category family.",
+      "Don't use literal black for the paper button. Use ink so it inverts in Dark Mode."
+    ]
+  }
+}

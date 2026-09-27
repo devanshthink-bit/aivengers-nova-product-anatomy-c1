@@ -65,7 +65,7 @@ private struct TopicTile: View {
 
     private var fill: AnyShapeStyle {
         isOn
-            ? AnyShapeStyle(category.tint.gradient)
+            ? AnyShapeStyle(category.tint)
             : AnyShapeStyle(Onboarding.surface)
     }
 
@@ -86,7 +86,7 @@ private struct TopicTile: View {
             Spacer(minLength: 12)
 
             Text(category.title)
-                .font(.system(size: 17, weight: .bold))
+                .novaMeta(.subheadline, weight: .bold)
                 .foregroundStyle(titleStyle)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -100,7 +100,9 @@ private struct TopicTile: View {
             if isOn {
                 Image(systemName: "checkmark")
                     .font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(category.tint)
+                    // Charcoal, not the tint: Sky and the other light tints drop below 3:1
+                    // as a small glyph on white.
+                    .foregroundStyle(Nova.charcoal)
                     .frame(width: 26, height: 26)
                     .background(Circle().fill(.white))
                     .padding(14)
@@ -108,7 +110,8 @@ private struct TopicTile: View {
             }
         }
         // The chosen tiles lift off the page; the rest stay flat against it.
-        .shadow(color: isOn ? category.tint.opacity(0.35) : .clear, radius: 16, y: 8)
+        .shadow(color: isOn ? .black.opacity(0.35) : .clear, radius: 14, y: 8)
+        .scaleEffect(isOn ? 1 : 0.98)
     }
 }
 

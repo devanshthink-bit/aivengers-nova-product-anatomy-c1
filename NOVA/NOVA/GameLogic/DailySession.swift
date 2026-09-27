@@ -141,6 +141,11 @@ final class DailySession {
 
     // MARK: - Round
 
+    /// False on a day when no question could be written — generation is best-effort and
+    /// falls back to no question per story. An empty round is not a finished one: it must
+    /// never read as "round done", score a perfect 0/0 or count toward the streak.
+    var hasRound: Bool { engine.questionCount > 0 }
+
     func story(for question: Question) -> Story? {
         stories.first { $0.id == question.storyID }
     }

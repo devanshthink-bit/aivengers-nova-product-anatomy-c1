@@ -73,18 +73,22 @@ almost all of the logic; the views are mostly rendering and gesture handling.
   `-hasSeenWelcome NO` launch argument: launch arguments live in `NSArgumentDomain`, which
   outranks the app's own defaults for the whole process, so the flow's write of `true` is
   real but every read after it still returns `false` and the hand-off looks broken.
-- Other DEBUG launch arguments, both read-only so they don't hit that trap:
+- Other DEBUG launch arguments, all read-only so they don't hit that trap:
   `-onboardingPage N` opens straight onto page N; `-onboardingAutoPlay YES` walks the whole
   journey by itself, which is the only way to record the transitions (synthetic taps aren't
-  available from a shell, and `simctl` has no `tap`).
+  available from a shell, and `simctl` has no `tap`). For the round: `-openRoute
+  quizIntro|quiz|results` opens that step, `-previewDeck YES` loads the hand-written deck
+  (its questions always exist), and `-simulateRound N` reads everything and answers the
+  first N right — together they are the only way to screenshot the flood and the results.
 - Answers are real: the name greets the reader on the last page, and chosen categories
   **reorder** the deck via `[Story].leading(with:)` — they never filter it, because the
   round needs all five stories. `RootView` applies them on every launch, not just the one
   that finished onboarding.
-- Visual language lives in `OnboardingStyle.swift`: flat grey ground, 36 pt bold type in
-  two colours, surfaces a shade *darker* than the ground so chosen tiles are the only thing
-  on the page, and one full-width `.primary` button (not literal black — it has to invert
-  on a dark ground). Disabled, the button's label says what is missing.
+- Visual language lives in `OnboardingStyle.swift`: the charcoal play surface, compressed
+  heavy capitals in two colours, surfaces a step *up* from the ground so chosen tiles are
+  the only thing on the page, and one full-width white chevron button. Disabled, the
+  button's label says what is missing. The overlay takes `.preferredColorScheme(.dark)`
+  outright because it covers the whole window.
 - The ripple is `RippleWave` (maths, tested) + `Ripple.metal` (a `layerEffect`) + a
   `TimelineView` driver in `OnboardingFlow`. Pages swap at 45 % of the ring so the water
   reveals the next one. Tune the feel in the "Ripple tuning" preview, then move the numbers
@@ -117,10 +121,32 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 plain strings. `Question.answers` is intentionally variable-length; the basket-per-answer
 layout is a view concern, not a model constraint.
 
-**Design system (`DesignSystem/NovaTheme.swift`)** — deliberately small: an accent colour,
-corner radii, and two font ramps (`Nova.display` = SF for headlines, `Nova.reading` = serif for
-body). Native materials and controls do the rest; don't add a parallel colour or glass system.
-`novaCard()` is opaque on purpose so body text never sits on translucency over the backdrop.
+**Design system (`DesignSystem/NovaTheme.swift`, `Components/`)** — two surfaces and one motif,
+chosen 2026-09-27 as a blend of Artifact, (Not Boring) Habits and an editorial serif.
+`DESIGN.md` at the repo root records the full system; the rules that are easy to break:
+- **Paper** is for reading (Home, sources, story detail, the deck, the Today sheet):
+  `Nova.paper` ground, `Nova.sheet` surfaces, hairlines instead of cards, `MetaLine` above
+  headlines, `Nova.reading` serif for body. **Charcoal** is for playing (onboarding, quiz
+  intro, quiz, results): `novaCharcoalSurface()`, `Nova.poster` compressed capitals,
+  `novaMeta()` mono labels, `ChevronButtonStyle`.
+- **Marigold means earned.** The flood, the score, ribbons, today's marker. Never text on
+  paper (fails contrast), never decoration.
+- **Category tints are fills only** — none reach 4.5:1 as small text on paper, which is why
+  `CategoryBadge` is ink beside a coloured square.
+- **No glass and no gradient backdrops.** The deck used to be frosted plates over a two-light
+  gradient and needed a rim, sheen and inner lip before text stopped swimming; `NovaBackdrop`
+  and `novaCard()` are gone. Don't bring them back.
+- On a charcoal screen, set `.environment(\.colorScheme, .dark)` *after* any `safeAreaBar`:
+  a bar outside it resolves `.secondary` to light-mode grey, which vanished on charcoal.
+- `.preferredColorScheme` flips the whole window, so pushed charcoal screens use the
+  environment instead; the quiz and results hide the navigation and status bars so the
+  flood can reach the top edge.
+- The pixel mosaic (`DailyMosaic`, tested) replaces the sculpture Habits grows. Each story
+  owns an equal, spread-out share of a 25-square asterisk: reading outlines it, a correct
+  answer fills it.
+- `PlayHistory` records a day only when a round with questions is finished. A day where
+  generation produced no questions has `DailySession.hasRound == false` and must never read
+  as "round done", score 0/0 as perfect, or count toward the streak.
 
 **Content (`Services/`)** — `NewsService` is the protocol the deck comes from.
 `LiveNewsService` is what ships; `PreviewNewsService` serves `MockNewsService`'s hand-authored

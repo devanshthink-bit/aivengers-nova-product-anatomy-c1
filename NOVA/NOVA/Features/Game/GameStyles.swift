@@ -82,34 +82,36 @@ struct BasketStyle: Equatable {
     let net: Color
     let board: Color
 
+    /// The mosaic's family, so the hoops belong to the same world as the squares they
+    /// earn. Marigold is left out on purpose: it is the reward, not a target.
     static let all: [BasketStyle] = [
         BasketStyle(
-            name: "Amber",
-            rim: Color(red: 1.00, green: 0.52, blue: 0.08),
-            rimHighlight: Color(red: 1.00, green: 0.82, blue: 0.38),
-            net: Color(red: 1.00, green: 0.94, blue: 0.82),
-            board: Color(red: 1.00, green: 0.55, blue: 0.12)
+            name: "Vermilion",
+            rim: Color(hex: 0xE0592A),
+            rimHighlight: Color(hex: 0xFFA27A),
+            net: Color(hex: 0xFFE6DA),
+            board: Color(hex: 0xE0592A)
         ),
         BasketStyle(
             name: "Sky",
-            rim: Color(red: 0.12, green: 0.52, blue: 0.98),
-            rimHighlight: Color(red: 0.62, green: 0.84, blue: 1.00),
-            net: Color(red: 0.86, green: 0.94, blue: 1.00),
-            board: Color(red: 0.18, green: 0.55, blue: 1.00)
+            rim: Color(hex: 0x4DA3E8),
+            rimHighlight: Color(hex: 0xA9D3F5),
+            net: Color(hex: 0xE2F1FD),
+            board: Color(hex: 0x4DA3E8)
         ),
         BasketStyle(
-            name: "Orchid",
-            rim: Color(red: 0.62, green: 0.28, blue: 0.98),
-            rimHighlight: Color(red: 0.88, green: 0.72, blue: 1.00),
-            net: Color(red: 0.94, green: 0.88, blue: 1.00),
-            board: Color(red: 0.62, green: 0.32, blue: 0.98)
+            name: "Cobalt",
+            rim: Color(hex: 0x5A72F0),
+            rimHighlight: Color(hex: 0xA8B6FF),
+            net: Color(hex: 0xE3E8FF),
+            board: Color(hex: 0x3550DA)
         ),
         BasketStyle(
             name: "Jade",
-            rim: Color(red: 0.04, green: 0.68, blue: 0.52),
-            rimHighlight: Color(red: 0.52, green: 0.96, blue: 0.78),
-            net: Color(red: 0.86, green: 1.00, blue: 0.92),
-            board: Color(red: 0.06, green: 0.72, blue: 0.56)
+            rim: Color(hex: 0x24B585),
+            rimHighlight: Color(hex: 0x86E6C3),
+            net: Color(hex: 0xDDF8EE),
+            board: Color(hex: 0x1E9A72)
         )
     ]
 

@@ -57,42 +57,49 @@ struct StoryReaderView: View {
             markCurrentStoryRead()
         }
         .onChange(of: topIndex) { markCurrentStoryRead() }
+        // A live load replaces the deck and clears reading progress, which undid the mark
+        // the `.task` above had just made — so the card on screen at launch never counted,
+        // and the quiz stayed locked until the reader swiped all the way round again.
+        .onChange(of: session.loadState) { _, state in
+            guard state == .loaded else { return }
+            topIndex = session.firstUnreadStoryIndex
+            markCurrentStoryRead()
+        }
     }
 
     // MARK: - Load states
 
+    /// The motif, waiting: the same five squares the round is made of.
     private var loadingState: some View {
-        VStack(spacing: 18) {
-            ProgressView()
-                .controlSize(.large)
+        VStack(spacing: 20) {
+            PixelLoader(size: 16)
             Text("Gathering today's stories")
-                .font(Nova.display(.headline))
+                .novaMeta(.caption)
                 .foregroundStyle(.secondary)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Gathering today's stories")
     }
 
     private var failedState: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 44, weight: .light))
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Today's stories didn't arrive.")
+                .font(Nova.display(.title2))
+                .tracking(-0.4)
 
-            Text("Today's stories didn't arrive")
-                .font(Nova.display(.title3))
-
-            Text("Check your connection and try again.")
-                .font(Nova.reading(.subheadline))
+            Text("The feeds didn't answer. Check your connection and try again.")
+                .font(Nova.reading(.body))
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
             Button("Try again") {
                 Task { await session.load(from: LiveNewsService()) }
             }
-            .buttonStyle(.borderedProminent)
-            .padding(.top, 4)
+            .buttonStyle(PaperButtonStyle())
+            .padding(.top, 10)
         }
-        .multilineTextAlignment(.center)
-        .padding(40)
+        .padding(.horizontal, 32)
+        .frame(maxWidth: Nova.readingMaxWidth)
     }
 
     // MARK: - Deck
@@ -154,18 +161,24 @@ struct StoryReaderView: View {
 
     // MARK: - Chrome
 
+    /// Paper, a shade darker than the sheet, so a card being thrown has a ground to leave.
     private var backdrop: some View {
-        NovaBackdrop(tint: story(at: topIndex)?.category.tint ?? Nova.accent)
-            .animation(.smooth(duration: 0.5), value: topIndex)
+        Nova.paper
     }
 
+    /// The day's five as pixels, on a dark chip so they read over any photograph.
     private var progressOverlay: some View {
         VStack {
             ProgressPips(
                 completed: session.storiesReadCount,
                 total: session.stories.count,
-                label: "stories read"
+                label: "stories read",
+                tints: session.stories.map(\.category.tint)
             )
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Nova.charcoal.opacity(0.72), in: .capsule)
+            .environment(\.colorScheme, .dark)
             .safeAreaPadding(.top, 4)
 
             Spacer(minLength: 0)
@@ -285,5 +298,4 @@ struct StoryReaderView: View {
     }
     .environment(DailySession())
     .environment(AppRouter())
-    .tint(Nova.accent)
 }

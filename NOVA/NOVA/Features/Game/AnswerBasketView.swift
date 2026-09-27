@@ -42,18 +42,22 @@ struct AnswerBasketView: View {
 
     // MARK: - Backboard
 
+    /// A flat charcoal board with the letter in a pixel of the hoop's colour. No glass:
+    /// the answer is the thing being read here, and it reads best on a solid ground.
     private var backboard: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top, spacing: 8) {
+        let shape = RoundedRectangle(cornerRadius: Nova.basketCornerRadius, style: .continuous)
+
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top, spacing: 9) {
                 Text(letter)
-                    .font(.caption2.weight(.bold))
+                    .font(Nova.meta(.caption2, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 20, height: 20)
-                    .background(style.rim, in: .circle)
+                    .background(style.rim, in: .rect(cornerRadius: 4, style: .continuous))
 
                 Text(answer)
-                    .font(Nova.reading(.subheadline, weight: .medium))
-                    .foregroundStyle(.primary)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
                     .lineLimit(3)
                     .minimumScaleFactor(0.7)
@@ -63,27 +67,24 @@ struct AnswerBasketView: View {
 
             if let status {
                 Label(status.text, systemImage: status.symbol)
-                    .font(.caption2.weight(.semibold))
+                    .novaMeta(.caption2, weight: .bold)
                     .foregroundStyle(status.tint)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.7)
             }
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Keeps the answer legible once the gradient backdrop is showing through.
-        .background {
-            RoundedRectangle(cornerRadius: Nova.basketCornerRadius)
-                .fill(.background.opacity(Nova.basketScrim))
-        }
-        .glassEffect(glass, in: .rect(cornerRadius: Nova.basketCornerRadius))
-        .overlay {
-            RoundedRectangle(cornerRadius: Nova.basketCornerRadius)
-                .strokeBorder(borderStyle, lineWidth: borderWidth)
-        }
+        .background(fill, in: shape)
+        .overlay { shape.strokeBorder(borderStyle, lineWidth: borderWidth) }
     }
 
     // MARK: - Styling
+
+    /// Brighter than system green and red, which go muddy on charcoal. The text label is
+    /// always there too, so colour is never the only way to tell.
+    static let right = Color(hex: 0x3DDC97)
+    static let wrong = Color(hex: 0xFF6B5E)
 
     private struct Status {
         let text: String
@@ -93,31 +94,31 @@ struct AnswerBasketView: View {
 
     private var status: Status? {
         switch appearance {
-        case .correct: Status(text: "Correct", symbol: "checkmark.circle.fill", tint: .green)
-        case .incorrect: Status(text: "Not this one", symbol: "xmark.circle.fill", tint: .red)
-        case .revealedAnswer: Status(text: "Correct answer", symbol: "checkmark.circle", tint: .green)
+        case .correct: Status(text: "Correct", symbol: "checkmark", tint: Self.right)
+        case .incorrect: Status(text: "Not this one", symbol: "xmark", tint: Self.wrong)
+        case .revealedAnswer: Status(text: "The answer", symbol: "checkmark", tint: Self.right)
         case .idle, .dimmed: nil
         }
     }
 
-    private var glass: Glass {
+    private var fill: Color {
         switch appearance {
-        case .correct, .revealedAnswer: .regular.tint(.green.opacity(0.3))
-        case .incorrect: .regular.tint(.red.opacity(0.3))
-        case .idle, .dimmed: .regular.tint(style.board.opacity(0.22)).interactive()
+        case .correct, .revealedAnswer: Self.right.opacity(0.14).mix(with: Nova.charcoalRaised, by: 0.5)
+        case .incorrect: Self.wrong.opacity(0.14).mix(with: Nova.charcoalRaised, by: 0.5)
+        case .idle, .dimmed: Nova.charcoalRaised
         }
     }
 
-    private var borderStyle: AnyShapeStyle {
+    private var borderStyle: Color {
         switch appearance {
-        case .correct, .revealedAnswer: AnyShapeStyle(Color.green)
-        case .incorrect: AnyShapeStyle(Color.red)
-        case .idle, .dimmed: AnyShapeStyle(.clear)
+        case .correct, .revealedAnswer: Self.right
+        case .incorrect: Self.wrong
+        case .idle, .dimmed: Nova.charcoalLine
         }
     }
 
     private var borderWidth: CGFloat {
-        appearance == .idle || appearance == .dimmed ? 0 : 2
+        appearance == .idle || appearance == .dimmed ? 1 : 2
     }
 }
 
@@ -132,4 +133,5 @@ struct AnswerBasketView: View {
     }
     .frame(height: 320)
     .padding()
+    .novaCharcoalSurface()
 }
