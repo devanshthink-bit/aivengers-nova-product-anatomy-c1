@@ -42,6 +42,9 @@ final class SpeechListener: VoiceListening {
     /// Bumped on every listen, so a late callback from a cancelled recognition can't
     /// write into the next one.
     private var generation = 0
+    /// Tracked apart from `engine.isRunning`: the engine stops *itself* on an interruption
+    /// or a route change, and a tap left behind then makes the next `installTap` trap.
+    private var tapInstalled = false
 
     func requestPermission() async -> Bool {
         let speech = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
@@ -75,11 +78,13 @@ final class SpeechListener: VoiceListening {
         input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { @Sendable buffer, _ in
             request.append(buffer)
         }
+        tapInstalled = true
         engine.prepare()
         do {
             try engine.start()
         } catch {
             input.removeTap(onBus: 0)
+            tapInstalled = false
             throw error
         }
 
@@ -131,7 +136,10 @@ final class SpeechListener: VoiceListening {
         capTimer?.cancel()
         if engine.isRunning {
             engine.stop()
+        }
+        if tapInstalled {
             engine.inputNode.removeTap(onBus: 0)
+            tapInstalled = false
         }
         request?.endAudio()
         task?.cancel()

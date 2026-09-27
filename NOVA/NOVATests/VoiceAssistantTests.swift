@@ -64,8 +64,35 @@ private final class FakeSpeaker: VoiceSpeaking {
 private final class FakeAudio: VoiceAudioSession {
     private(set) var begins = 0
     private(set) var ends = 0
+    var onInterruption: (() -> Void)?
     func beginVoice() { begins += 1 }
     func endVoice() { ends += 1 }
+    /// What a phone call or unplugged headphones would do.
+    func interrupt() { onInterruption?() }
+}
+
+/// Behaves like the real listener on `stop()`: a listen that is still waiting returns
+/// whatever was heard so far, rather than nothing.
+private final class MidSentenceListener: VoiceListening {
+    var onPartial: ((String) -> Void)?
+    /// Called once the listen is waiting, so a test can stop it mid-sentence.
+    var onListening: (() -> Void)?
+    private var pending: CheckedContinuation<String, Never>?
+
+    func requestPermission() async -> Bool { true }
+
+    func listen(language: VoiceLanguage) async throws -> String {
+        await withCheckedContinuation { continuation in
+            pending = continuation
+            onPartial?("tech ne")
+            onListening?()
+        }
+    }
+
+    func stop() {
+        pending?.resume(returning: "tech ne")
+        pending = nil
+    }
 }
 
 private struct NoTranslation: HeadlineTranslating {
@@ -197,5 +224,34 @@ struct VoiceAssistantTests {
         #expect(voice.briefing?.items.first?.storyID.rawValue == "i1")
         #expect(voice.phase == .done)
         #expect(audio.begins == 2 && audio.ends == 2)
+    }
+
+    @Test("Stopping mid-sentence settles the phase instead of going on to think")
+    func stopWhileListening() async {
+        let listener = MidSentenceListener()
+        let voice = VoiceAssistant(listener: listener, speaker: FakeSpeaker(),
+                                   writer: RuleBriefingWriter(translator: NoTranslation()))
+        listener.onListening = { voice.stop() }
+        voice.start(pool: pool, readerName: "", language: .english, audio: nil)
+        await voice.waitUntilFinished()
+
+        #expect(voice.phase == .idle)
+        #expect(!voice.isActive)
+        #expect(voice.briefing == nil)
+    }
+
+    @Test("An audio interruption mid-briefing stops it and hands back the audio")
+    func interruptionStops() async {
+        let speaker = FakeSpeaker()
+        let audio = FakeAudio()
+        let voice = assistant(FakeListener([.heard("tech news")]), speaker)
+        speaker.onSay = { line in if line.hasPrefix("2.") { audio.interrupt() } }
+        voice.start(pool: pool, readerName: "", language: .english, audio: audio)
+        await voice.waitUntilFinished()
+
+        #expect(!speaker.lines.contains { $0.hasPrefix("3.") })
+        #expect(voice.phase == .done)
+        #expect(audio.ends == 1)
+        #expect(audio.onInterruption == nil)
     }
 }

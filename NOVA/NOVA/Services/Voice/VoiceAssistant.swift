@@ -8,6 +8,9 @@ import Observation
 
 /// Whoever owns the audio session. `SoundPlayer` in the app; a counter in tests.
 protocol VoiceAudioSession: AnyObject {
+    /// Called when a phone call, Siri or a lost audio route takes the session away. The
+    /// briefing can't carry on through that, so it stops.
+    var onInterruption: (() -> Void)? { get set }
     func beginVoice()
     func endVoice()
 }
@@ -129,6 +132,9 @@ final class VoiceAssistant {
             if !Task.isCancelled { phase = .failed(.nothingHeard) }
             return
         }
+        // Stopping mid-sentence hands back what was heard so far, so a transcript here
+        // doesn't mean the reader is still waiting for an answer.
+        guard !Task.isCancelled else { return }
 
         phase = .thinking
         var intent = VoiceIntent.parse(heard)
@@ -168,11 +174,15 @@ final class VoiceAssistant {
             do {
                 let heard = try await listener.listen(language: language)
                     .trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !Task.isCancelled else { return nil }
                 if !heard.isEmpty { return heard }
             } catch ListenError.localeUnavailable where language == .hindi {
                 // This phone can't recognise Hindi. Say so in Hindi, then carry on in
                 // English: a briefing in the other language beats none.
                 await speaker.say(VoiceLanguage.hindiRecognitionUnavailable, language: .hindi)
+                // A run stopped during that line must not change the language of the run
+                // that replaced it.
+                guard !Task.isCancelled else { return nil }
                 language = .english
                 continue
             } catch {
@@ -191,11 +201,13 @@ final class VoiceAssistant {
     private func takeAudio() {
         guard !holdsAudio else { return }
         audio?.beginVoice()
+        audio?.onInterruption = { [weak self] in self?.stop() }
         holdsAudio = true
     }
 
     private func releaseAudio() {
         guard holdsAudio else { return }
+        audio?.onInterruption = nil
         audio?.endVoice()
         holdsAudio = false
     }
