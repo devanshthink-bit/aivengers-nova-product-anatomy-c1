@@ -1,6 +1,6 @@
 # Voice briefing — design
 
-Date: 2026-09-27 · Branch: `feat/voice-readout` · Status: approved design, awaiting spec review
+Date: 2026-09-27 · Branch: `feat/voice-readout` · Status: approved, implemented
 
 ## Goal
 
@@ -161,7 +161,7 @@ protocol BriefingWriter: Sendable {
     `[.defaultToSpeaker, .duckOthers, .allowBluetoothHFP]`.
   - On close, it restores `SoundPlayer`'s `.ambient`, so the game keeps respecting the silent
     switch.
-  - `SoundPlayer` gains `suspend()` / `resume()` for this. The iOS/visionOS-only calls stay
+  - `SoundPlayer` gains `beginVoice()` / `endVoice()` for this. The iOS/visionOS-only calls stay
     inside those helpers and never appear at call sites.
 
 ### State and wiring
