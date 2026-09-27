@@ -56,6 +56,23 @@ struct TopicSelection: Equatable, Sendable {
             categories.insert(category)
         }
     }
+
+    /// Whether editing this category from Profile is allowed.
+    ///
+    /// Onboarding can't finish below the minimum, so Profile mustn't be a back door to
+    /// it. A selection that is *already* short — one stored before the minimum existed,
+    /// or cleared by the debug restart — stays freely editable so it can be fixed.
+    func canToggle(_ category: StoryCategory) -> Bool {
+        !(contains(category) && isComplete && count <= Self.minimum)
+    }
+
+    /// `toggle`, refused when it would break the minimum. Returns whether it changed.
+    @discardableResult
+    mutating func toggleKeepingMinimum(_ category: StoryCategory) -> Bool {
+        guard canToggle(category) else { return false }
+        toggle(category)
+        return true
+    }
 }
 
 extension Array where Element == Story {

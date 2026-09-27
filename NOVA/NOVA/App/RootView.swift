@@ -12,7 +12,6 @@ struct RootView: View {
     @State private var sound = SoundPlayer()
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
-    @AppStorage("readerName") private var readerName = ""
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
 
     var body: some View {
@@ -56,6 +55,12 @@ struct RootView: View {
                                 // under the slingshot and steal the drag.
                                 .toolbar(.hidden, for: .tabBar)
                             }
+                    }
+                }
+
+                Tab("Profile", systemImage: "person.crop.circle", value: AppTab.profile) {
+                    NavigationStack {
+                        ProfileView()
                     }
                 }
             }
@@ -104,15 +109,8 @@ struct RootView: View {
     }
 
     #if DEBUG
-    /// Forgets everything onboarding stored and starts the journey over.
     private func restartOnboarding() {
-        readerName = ""
-        pickedTopicsRaw = ""
-        session.applyTopics(TopicSelection())
-        router.popToReader()
-        withAnimation(.easeInOut(duration: 0.3)) {
-            hasSeenWelcome = false
-        }
+        OnboardingReset.run(session: session, router: router)
     }
     #endif
 }
