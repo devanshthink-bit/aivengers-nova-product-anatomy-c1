@@ -11,6 +11,8 @@ struct RootView: View {
     @State private var router = AppRouter()
     @State private var sound = SoundPlayer()
     @State private var history = PlayHistory()
+    @State private var voice = VoiceAssistant()
+    @State private var showsVoicePanel = false
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
@@ -84,11 +86,28 @@ struct RootView: View {
                 .zIndex(1)
             }
         }
+        // Written before the `.environment` calls so the sheet sits inside them. A sheet
+        // presents its own hierarchy, and it only inherits what was injected above the
+        // point it's attached. Attached after the injections, the panel would crash
+        // looking for `VoiceAssistant`.
+        .overlay(alignment: .bottomTrailing) {
+            if showsVoiceFloater {
+                VoiceFloater { showsVoicePanel = true }
+                    .padding(.trailing, Nova.screenPadding)
+                    // Clears the floating tab bar.
+                    .padding(.bottom, 72)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .sheet(isPresented: $showsVoicePanel) {
+            VoiceBriefingPanel()
+        }
         .environment(session)
         .environment(store)
         .environment(router)
         .environment(sound)
         .environment(history)
+        .environment(voice)
         .tint(Nova.accent)
         // Also on every later launch, not just the one that finished onboarding —
         // otherwise a stored preference silently stops applying the next morning.
@@ -113,6 +132,10 @@ struct RootView: View {
             #endif
             #if DEBUG
             simulateRoundIfAsked()
+            // `-openVoice YES` opens the briefing on launch. Synthetic taps aren't available
+            // from a shell, so this is the only way to screenshot the panel. Read-only, like
+            // the other arguments.
+            if UserDefaults.standard.bool(forKey: "openVoice") { showsVoicePanel = true }
             #endif
         }
         #if DEBUG
@@ -125,6 +148,12 @@ struct RootView: View {
             }
         }
         #endif
+    }
+
+    /// The mic stays off the charcoal round: the slingshot is aimed near the bottom edge,
+    /// where the button would sit. It also waits for onboarding to finish.
+    private var showsVoiceFloater: Bool {
+        hasSeenWelcome && !(router.tab == .scroll && !router.path.isEmpty)
     }
 
     #if DEBUG

@@ -25,19 +25,83 @@ final class SoundPlayer {
     /// Off keeps the game silent without callers needing to care.
     var isEnabled = true
 
+    /// True while the voice briefing owns the audio session. Effects stay quiet so a shot
+    /// sound can't land in the middle of a spoken line.
+    private(set) var isVoiceActive = false
+
+    /// Set by the voice briefing while it holds the session. See `observeInterruptions`.
+    var onInterruption: (() -> Void)?
+
     private var players: [Effect: AVAudioPlayer] = [:]
 
     init() {
         configureSession()
+        observeInterruptions()
         for effect in Effect.allCases {
             players[effect] = Self.makePlayer(for: effect)
         }
     }
 
     func play(_ effect: Effect) {
-        guard isEnabled, let player = players[effect] else { return }
+        guard isEnabled, !isVoiceActive, let player = players[effect] else { return }
         player.currentTime = 0
         player.play()
+    }
+
+    // MARK: - Voice
+
+    /// Hands the session to the voice briefing: recording plus spoken playback, over the
+    /// speaker rather than the earpiece, ducking anything else that's playing.
+    func beginVoice() {
+        isVoiceActive = true
+        #if os(iOS) || os(visionOS)
+        do {
+            try AVAudioSession.sharedInstance().setCategory(
+                .playAndRecord,
+                mode: .spokenAudio,
+                options: [.defaultToSpeaker, .duckOthers, .allowBluetoothHFP]
+            )
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            // Without the session the recogniser gets no audio. The listener then hears
+            // nothing, and the assistant says so; nothing here needs to.
+        }
+        #endif
+    }
+
+    /// Takes the session back to `.ambient`, so the game keeps respecting the silent switch.
+    func endVoice() {
+        isVoiceActive = false
+        #if os(iOS) || os(visionOS)
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
+        configureSession()
+    }
+
+    /// A call, Siri, or headphones being unplugged takes the session away mid-briefing.
+    /// The recogniser and the synthesizer both go quiet without saying so, which left the
+    /// panel waiting on a line that would never finish, so the briefing is told to stop.
+    private func observeInterruptions() {
+        #if os(iOS) || os(visionOS)
+        let center = NotificationCenter.default
+        center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
+            let type = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            guard type == AVAudioSession.InterruptionType.began.rawValue else { return }
+            let player = self
+            MainActor.assumeIsolated { player?.voiceWasInterrupted() }
+        }
+        center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { [weak self] note in
+            let reason = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+            guard reason == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue else { return }
+            let player = self
+            MainActor.assumeIsolated { player?.voiceWasInterrupted() }
+        }
+        #endif
+    }
+
+    private func voiceWasInterrupted() {
+        guard isVoiceActive else { return }
+        onInterruption?()
     }
 
     // MARK: - Setup
@@ -62,3 +126,5 @@ final class SoundPlayer {
         return player
     }
 }
+
+extension SoundPlayer: VoiceAudioSession {}

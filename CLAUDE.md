@@ -180,6 +180,26 @@ which is why the preview conformance is a separate type rather than an extension
 **Sound (`Services/SoundPlayer.swift`)** — preloaded `AVAudioPlayer`s on an `.ambient` session
 (respects the silent switch, never interrupts other audio). Failures are swallowed by design.
 
+**Voice (`Services/Voice/`, `Features/Voice/`)** — the mic floater: greet, listen once, speak up to
+ten one-line highlights from `NewsStore.allStories`, in English or Hindi. Free by construction:
+Apple Speech in, `AVSpeechSynthesizer` out, and the lines come from `FallbackBriefingWriter` —
+ZeroAPI, then Foundation Models, then `RuleBriefingWriter`, which can't fail on a non-empty pool
+and so is the only tier with no timeout. Keep that last tier working; it is what the button says
+when both AI tiers are down.
+- `VoiceAssistant` depends only on protocols (`VoiceListening`, `VoiceSpeaking`,
+  `VoiceAudioSession`, `BriefingWriter`) so the whole flow is tested with fakes.
+- Stories go to models by number, not ID — feed IDs are often URLs and ten of them would eat
+  the reply's token budget.
+- Audio-thread and delegate closures in `SpeechListener` / `Speaker` are `@Sendable` or
+  `nonisolated` on purpose: under default MainActor isolation an unannotated tap closure is
+  inferred main-actor and traps when audio arrives.
+- `SoundPlayer.beginVoice()` / `endVoice()` swap `.ambient` for `.playAndRecord` and back; an
+  abandoned run must not call `endVoice()` under the run that replaced it (`runID`).
+- The floater hides during onboarding and on quiz routes. The panel's sheet is attached *inside*
+  `RootView`'s `.environment` calls. `-openVoice YES` (DEBUG) opens it on launch for screenshots.
+- `simctl privacy` can't grant speech recognition, so the spoken flow can only be checked by
+  hand on a simulator or device — the tests cover everything above the microphone.
+
 ## Conventions
 
 - Views read `@Environment(DailySession.self)` / `AppRouter` / `SoundPlayer`; nothing is passed
