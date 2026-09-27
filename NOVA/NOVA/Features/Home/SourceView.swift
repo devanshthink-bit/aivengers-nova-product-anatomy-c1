@@ -24,16 +24,16 @@ struct SourceView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 8) {
                 header
                 storyList
             }
             .padding(.horizontal, Nova.screenPadding)
-            .padding(.bottom, 24)
+            .padding(.bottom, 32)
             .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
-        .background(NovaBackdrop(tint: Nova.accent, intensity: 0.35).ignoresSafeArea())
+        .novaPaperSurface()
         .navigationTitle(source)
         .novaInlineTitle()
         // Keyed on the story count, not `onAppear`: the page can be on screen before the
@@ -48,46 +48,30 @@ struct SourceView: View {
 
     // MARK: - Header
 
+    /// No card: the mark, the name at headline scale, and a hairline to close it off.
     @ViewBuilder
     private var header: some View {
         if let feed {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .center, spacing: 14) {
-                    Group {
-                        if Nova.hasAsset(feed.logoAssetName) {
-                            Image(feed.logoAssetName)
-                                .resizable()
-                                .scaledToFill()
-                        } else {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(feed.category.tint.gradient)
-                                .overlay {
-                                    Text(feed.monogram)
-                                        .font(.system(size: 22, weight: .heavy, design: .rounded))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            VStack(alignment: .leading, spacing: 16) {
+                SourceMark(source: feed.source, category: feed.category, size: 64)
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(feed.source)
-                            .font(Nova.display(.title2))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(feed.source)
+                        .font(Nova.display(.largeTitle))
+                        .tracking(-0.8)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: 12) {
                         CategoryBadge(category: feed.category)
+                        Text("\(stories.count) recent \(stories.count == 1 ? "story" : "stories")")
+                            .novaMeta(.caption2)
+                            .foregroundStyle(.secondary)
                     }
-
-                    Spacer(minLength: 0)
                 }
 
-                Text("\(stories.count) recent \(stories.count == 1 ? "story" : "stories")")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Divider().overlay(Nova.hairline)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(18)
-            .novaCard()
-            .padding(.top, 4)
+            .padding(.top, 12)
         }
     }
 
@@ -96,17 +80,23 @@ struct SourceView: View {
     @ViewBuilder
     private var storyList: some View {
         if stories.isEmpty {
-            ContentUnavailableView(
-                "Nothing from \(source) yet",
-                systemImage: "tray",
-                description: Text("This feed didn't return any stories on the last refresh.")
-            )
-            .padding(.top, 40)
+            VStack(alignment: .leading, spacing: 10) {
+                PixelLoader(tints: [feed?.category.tint ?? .primary], size: 12)
+                    .opacity(store.loadState == .loading ? 1 : 0)
+                Text(store.loadState == .loading ? "Reading \(source)…" : "Nothing from \(source) yet.")
+                    .font(Nova.display(.title3))
+                Text("This feed didn't return any stories on the last refresh.")
+                    .font(Nova.reading(.subheadline))
+                    .foregroundStyle(.secondary)
+                    .opacity(store.loadState == .loading ? 0 : 1)
+            }
+            .padding(.top, 24)
         } else {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 0) {
                 // The source is already the page title, so repeating it on every row
                 // would be noise.
-                ForEach(stories) { story in
+                ForEach(Array(stories.enumerated()), id: \.element.id) { index, story in
+                    if index > 0 { Divider().overlay(Nova.hairline) }
                     FeedRow(story: story, showsSource: false) {
                         router.pushHome(.story(story.id))
                     }
@@ -121,6 +111,5 @@ struct SourceView: View {
         SourceView(source: "BBC News")
             .environment(NewsStore())
             .environment(AppRouter())
-            .tint(Nova.accent)
     }
 }

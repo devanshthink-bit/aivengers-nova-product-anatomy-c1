@@ -10,6 +10,7 @@ struct RootView: View {
     @State private var store = NewsStore()
     @State private var router = AppRouter()
     @State private var sound = SoundPlayer()
+    @State private var history = PlayHistory()
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
@@ -75,6 +76,10 @@ struct RootView: View {
                     // The deck only reorders once the reader has actually chosen.
                     session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
                 }
+                // Onboarding is charcoal and covers the whole window, so it can take the
+                // dark appearance outright — status bar included — without the paper
+                // underneath ever being seen in it.
+                .preferredColorScheme(.dark)
                 .transition(.opacity)
                 .zIndex(1)
             }
@@ -83,6 +88,7 @@ struct RootView: View {
         .environment(store)
         .environment(router)
         .environment(sound)
+        .environment(history)
         .tint(Nova.accent)
         // Also on every later launch, not just the one that finished onboarding —
         // otherwise a stored preference silently stops applying the next morning.
@@ -94,7 +100,20 @@ struct RootView: View {
         .task {
             session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
             await store.load()
+            #if DEBUG
+            // `-previewDeck YES`: the hand-written deck, whose questions always exist, so
+            // the round can be exercised on a day the question service is down.
+            if UserDefaults.standard.bool(forKey: "previewDeck") {
+                await session.load(from: PreviewNewsService())
+            } else {
+                await session.load(from: LiveNewsService(prefetched: store.allStories))
+            }
+            #else
             await session.load(from: LiveNewsService(prefetched: store.allStories))
+            #endif
+            #if DEBUG
+            simulateRoundIfAsked()
+            #endif
         }
         #if DEBUG
         // Only over the deck. Home has a navigation bar now, and the button sat on top
@@ -109,6 +128,24 @@ struct RootView: View {
     }
 
     #if DEBUG
+    /// `-simulateRound N` reads the whole deck and answers the first N questions right and
+    /// the rest wrong, so the mosaic, the flood and the results can be screenshotted.
+    /// Read-only like the other arguments: it changes the session, never the defaults.
+    private func simulateRoundIfAsked() {
+        guard UserDefaults.standard.object(forKey: "simulateRound") != nil else { return }
+        let correct = UserDefaults.standard.integer(forKey: "simulateRound")
+        session.stories.forEach(session.markRead)
+        var answered = 0
+        while let question = session.engine.currentQuestion {
+            let right = question.correctAnswerIndex
+            let wrong = question.answers.indices.first { $0 != right } ?? right
+            session.submitAnswer(at: answered < correct ? right : wrong)
+            session.advanceToNextQuestion()
+            answered += 1
+        }
+    }
+
+    /// Forgets everything onboarding stored and starts the journey over.
     private func restartOnboarding() {
         OnboardingReset.run(session: session, router: router)
     }

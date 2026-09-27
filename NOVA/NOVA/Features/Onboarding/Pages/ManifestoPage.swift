@@ -13,8 +13,11 @@ import SwiftUI
 /// NOVA ever shows, which is precisely what the ripple needs in order to disturb it.
 struct ManifestoPage: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 36) {
             Spacer(minLength: 0)
+
+            // Artifact's welcome pixels, falling into place before the sentence arrives.
+            PixelScatter(unit: 26)
 
             Headline(text: copy, size: Onboarding.manifestoSize)
                 .onboardingEntry(0)

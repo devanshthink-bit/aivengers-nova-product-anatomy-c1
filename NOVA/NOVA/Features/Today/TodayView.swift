@@ -16,7 +16,7 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 26) {
                     roundHeader
                     storyList
                     demoNotice
@@ -26,7 +26,9 @@ struct TodayView: View {
                 .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
                 .frame(maxWidth: .infinity)
             }
+            .novaPaperSurface()
             .navigationTitle("Today")
+            .novaInlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
@@ -37,44 +39,43 @@ struct TodayView: View {
 
     // MARK: - Header
 
+    /// The mosaic beside the promise, so the index shows what the reading is building.
     private var roundHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(Date.now, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-
-            Text("Read five stories, then earn your five shots.")
-                .font(Nova.display(.title3))
-                .fixedSize(horizontal: false, vertical: true)
-
-            HStack(spacing: 12) {
-                ProgressPips(
-                    completed: session.storiesReadCount,
-                    total: session.stories.count,
-                    label: "stories read"
-                )
-                Text("\(session.storiesReadCount) of \(session.stories.count) read")
-                    .font(.footnote)
+        HStack(alignment: .center, spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(Date.now, format: .dateTime.weekday(.wide).month(.wide).day())
+                    .novaMeta(.caption2)
                     .foregroundStyle(.secondary)
+
+                Text("Read five stories, then earn your five shots.")
+                    .font(Nova.display(.title3))
+                    .tracking(-0.3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("\(session.storiesReadCount) / \(session.stories.count) read")
+                    .font(Nova.meta(.caption, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
             }
 
-            Text("Round 1 of 3 · about 5 minutes")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+            Spacer(minLength: 0)
+
+            MosaicView(
+                mosaic: session.mosaic,
+                tints: session.stories.map(\.category.tint),
+                cell: 10,
+                gap: 2
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .novaCard()
+        .padding(.top, 8)
     }
 
     // MARK: - Stories
 
     private var storyList: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Today's five")
-                .font(Nova.display(.headline))
-
+        VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(session.stories.enumerated()), id: \.element.id) { index, story in
+                if index > 0 { Divider().overlay(Nova.hairline) }
                 StoryRow(
                     position: index + 1,
                     story: story,
@@ -93,7 +94,7 @@ struct TodayView: View {
     private var demoNotice: some View {
         Text("Summaries and questions are generated automatically and aren't editorially checked.")
             .font(.caption)
-            .foregroundStyle(.tertiary)
+            .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.bottom, 8)
     }
@@ -102,5 +103,4 @@ struct TodayView: View {
 #Preview {
     TodayView { _ in }
         .environment(DailySession())
-        .tint(Nova.accent)
 }

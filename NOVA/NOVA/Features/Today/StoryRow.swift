@@ -5,6 +5,10 @@
 
 import SwiftUI
 
+/// One of today's five in the index sheet.
+///
+/// The position sits in a pixel square: outlined while unread, filled with the story's
+/// colour once read — the same two states the story's squares have in the mosaic.
 struct StoryRow: View {
     let position: Int
     let story: Story
@@ -14,46 +18,58 @@ struct StoryRow: View {
     var body: some View {
         Button(action: action) {
             HStack(alignment: .top, spacing: 14) {
-                Text("\(position)")
-                    .font(.footnote.weight(.bold).monospacedDigit())
-                    .foregroundStyle(isRead ? Color.white : Nova.accent)
-                    .frame(width: 26, height: 26)
-                    .background(isRead ? AnyShapeStyle(Nova.accent) : AnyShapeStyle(Nova.accent.opacity(0.15)),
-                                in: .circle)
+                marker
 
-                VStack(alignment: .leading, spacing: 8) {
-                    CategoryBadge(category: story.category)
+                VStack(alignment: .leading, spacing: 7) {
+                    MetaLine(story: story)
 
                     Text(story.title)
-                        .font(Nova.display(.headline))
+                        .font(.headline)
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    Text("\(story.source) · \(story.publishedDescription)")
-                        .font(Nova.reading(.caption))
-                        .foregroundStyle(.secondary)
                 }
 
                 Spacer(minLength: 0)
 
-                Image(systemName: isRead ? "checkmark.circle.fill" : "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isRead ? Color.green : Color.secondary)
-                    .padding(.top, 4)
+                StoryThumbnail(story: story, size: 60)
             }
-            .padding(16)
+            .padding(.vertical, 14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .novaCard()
+            .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("Story \(position), \(story.category.title). \(story.title)")
         .accessibilityValue(isRead ? "Read" : "Not read yet")
         .accessibilityHint("Opens the story")
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var marker: some View {
+        let shape = RoundedRectangle(cornerRadius: 5, style: .continuous)
+
+        return Text("\(position)")
+            .font(Nova.meta(.footnote, weight: .bold))
+            .foregroundStyle(isRead ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
+            .frame(width: 28, height: 28)
+            .background {
+                if isRead {
+                    shape.fill(story.category.tint)
+                } else {
+                    shape.strokeBorder(.primary.opacity(0.25), lineWidth: 1.5)
+                }
+            }
+            .animation(Nova.Motion.pop, value: isRead)
     }
 }
 
 #Preview {
-    StoryRow(position: 1, story: MockNewsService.todayStories[0], isRead: false) {}
-        .padding()
+    VStack(spacing: 0) {
+        StoryRow(position: 1, story: MockNewsService.todayStories[0], isRead: true) {}
+        Divider()
+        StoryRow(position: 2, story: MockNewsService.todayStories[1], isRead: false) {}
+    }
+    .padding()
+    .novaPaperSurface()
 }

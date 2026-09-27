@@ -64,7 +64,21 @@ final class AppRouter {
         #endif
         return []
     }
-    var path: [Route] = []
+    /// DEBUG only: `-openRoute quizIntro|quiz|results` opens the Scroll tab on that step,
+    /// for the same reason as `-openSource` — the charcoal screens can't be reached for a
+    /// screenshot otherwise, since getting there takes five swipes and a shot.
+    private static var initialPath: [Route] {
+        #if DEBUG
+        switch UserDefaults.standard.string(forKey: "openRoute") {
+        case "quizIntro": return [.quizIntro]
+        case "quiz": return [.quiz]
+        case "results": return [.results]
+        default: break
+        }
+        #endif
+        return []
+    }
+    var path: [Route] = AppRouter.initialPath
     /// Home's own stack, kept separate so pushing a source can't disturb a quiz in
     /// progress on the other tab.
     var homePath: [HomeRoute] = AppRouter.initialHomePath

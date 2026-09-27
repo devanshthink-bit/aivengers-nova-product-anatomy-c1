@@ -20,12 +20,10 @@ struct ReadyPage: View {
             if !chosen.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(chosen, id: \.self) { category in
-                        Label(category.title, systemImage: category.symbolName)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(category.tint)
-                            .padding(.horizontal, 13)
+                        CategoryBadge(category: category)
+                            .padding(.horizontal, 12)
                             .padding(.vertical, 9)
-                            .background { Capsule().fill(category.tint.opacity(0.14)) }
+                            .background(Onboarding.surface, in: .rect(cornerRadius: 8, style: .continuous))
                     }
                 }
                 .onboardingEntry(1)

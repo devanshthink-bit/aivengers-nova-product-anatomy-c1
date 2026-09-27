@@ -5,11 +5,11 @@
 
 import SwiftUI
 
-/// A single story, opened from Home.
+/// A single story, opened from Home: Artifact's reader.
 ///
-/// Separate from `StoryCardView` because the deck card is a fixed-height surface built to
-/// be thrown off-screen — it can't scroll, and a long story would be clipped inside it.
-/// This is the scrollable reading view.
+/// Publisher line, a big sans headline, the picture, then serif body copy at a comfortable
+/// measure. Separate from `StoryCardView` because the deck card is a fixed-height surface
+/// built to be thrown off-screen — it can't scroll, and a long story would be clipped.
 ///
 /// Reading here does not mark the story read: browsing is deliberately outside the round.
 struct StoryDetailView: View {
@@ -22,31 +22,36 @@ struct StoryDetailView: View {
     var body: some View {
         ScrollView {
             if let story {
-                VStack(alignment: .leading, spacing: 18) {
-                    artwork(for: story)
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        CategoryBadge(category: story.category)
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        MetaLine(story: story)
 
                         Text(story.title)
                             .font(Nova.display(.title))
+                            .tracking(-0.6)
                             .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
 
-                        Text("\(story.source) · \(story.publishedDescription)")
-                            .font(Nova.reading(.footnote))
-                            .foregroundStyle(.secondary)
+                        CategoryBadge(category: story.category)
+                    }
+                    .padding(.horizontal, Nova.screenPadding)
 
-                        Divider().padding(.vertical, 4)
+                    artwork(for: story)
 
+                    VStack(alignment: .leading, spacing: 18) {
                         Text(story.summary)
                             .font(Nova.reading(.body))
+                            .lineSpacing(6)
                             .fixedSize(horizontal: false, vertical: true)
+
+                        Divider().overlay(Nova.hairline)
 
                         generationNotice
                     }
                     .padding(.horizontal, Nova.screenPadding)
                 }
-                .padding(.bottom, 32)
+                .padding(.top, 8)
+                .padding(.bottom, 40)
                 .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
                 .frame(maxWidth: .infinity)
             } else {
@@ -58,7 +63,7 @@ struct StoryDetailView: View {
                 .padding(.top, 60)
             }
         }
-        .background(NovaBackdrop(tint: story?.category.tint ?? Nova.accent, intensity: 0.4).ignoresSafeArea())
+        .novaPaperSurface()
         .novaInlineTitle()
     }
 
@@ -66,23 +71,25 @@ struct StoryDetailView: View {
     private func artwork(for story: Story) -> some View {
         switch story.artwork {
         case .remote(let url):
-            AsyncImage(url: url) { phase in
-                if case .success(let image) = phase {
-                    image.resizable().scaledToFill()
-                } else {
-                    Color.clear
+            Color.clear
+                .aspectRatio(3 / 2, contentMode: .fit)
+                .overlay {
+                    AsyncImage(url: url) { phase in
+                        if case .success(let image) = phase {
+                            image.resizable().scaledToFill()
+                        } else {
+                            story.category.tint.opacity(0.14)
+                        }
+                    }
                 }
-            }
-            .frame(height: 220)
-            .frame(maxWidth: .infinity)
-            .clipped()
-        case .asset(let name):
-            Image(name)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 220)
-                .frame(maxWidth: .infinity)
                 .clipped()
+                .accessibilityHidden(true)
+        case .asset(let name):
+            Color.clear
+                .aspectRatio(3 / 2, contentMode: .fit)
+                .overlay { Image(name).resizable().scaledToFill() }
+                .clipped()
+                .accessibilityHidden(true)
         case .none:
             EmptyView()
         }
@@ -91,13 +98,14 @@ struct StoryDetailView: View {
     /// The summary shown here is machine-written from the headline and the feed's own
     /// blurb. Saying so is the honest thing to do when the text is not the publisher's.
     private var generationNotice: some View {
-        Label(
-            "Summarised automatically from \(story?.source ?? "the feed"). Open the publisher for the full report.",
-            systemImage: "sparkles"
-        )
-        .font(.caption)
-        .foregroundStyle(.tertiary)
-        .fixedSize(horizontal: false, vertical: true)
-        .padding(.top, 8)
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: "sparkles")
+                .font(.caption)
+            Text("Summarised automatically from \(story?.source ?? "the feed"). Open the publisher for the full report.")
+                .font(.caption)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
     }
 }

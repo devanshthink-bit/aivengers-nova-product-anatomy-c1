@@ -9,10 +9,11 @@ import SwiftUI
 ///
 /// Everything here edits what onboarding already stored — the same `@AppStorage` keys —
 /// so there is still exactly one place each answer lives. The "Today" numbers are read
-/// straight off the session and reset on relaunch like the rest of the game; nothing is
-/// saved across days yet, so the page doesn't pretend to have a history.
+/// straight off the session and reset on relaunch like the rest of the game. The week
+/// underneath comes from `PlayHistory`, which only records days a round was finished.
 struct ProfileView: View {
     @Environment(DailySession.self) private var session
+    @Environment(PlayHistory.self) private var history
     @Environment(AppRouter.self) private var router
 
     @AppStorage("readerName") private var readerName = ""
@@ -35,7 +36,7 @@ struct ProfileView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(NovaBackdrop(tint: Nova.accent, intensity: 0.35).ignoresSafeArea())
+        .novaPaperSurface()
         .navigationTitle("Profile")
         .novaInlineTitle()
     }
@@ -50,7 +51,7 @@ struct ProfileView: View {
                 .autocorrectionDisabled()
                 .submitLabel(.done)
                 .padding(16)
-                .novaCard()
+                .profileSurface()
                 // Trimmed only when the reader is done, so a space typed between two
                 // names isn't eaten mid-word.
                 .onSubmit { readerName = readerName.trimmingCharacters(in: .whitespaces) }
@@ -96,20 +97,27 @@ struct ProfileView: View {
     private var todaySection: some View {
         let engine = session.engine
         return ProfileSection(title: "Today") {
-            HStack(spacing: 12) {
-                StatTile(
-                    value: "\(session.storiesReadCount)/\(session.stories.count)",
-                    label: "Stories read"
-                )
-                StatTile(value: "\(engine.score)", label: "Score")
-                StatTile(
-                    // A dash, not "0%", before anything is answered: nothing has been
-                    // got wrong yet.
-                    value: engine.answeredCount > 0
-                        ? engine.accuracy.formatted(.percent.precision(.fractionLength(0)))
-                        : "–",
-                    label: "Accuracy"
-                )
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    StatTile(
+                        value: "\(session.storiesReadCount)/\(session.stories.count)",
+                        label: "Stories read"
+                    )
+                    StatTile(value: "\(engine.score)", label: "Score")
+                    StatTile(
+                        // A dash, not "0%", before anything is answered: nothing has been
+                        // got wrong yet.
+                        value: engine.answeredCount > 0
+                            ? engine.accuracy.formatted(.percent.precision(.fractionLength(0)))
+                            : "–",
+                        label: "Accuracy"
+                    )
+                }
+
+                WeekStrip(days: history.week(), dot: 26)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 6)
+                    .profileSurface()
             }
         }
     }
@@ -125,7 +133,7 @@ struct ProfileView: View {
                 Label("Restart onboarding", systemImage: "arrow.counterclockwise")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .novaCard()
+                    .profileSurface()
             }
             .buttonStyle(.plain)
             .foregroundStyle(.red)
@@ -137,7 +145,7 @@ struct ProfileView: View {
 
 // MARK: - Pieces
 
-/// The initial in an accent disc, and the name under it.
+/// The initial in an ink disc, and the name under it.
 ///
 /// Falls back to "Reader" rather than an empty line: onboarding lets the name be skipped,
 /// and a blank header reads like a loading failure.
@@ -158,10 +166,9 @@ private struct ProfileHeader: View {
                         .font(.system(size: 36, weight: .semibold))
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Nova.paper)
             .frame(width: 88, height: 88)
-            .background(Circle().fill(Nova.accent.gradient))
-            .shadow(color: Nova.accent.opacity(0.3), radius: 16, y: 8)
+            .background(Circle().fill(Nova.ink))
             .accessibilityHidden(true)
 
             Text(displayName)
@@ -184,9 +191,8 @@ private struct ProfileSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.footnote.weight(.semibold))
+                .novaMeta(.caption, weight: .semibold)
                 .foregroundStyle(.secondary)
-                .textCase(.uppercase)
                 .accessibilityAddTraits(.isHeader)
 
             content
@@ -200,7 +206,8 @@ private struct ProfileSection<Content: View>: View {
     }
 }
 
-/// Same look as `CategoryBadge`, flooded with the tint when chosen.
+/// The category's square and its name. Chosen chips go ink, the way Artifact marks a
+/// selected topic; the colour stays on the square because the tints fail contrast as text.
 ///
 /// A locked chip is one of the last two chosen: it stays tappable-looking but dims a
 /// touch, and VoiceOver says why nothing happens instead of silently ignoring the tap.
@@ -212,18 +219,31 @@ private struct TopicChip: View {
 
     var body: some View {
         Button(action: action) {
-            Label(category.title, systemImage: isOn ? "checkmark" : category.symbolName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(isOn ? AnyShapeStyle(.white) : AnyShapeStyle(category.tint))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(
-                    isOn ? AnyShapeStyle(category.tint.gradient) : AnyShapeStyle(category.tint.opacity(0.15)),
-                    in: .capsule
-                )
-                .opacity(isLocked ? 0.75 : 1)
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(category.tint)
+                    .frame(width: 9, height: 9)
+                Text(category.title)
+                    .font(.subheadline.weight(.semibold))
+                if isOn {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.heavy))
+                }
+            }
+            .foregroundStyle(isOn ? Nova.paper : Nova.ink)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background {
+                if isOn {
+                    Capsule().fill(Nova.ink)
+                } else {
+                    Capsule().fill(Nova.sheet)
+                    Capsule().strokeBorder(Nova.hairline, lineWidth: 1)
+                }
+            }
+            .opacity(isLocked ? 0.75 : 1)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
         .accessibilityLabel(category.title)
         .accessibilityValue(isOn ? "Chosen" : "Not chosen")
         .accessibilityHint(isLocked ? "At least \(TopicSelection.minimum) topics stay chosen." : "")
@@ -238,8 +258,7 @@ private struct StatTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
-                .font(Nova.display(.title2))
-                .monospacedDigit()
+                .font(Nova.meta(.title2, weight: .bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .contentTransition(.numericText())
@@ -251,7 +270,7 @@ private struct StatTile: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .novaCard()
+        .profileSurface()
         .accessibilityElement(children: .combine)
     }
 }
@@ -304,10 +323,23 @@ private struct FlowChips: Layout {
     }
 }
 
+private extension View {
+    /// The paper sheet the profile's fields and tiles sit on: opaque, with a hairline,
+    /// in place of the old `novaCard()` the redesign removed.
+    func profileSurface() -> some View {
+        background(Nova.sheet, in: .rect(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Nova.hairline, lineWidth: 1)
+            }
+    }
+}
+
 #Preview {
     NavigationStack {
         ProfileView()
     }
     .environment(DailySession())
+    .environment(PlayHistory())
     .environment(AppRouter())
 }

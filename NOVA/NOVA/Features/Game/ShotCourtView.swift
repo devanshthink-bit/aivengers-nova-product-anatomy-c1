@@ -21,6 +21,8 @@ struct ShotCourtView: View {
     var shotNumber: Int = 1
     /// Non-nil once the shot has been judged.
     let result: AnswerSubmission?
+    /// Where the ball dropped through a hoop, in global space. The flood starts there.
+    var onScoredAt: ((CGPoint) -> Void)? = nil
     let onShoot: (Int) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -35,6 +37,7 @@ struct ShotCourtView: View {
     @State private var ballOpacity: Double = 1
     /// Per-hoop impact counters, so only the hoop that was hit moves its net.
     @State private var netImpacts: [Int: Int] = [:]
+    @State private var courtFrame: CGRect = .zero
 
     var body: some View {
         GeometryReader { proxy in
@@ -54,6 +57,7 @@ struct ShotCourtView: View {
                 .frame(width: proxy.size.width, height: proxy.size.height)
             }
         }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { courtFrame = $0 }
         .onChange(of: result) { _, newResult in
             guard let newResult else { return }
             sound.play(newResult.isCorrect ? .score : .miss)
@@ -107,7 +111,7 @@ struct ShotCourtView: View {
                 path.addLine(to: ball)
             }
             .stroke(
-                Nova.accent.opacity(0.45),
+                .white.opacity(0.35),
                 style: StrokeStyle(lineWidth: 2.5, lineCap: .round, dash: [5, 4])
             )
         }
@@ -128,7 +132,7 @@ struct ShotCourtView: View {
                 }
                 .stroke(
                     LinearGradient(
-                        colors: [Nova.accent.opacity(0.8), Nova.accent.opacity(0.14)],
+                        colors: [.white.opacity(0.85), .white.opacity(0.1)],
                         startPoint: .bottom,
                         endPoint: .top
                     ),
@@ -191,11 +195,12 @@ struct ShotCourtView: View {
         }
 
         return Label(message, systemImage: symbol)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .glassEffect(.regular, in: .capsule)
+            .novaMeta(.caption2, weight: .semibold)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(Nova.charcoalRaised, in: .capsule)
+            .overlay { Capsule().strokeBorder(Nova.charcoalLine, lineWidth: 1) }
             .position(x: court.bounds.midX, y: court.launchPoint.y - 58)
             .transition(.opacity)
             .accessibilityAddTraits(.isStaticText)
@@ -228,8 +233,8 @@ struct ShotCourtView: View {
 
     private func hoopTint(for index: Int) -> Color {
         guard let result else { return BasketStyle.forBasket(index).rim }
-        if index == result.chosenAnswerIndex { return result.isCorrect ? .green : .red }
-        if index == result.correctAnswerIndex { return .green }
+        if index == result.chosenAnswerIndex { return result.isCorrect ? AnswerBasketView.right : AnswerBasketView.wrong }
+        if index == result.correctAnswerIndex { return AnswerBasketView.right }
         return BasketStyle.forBasket(index).rim
     }
 
@@ -297,6 +302,9 @@ struct ShotCourtView: View {
         switch trajectory.outcome {
         case .scored(let basket):
             netImpacts[basket, default: 0] += 1
+            if let landing = trajectory.points.last {
+                onScoredAt?(CGPoint(x: courtFrame.minX + landing.x, y: courtFrame.minY + landing.y))
+            }
             onShoot(basket)
         case .rim(let basket):
             netImpacts[basket, default: 0] += 1
@@ -375,5 +383,6 @@ private struct TrajectoryMotion: GeometryEffect {
     ShotCourtView(question: MockNewsService.todayQuestions[1], shotNumber: 2, result: nil) { _ in }
         .frame(height: 460)
         .padding()
+        .novaCharcoalSurface()
         .environment(SoundPlayer())
 }
