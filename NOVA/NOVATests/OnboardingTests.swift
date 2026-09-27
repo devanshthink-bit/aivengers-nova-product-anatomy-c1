@@ -75,6 +75,31 @@ struct TopicSelectionTests {
     func decodingEmptyString() {
         #expect(TopicSelection(rawValue: "") == TopicSelection())
     }
+
+    @Test("Editing can't drop a complete selection below the minimum")
+    func editingKeepsTheMinimum() {
+        var selection = TopicSelection(categories: [.india, .science])
+
+        #expect(selection.canToggle(.india) == false)
+        let refused = selection.toggleKeepingMinimum(.india)
+        #expect(refused == false)
+        #expect(selection.contains(.india))
+
+        #expect(selection.canToggle(.world))
+        let added = selection.toggleKeepingMinimum(.world)
+        let removed = selection.toggleKeepingMinimum(.india)
+        #expect(added && removed)
+        #expect(selection.contains(.india) == false)
+        #expect(selection.count == TopicSelection.minimum)
+    }
+
+    @Test("An incomplete selection can still be edited in either direction")
+    func editingAnIncompleteSelection() {
+        let selection = TopicSelection(categories: [.india])
+
+        #expect(selection.canToggle(.india))
+        #expect(selection.canToggle(.world))
+    }
 }
 
 @Suite("Story ordering")

@@ -41,4 +41,24 @@ struct DebugRestartButton: View {
         .accessibilityHint("Debug only. Clears your name and topics and returns to the first page.")
     }
 }
+
+/// The one way to restart onboarding, shared by this button and the Profile tab's row.
+///
+/// Writes `UserDefaults.standard` directly rather than taking `@AppStorage` bindings:
+/// every `@AppStorage` reading these keys observes that store, so `RootView`'s overlay
+/// reacts without the caller needing to own the properties.
+enum OnboardingReset {
+    static func run(session: DailySession, router: AppRouter) {
+        let defaults = UserDefaults.standard
+        defaults.set("", forKey: "readerName")
+        defaults.set("", forKey: "pickedTopics")
+        session.applyTopics(TopicSelection())
+        router.popToReader()
+        // Finishing onboarding should land on the deck, not back on the tab that asked.
+        router.tab = .scroll
+        withAnimation(.easeInOut(duration: 0.3)) {
+            defaults.set(false, forKey: "hasSeenWelcome")
+        }
+    }
+}
 #endif
