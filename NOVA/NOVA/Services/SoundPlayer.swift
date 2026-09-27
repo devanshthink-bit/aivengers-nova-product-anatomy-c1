@@ -96,3 +96,5 @@ final class SoundPlayer {
         return player
     }
 }
+
+extension SoundPlayer: VoiceAudioSession {}
