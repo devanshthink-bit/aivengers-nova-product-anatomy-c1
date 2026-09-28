@@ -186,13 +186,18 @@ struct OnboardingFlow: View {
 
     private var buttonTitle: String {
         switch page {
-        case .language: "Continue"
-        case .manifesto: "Get started"
-        case .ritual: "Sounds good"
-        case .name: readerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Skip for now" : "Continue"
+        case .language: String(localized: "Continue")
+        case .manifesto: String(localized: "Get started")
+        case .ritual: String(localized: "Sounds good")
+        case .name:
+            readerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? String(localized: "Skip for now")
+                : String(localized: "Continue")
         case .topics:
-            selection.wrappedValue.isComplete ? "Continue" : "Pick \(selection.wrappedValue.remaining) more"
-        case .ready: "Start reading"
+            selection.wrappedValue.isComplete
+                ? String(localized: "Continue")
+                : String(localized: "Pick \(selection.wrappedValue.remaining) more")
+        case .ready: String(localized: "Start reading")
         }
     }
 

@@ -94,9 +94,9 @@ struct AnswerBasketView: View {
 
     private var status: Status? {
         switch appearance {
-        case .correct: Status(text: "Correct", symbol: "checkmark", tint: Self.right)
-        case .incorrect: Status(text: "Not this one", symbol: "xmark", tint: Self.wrong)
-        case .revealedAnswer: Status(text: "The answer", symbol: "checkmark", tint: Self.right)
+        case .correct: Status(text: String(localized: "Correct"), symbol: "checkmark", tint: Self.right)
+        case .incorrect: Status(text: String(localized: "Not this one"), symbol: "xmark", tint: Self.wrong)
+        case .revealedAnswer: Status(text: String(localized: "The answer"), symbol: "checkmark", tint: Self.right)
         case .idle, .dimmed: nil
         }
     }

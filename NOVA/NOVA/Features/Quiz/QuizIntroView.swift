@@ -37,7 +37,9 @@ struct QuizIntroView: View {
             Spacer(minLength: 28)
 
             VStack(spacing: 14) {
-                Text(session.hasRound ? "\(spelled(shots)) \(shots == 1 ? "shot" : "shots")." : "No shots today.")
+                Text(session.hasRound
+                    ? (shots == 1 ? String(localized: "\(spelled(shots)) shot.") : String(localized: "\(spelled(shots)) shots."))
+                    : String(localized: "No shots today."))
                     .font(.system(size: titleSize, weight: .heavy).width(.compressed))
                     .textCase(.uppercase)
                     .lineLimit(1)
@@ -104,7 +106,7 @@ struct QuizIntroView: View {
         .overlay(alignment: .bottom) { Rectangle().fill(Nova.charcoalLine).frame(height: 1) }
     }
 
-    private func rule(_ text: String) -> some View {
+    private func rule(_ text: LocalizedStringKey) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             RoundedRectangle(cornerRadius: 1.5, style: .continuous)
                 .fill(.white.opacity(0.45))

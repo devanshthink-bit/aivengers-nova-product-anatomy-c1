@@ -187,10 +187,10 @@ struct ShotCourtView: View {
         let symbol: String
         switch outcome {
         case .rim:
-            message = "Off the rim. So close."
+            message = String(localized: "Off the rim. So close.")
             symbol = "circle.dashed"
         case .missed, .scored:
-            message = "Short. Throw it harder."
+            message = String(localized: "Short. Throw it harder.")
             symbol = "arrow.up"
         }
 

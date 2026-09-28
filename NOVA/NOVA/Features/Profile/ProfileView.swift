@@ -240,7 +240,7 @@ private struct ProfileHeader: View {
     let name: String
 
     private var trimmed: String { name.trimmingCharacters(in: .whitespaces) }
-    private var displayName: String { trimmed.isEmpty ? "Reader" : trimmed }
+    private var displayName: String { trimmed.isEmpty ? String(localized: "Reader") : trimmed }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -271,8 +271,8 @@ private struct ProfileHeader: View {
 }
 
 private struct ProfileSection<Content: View>: View {
-    let title: String
-    var footnote: String?
+    let title: LocalizedStringKey
+    var footnote: LocalizedStringKey?
     @ViewBuilder let content: Content
 
     var body: some View {

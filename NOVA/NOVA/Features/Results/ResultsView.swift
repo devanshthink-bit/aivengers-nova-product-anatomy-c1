@@ -146,10 +146,10 @@ struct ResultsView: View {
     private var badge: String {
         let total = max(engine.questionCount, 1)
         switch engine.correctAnswers {
-        case total: return "Sharpshooter"
-        case 0: return "Warm-up"
-        case let hits where Double(hits) / Double(total) >= 0.6: return "Sharp eye"
-        default: return "On the board"
+        case total: return String(localized: "Sharpshooter")
+        case 0: return String(localized: "Warm-up")
+        case let hits where Double(hits) / Double(total) >= 0.6: return String(localized: "Sharp eye")
+        default: return String(localized: "On the board")
         }
     }
 
@@ -158,11 +158,11 @@ struct ResultsView: View {
     }
 
     private var headline: String {
-        guard session.hasRound else { return "No questions could be written today." }
+        guard session.hasRound else { return String(localized: "No questions could be written today.") }
         return switch engine.correctAnswers {
-        case engine.questionCount: "Perfect round. You read properly."
-        case 0: "Tough round. The stories are still there to re-read."
-        default: "You held on to \(engine.correctAnswers) of \(engine.questionCount) stories."
+        case engine.questionCount: String(localized: "Perfect round. You read properly.")
+        case 0: String(localized: "Tough round. The stories are still there to re-read.")
+        default: String(localized: "You held on to \(engine.correctAnswers) of \(engine.questionCount) stories.")
         }
     }
 
@@ -208,7 +208,7 @@ struct ResultsView: View {
                         .font(.subheadline.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text(submission.isCorrect ? "Sunk" : "Answer: \(question?.correctAnswer ?? "")")
+                    Text(submission.isCorrect ? String(localized: "Sunk") : String(localized: "Answer: \(question?.correctAnswer ?? "")"))
                         .novaMeta(.caption2)
                         .opacity(0.7)
                         .fixedSize(horizontal: false, vertical: true)
@@ -226,7 +226,9 @@ struct ResultsView: View {
                 Spacer(minLength: 0)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Question \(number), \(submission.isCorrect ? "correct" : "incorrect"). \(question?.prompt ?? "")")
+            .accessibilityLabel(submission.isCorrect
+                ? String(localized: "Question \(number), correct. \(question?.prompt ?? "")")
+                : String(localized: "Question \(number), incorrect. \(question?.prompt ?? "")"))
 
             if let question {
                 QuestionShareButton(question: question, source: session.story(for: question)?.source ?? "", ink: ink)

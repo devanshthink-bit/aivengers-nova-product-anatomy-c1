@@ -223,11 +223,17 @@ extension View {
         #endif
     }
 
-    /// Mono capitals with the wide tracking the Habits labels use.
+    /// Mono capitals with the wide tracking the Habits labels use — in Latin script.
+    ///
+    /// In Hindi the same treatment pulled Devanagari apart: SF Mono has no Devanagari, so
+    /// the fallback face was set on a monospaced grid and then tracked, which split every
+    /// conjunct and made "लगातार" read as "ल गा ता र". There the labels keep their weight
+    /// and size but set proportionally, untracked. Uppercase is a no-op on Devanagari.
     func novaMeta(_ style: Font.TextStyle = .caption, weight: Font.Weight = .medium) -> some View {
-        font(Nova.meta(style, weight: weight))
+        let meta = Nova.metaStyle(forLocalization: Bundle.main.preferredLocalizations.first)
+        return font(meta.monospaced ? Nova.meta(style, weight: weight) : .system(style).weight(weight))
             .textCase(.uppercase)
-            .tracking(1.2)
+            .tracking(meta.tracking)
     }
 
     /// `navigationBarTitleDisplayMode` doesn't exist on macOS, and the target builds
@@ -279,5 +285,21 @@ extension Nova {
         #if canImport(UIKit)
         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
         #endif
+    }
+}
+
+extension Nova {
+    struct MetaStyle: Equatable {
+        let monospaced: Bool
+        let tracking: CGFloat
+    }
+
+    /// How `novaMeta` labels are set for the UI's language. Keyed on the bundle's resolved
+    /// localization rather than `Locale.current`, because that is the language the strings
+    /// themselves come out in.
+    static func metaStyle(forLocalization localization: String?) -> MetaStyle {
+        localization?.hasPrefix("hi") == true
+            ? MetaStyle(monospaced: false, tracking: 0)
+            : MetaStyle(monospaced: true, tracking: 1.2)
     }
 }

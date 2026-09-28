@@ -49,7 +49,7 @@ struct MosaicView: View {
 
     private var accessibilityValue: String {
         let total = mosaic.cells.count
-        return "\(mosaic.earnedCount) of \(total) squares earned"
+        return String(localized: "\(mosaic.earnedCount) of \(total) squares earned")
     }
 }
 

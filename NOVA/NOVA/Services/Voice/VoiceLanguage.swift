@@ -75,7 +75,10 @@ enum VoiceLanguage: String, CaseIterable, Sendable {
         switch self {
         case .english:
             // "India" is a name, so it keeps its capital; the rest read as ordinary words.
-            return category == .india ? category.title : category.title.lowercased()
+            // The raw value, not `title`: `title` follows the UI language, and an English
+            // briefing on a Hindi phone must still say "sports", not "खेल".
+            let name = category.rawValue
+            return category == .india ? name.capitalized : name
         case .hindi:
             switch category {
             case .india: return "भारत"

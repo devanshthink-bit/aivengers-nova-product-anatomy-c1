@@ -71,7 +71,7 @@ struct Headline: View {
 
 /// The grey line under a headline. Never competes; always explains.
 struct Subhead: View {
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         Text(text)

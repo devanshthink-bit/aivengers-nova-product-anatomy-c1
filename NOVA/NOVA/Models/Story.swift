@@ -43,13 +43,13 @@ enum StoryCategory: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .india: "India"
-        case .technology: "Technology"
-        case .business: "Business"
-        case .world: "World"
-        case .science: "Science"
-        case .sports: "Sports"
-        case .entertainment: "Entertainment"
+        case .india: String(localized: "India")
+        case .technology: String(localized: "Technology")
+        case .business: String(localized: "Business")
+        case .world: String(localized: "World")
+        case .science: String(localized: "Science")
+        case .sports: String(localized: "Sports")
+        case .entertainment: String(localized: "Entertainment")
         }
     }
 

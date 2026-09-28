@@ -214,7 +214,7 @@ struct HomeView: View {
         }
     }
 
-    private func sectionTitle(_ title: String) -> some View {
+    private func sectionTitle(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(Nova.display(.title2))
             .tracking(-0.4)
@@ -354,34 +354,44 @@ private struct TodayRoundCard: View {
         let read = session.storiesReadCount
         let engine = session.engine
         let streak = history.streak()
-        let streakText = streak > 0 ? "\(streak)-day streak" : "Round 1 of today"
+        let streakText = streak > 0 ? String(localized: "\(streak)-day streak") : String(localized: "Round 1 of today")
 
         if !session.hasRound {
             let left = total - read
             return Status(
-                headline: left == 0 ? "All \(total) read." : "\(left) \(left == 1 ? "story" : "stories") to read.",
-                detail: "No questions could be written today",
-                action: read == 0 ? "Start reading" : "Keep reading"
+                headline: left == 0
+                    ? String(localized: "All \(total) read.")
+                    : left == 1 ? String(localized: "1 story to read.") : String(localized: "\(left) stories to read."),
+                detail: String(localized: "No questions could be written today"),
+                action: read == 0 ? String(localized: "Start reading") : String(localized: "Keep reading")
             )
         }
         if engine.isComplete {
             return Status(
-                headline: "Round done. \(engine.correctAnswers) of \(engine.questionCount) sunk.",
+                headline: String(localized: "Round done. \(engine.correctAnswers) of \(engine.questionCount) sunk."),
                 detail: streakText,
-                action: "See your round"
+                action: String(localized: "See your round")
             )
         }
         if session.hasReadAllStories {
-            return Status(headline: "All \(total) read. Your shots are waiting.", detail: streakText, action: "Take your shots")
+            return Status(
+                headline: String(localized: "All \(total) read. Your shots are waiting."),
+                detail: streakText,
+                action: String(localized: "Take your shots")
+            )
         }
         if read == 0 {
-            return Status(headline: "Today's \(total) are waiting.", detail: streakText, action: "Start reading")
+            return Status(
+                headline: String(localized: "Today's \(total) are waiting."),
+                detail: streakText,
+                action: String(localized: "Start reading")
+            )
         }
         let left = total - read
         return Status(
-            headline: "\(left) \(left == 1 ? "story" : "stories") to go.",
-            detail: "\(read) / \(total) read · \(streakText)",
-            action: "Keep reading"
+            headline: left == 1 ? String(localized: "1 story to go.") : String(localized: "\(left) stories to go."),
+            detail: String(localized: "\(read) / \(total) read · \(streakText)"),
+            action: String(localized: "Keep reading")
         )
     }
 
