@@ -42,7 +42,8 @@ enum Onboarding {
     static var surface: Color { Nova.charcoalRaised }
 
     static let tileRadius: CGFloat = 22
-    static let tileHeight: CGFloat = 112
+    /// 88, not 112: seven tiles in two columns have to clear the button on a phone.
+    static let tileHeight: CGFloat = 88
 
     static let ctaHeight: CGFloat = 56
 }
@@ -172,9 +173,10 @@ struct ChoiceTile: View {
                     .transition(.scale(scale: 0.4).combined(with: .opacity))
             }
         }
-        // The chosen tiles lift off the page; the rest stay flat against it.
+        // The chosen tiles lift off the page on their shadow; the rest stay flat against it.
+        // No scale: shrinking the unchosen tiles knocked their edges out of line with a
+        // chosen neighbour in the same row.
         .shadow(color: isOn ? .black.opacity(0.35) : .clear, radius: 14, y: 8)
-        .scaleEffect(isOn ? 1 : 0.98)
     }
 }
 

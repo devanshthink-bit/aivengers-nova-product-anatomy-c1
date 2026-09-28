@@ -5,20 +5,15 @@
 
 import SwiftUI
 
-/// The five real categories, with the tints and symbols they already carry elsewhere.
+/// The seven categories, with the symbols and tint squares they carry elsewhere.
 ///
-/// Chosen tiles flood with their own colour and grow a white tick, so the selection is
-/// legible from across the room rather than needing to be read. The promise in the
-/// subtitle is the literal behaviour: chosen categories sort to the front of the deck and
-/// nothing is removed, because the round needs all five stories. Saying "lead with these"
-/// rather than "only these" is the difference between a preference and a lie.
+/// Chosen tiles invert to white (see `ChoiceTile`). They used to flood with their own
+/// tint, and with two or three chosen out of seven the page became a patchwork of accents
+/// that nothing else in the app uses. The promise in the subtitle is the literal
+/// behaviour: chosen categories fill the deck first and nothing is removed. Saying "lead
+/// with these" rather than "only these" is the difference between a preference and a lie.
 struct TopicsPage: View {
     @Binding var selection: TopicSelection
-
-    private let columns = [
-        GridItem(.flexible(), spacing: 12),
-        GridItem(.flexible(), spacing: 12),
-    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: Onboarding.blockSpacing) {
@@ -30,20 +25,16 @@ struct TopicsPage: View {
                     .onboardingEntry(1)
             }
 
-            LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(Array(StoryCategory.allCases.enumerated()), id: \.element) { index, category in
-                    Button {
-                        withAnimation(.snappy(duration: 0.3)) {
-                            selection.toggle(category)
+            // Pairs, with a lone last tile spanning both columns: seven doesn't divide by
+            // two, and a half-width tile under a full row reads as a leftover.
+            Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                ForEach(Array(StoryCategory.allCases.chunked(into: 2).enumerated()), id: \.offset) { row, pair in
+                    GridRow {
+                        ForEach(Array(pair.enumerated()), id: \.element) { column, category in
+                            tile(for: category, index: row * 2 + column)
+                                .gridCellColumns(pair.count == 1 ? 2 : 1)
                         }
-                    } label: {
-                        TopicTile(category: category, isOn: selection.contains(category))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(category.title)
-                    .accessibilityValue(selection.contains(category) ? "Chosen" : "Not chosen")
-                    .accessibilityAddTraits(selection.contains(category) ? [.isSelected, .isButton] : .isButton)
-                    .onboardingEntry(2 + index)
                 }
             }
 
@@ -51,67 +42,29 @@ struct TopicsPage: View {
         }
     }
 
+    private func tile(for category: StoryCategory, index: Int) -> some View {
+        Button {
+            withAnimation(.snappy(duration: 0.3)) {
+                selection.toggle(category)
+            }
+        } label: {
+            ChoiceTile(
+                title: category.title,
+                symbol: category.symbolName,
+                tint: category.tint,
+                isOn: selection.contains(category)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(category.title)
+        .accessibilityValue(selection.contains(category) ? "Chosen" : "Not chosen")
+        .accessibilityAddTraits(selection.contains(category) ? [.isSelected, .isButton] : .isButton)
+        .onboardingEntry(2 + index)
+    }
+
     private var headline: Text {
         Text("What do you\n").foregroundStyle(.secondary)
         + Text("want first?").foregroundStyle(.primary)
-    }
-}
-
-/// Split out because the chosen/unchosen styling is a thicket of conditional shape
-/// styles, and the type checker gives up when it all sits inline in the page.
-private struct TopicTile: View {
-    let category: StoryCategory
-    let isOn: Bool
-
-    private var fill: AnyShapeStyle {
-        isOn
-            ? AnyShapeStyle(category.tint)
-            : AnyShapeStyle(Onboarding.surface)
-    }
-
-    private var symbolStyle: AnyShapeStyle {
-        isOn ? AnyShapeStyle(.white) : AnyShapeStyle(category.tint)
-    }
-
-    private var titleStyle: AnyShapeStyle {
-        isOn ? AnyShapeStyle(.white) : AnyShapeStyle(.primary)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Image(systemName: category.symbolName)
-                .font(.system(size: 26, weight: .medium))
-                .foregroundStyle(symbolStyle)
-
-            Spacer(minLength: 12)
-
-            Text(category.title)
-                .novaMeta(.subheadline, weight: .bold)
-                .foregroundStyle(titleStyle)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: Onboarding.tileHeight, alignment: .leading)
-        .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: Onboarding.tileRadius, style: .continuous)
-                .fill(fill)
-        }
-        .overlay(alignment: .topTrailing) {
-            if isOn {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .heavy))
-                    // Charcoal, not the tint: Sky and the other light tints drop below 3:1
-                    // as a small glyph on white.
-                    .foregroundStyle(Nova.charcoal)
-                    .frame(width: 26, height: 26)
-                    .background(Circle().fill(.white))
-                    .padding(14)
-                    .transition(.scale(scale: 0.4).combined(with: .opacity))
-            }
-        }
-        // The chosen tiles lift off the page; the rest stay flat against it.
-        .shadow(color: isOn ? .black.opacity(0.35) : .clear, radius: 14, y: 8)
-        .scaleEffect(isOn ? 1 : 0.98)
     }
 }
 

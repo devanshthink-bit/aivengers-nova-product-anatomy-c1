@@ -129,10 +129,21 @@ final class NewsStore {
     }
 
     /// The merged river for Home, newest first across every source.
-    func latest(limit: Int = 40) -> [Story] {
+    ///
+    /// Optionally one category's, for Home's category tabs.
+    func latest(limit: Int = 40, category: StoryCategory? = nil) -> [Story] {
         allStories
+            .filter { category == nil || $0.category == category }
             .prefix(limit)
             .map { $0.applying(summary: generatedSummaries[$0.id]) }
+    }
+
+    /// The categories Home can offer a tab for: only those some feed actually returned —
+    /// Science has no Hindi feed, and any feed can be down — in the reader's topic order.
+    func categories(ordered topics: TopicSelection) -> [StoryCategory] {
+        let present = Set(allStories.map(\.category))
+        let base = StoryCategory.allCases.filter(present.contains)
+        return base.filter(topics.contains) + base.filter { !topics.contains($0) }
     }
 
     func story(withID id: StoryID) -> Story? {
@@ -156,9 +167,14 @@ final class NewsStore {
         enqueue(Array(stories), front: true)
     }
 
-    /// Same, for the stories at the top of Home's river.
-    func generateSummaries(forLatest limit: Int = NewsStore.riverGenerationLimit) {
-        enqueue(Array(allStories.prefix(limit)), front: false)
+    /// Same, for the stories at the top of Home's river — or of one category tab, which
+    /// jumps the queue because it is what the reader just asked to see.
+    func generateSummaries(
+        forLatest limit: Int = NewsStore.riverGenerationLimit,
+        category: StoryCategory? = nil
+    ) {
+        let stories = allStories.filter { category == nil || $0.category == category }
+        enqueue(Array(stories.prefix(limit)), front: category != nil)
     }
 
     private func enqueue(_ stories: [Story], front: Bool) {

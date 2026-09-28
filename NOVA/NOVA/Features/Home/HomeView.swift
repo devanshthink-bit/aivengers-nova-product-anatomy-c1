@@ -8,20 +8,35 @@ import SwiftUI
 /// Browsing, as opposed to playing.
 ///
 /// A masthead with today's round pinned under it, the rail of sources, then the newest
-/// stories from every feed as an Artifact-style river. Nothing here touches the round:
+/// stories from every feed as an Artifact-style river, narrowed by the category tabs that
+/// pin over it once it scrolls up. Nothing here touches the round:
 /// reading from Home marks nothing read and unlocks no quiz — that all lives in the
 /// Scroll tab. The round card only *reports* on it and offers the way in.
 struct HomeView: View {
     @Environment(NewsStore.self) private var store
     @Environment(AppRouter.self) private var router
 
+    @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    /// Nil is "All".
+    @State private var category: StoryCategory?
+
+    init(initialCategory: StoryCategory? = nil) {
+        _category = State(initialValue: initialCategory)
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
+            // Lazy only because pinned section headers need a lazy stack: the tabs have to
+            // stay reachable while the reader is forty rows down.
+            LazyVStack(alignment: .leading, spacing: 30, pinnedViews: [.sectionHeaders]) {
                 masthead
                 TodayRoundCard()
                 channelRail
-                latestStories
+                Section {
+                    latestStories
+                } header: {
+                    categoryTabs
+                }
             }
             .padding(.bottom, 32)
         }
@@ -90,17 +105,68 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Category tabs
+
+    /// Pinned over the river once it scrolls up, on opaque paper with a hairline under it —
+    /// no material behind the chips, per the Opaque Ground Rule. Chips follow the reader's
+    /// topic order and only offer categories that actually arrived.
+    private var categoryTabs: some View {
+        let categories = store.categories(ordered: TopicSelection(rawValue: pickedTopicsRaw))
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Headlines")
+                .padding(.horizontal, Nova.screenPadding)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    TopicChip(title: String(localized: "All"), tint: nil, isOn: category == nil) {
+                        select(nil)
+                    }
+                    ForEach(categories, id: \.self) { item in
+                        TopicChip(title: item.title, tint: item.tint, isOn: category == item) {
+                            select(item)
+                        }
+                    }
+                }
+                .padding(.horizontal, Nova.screenPadding)
+            }
+            .scrollClipDisabled()
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Categories")
+        }
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+        .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Nova.paper)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Nova.hairline).frame(height: 1)
+        }
+        .onChange(of: categories) {
+            // A category that stopped arriving — a language switch, a feed down — can't
+            // stay selected over an empty river.
+            if let category, !categories.contains(category) { self.category = nil }
+        }
+    }
+
+    private func select(_ next: StoryCategory?) {
+        withAnimation(.snappy(duration: 0.25)) { category = next }
+        store.generateSummaries(forLatest: NewsStore.riverGenerationLimit, category: next)
+    }
+
     // MARK: - Latest
 
     @ViewBuilder
     private var latestStories: some View {
-        let stories = store.latest(limit: Self.riverLimit)
+        let stories = store.latest(limit: Self.riverLimit, category: category)
 
         VStack(alignment: .leading, spacing: 4) {
-            sectionTitle("Headlines")
-                .padding(.bottom, 8)
-
-            if stories.isEmpty {
+            if stories.isEmpty, let category, store.loadState == .loaded {
+                Text("Nothing in \(category.title) right now. The feeds for it may be down.")
+                    .font(Nova.reading(.body))
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 20)
+            } else if stories.isEmpty {
                 riverPlaceholder
             } else if let lead = stories.first {
                 LeadStory(story: lead) { router.pushHome(.story(lead.id)) }

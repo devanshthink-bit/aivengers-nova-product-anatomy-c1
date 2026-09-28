@@ -87,6 +87,34 @@ struct NewsStoreTests {
         #expect(store.allStories.isEmpty)
     }
 
+    @Test("Filtering by category keeps newest-first and the limit")
+    func latestByCategory() async {
+        let store = await store(with: [
+            story("a", source: "S", category: .sports, hoursAgo: 1),
+            story("b", source: "S", category: .india, hoursAgo: 2),
+            story("c", source: "S", category: .sports, hoursAgo: 3)
+        ])
+
+        #expect(store.latest(category: .sports).map(\.id.rawValue) == ["a", "c"])
+        #expect(store.latest(limit: 1, category: .sports).count == 1)
+        #expect(store.latest().count == 3)
+    }
+
+    @Test("Only categories that arrived are listed, chosen ones first")
+    func categoriesListOnlyPresent() async {
+        let store = await store(with: [
+            story("a", source: "S", category: .world),
+            story("b", source: "S", category: .sports),
+            story("c", source: "S", category: .india)
+        ])
+
+        let listed = store.categories(ordered: TopicSelection(categories: [.sports]))
+
+        #expect(listed.first == .sports)
+        #expect(Set(listed) == [.world, .sports, .india])
+        #expect(!listed.contains(.science))
+    }
+
     @Test("The rail lists only sources that actually returned stories")
     func railSkipsEmptySources() async {
         let store = await store(with: [

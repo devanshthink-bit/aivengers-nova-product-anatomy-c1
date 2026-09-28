@@ -112,9 +112,11 @@ struct ProfileView: View {
             FlowChips(spacing: 8) {
                 ForEach(StoryCategory.allCases, id: \.self) { category in
                     TopicChip(
-                        category: category,
+                        title: category.title,
+                        tint: category.tint,
                         isOn: topics.contains(category),
-                        isLocked: !topics.canToggle(category)
+                        isLocked: !topics.canToggle(category),
+                        lockedHint: "At least \(TopicSelection.minimum) topics stay chosen."
                     ) {
                         toggle(category)
                     }
@@ -288,51 +290,6 @@ private struct ProfileSection<Content: View>: View {
                     .foregroundStyle(.secondary)
             }
         }
-    }
-}
-
-/// The category's square and its name. Chosen chips go ink, the way Artifact marks a
-/// selected topic; the colour stays on the square because the tints fail contrast as text.
-///
-/// A locked chip is one of the last two chosen: it stays tappable-looking but dims a
-/// touch, and VoiceOver says why nothing happens instead of silently ignoring the tap.
-private struct TopicChip: View {
-    let category: StoryCategory
-    let isOn: Bool
-    let isLocked: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(category.tint)
-                    .frame(width: 9, height: 9)
-                Text(category.title)
-                    .font(.subheadline.weight(.semibold))
-                if isOn {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.heavy))
-                }
-            }
-            .foregroundStyle(isOn ? Nova.paper : Nova.ink)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background {
-                if isOn {
-                    Capsule().fill(Nova.ink)
-                } else {
-                    Capsule().fill(Nova.sheet)
-                    Capsule().strokeBorder(Nova.hairline, lineWidth: 1)
-                }
-            }
-            .opacity(isLocked ? 0.75 : 1)
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityLabel(category.title)
-        .accessibilityValue(isOn ? "Chosen" : "Not chosen")
-        .accessibilityHint(isLocked ? "At least \(TopicSelection.minimum) topics stay chosen." : "")
-        .accessibilityAddTraits(isOn ? [.isSelected, .isButton] : .isButton)
     }
 }
 
