@@ -6,7 +6,8 @@
 import SwiftUI
 
 struct RootView: View {
-    @State private var session = DailySession()
+    @State private var archive: QuestionArchive
+    @State private var session: DailySession
     @State private var store = NewsStore()
     @State private var router = AppRouter()
     @State private var sound = SoundPlayer()
@@ -22,6 +23,14 @@ struct RootView: View {
     @AppStorage("voiceLanguage") private var voiceLanguageRaw = VoiceLanguage.preferred().rawValue
 
     private var language: ContentLanguage { ContentLanguage(rawValue: languageRaw) ?? .english }
+
+    /// The archive is made first because the session records into it: every answer, from
+    /// either way of answering, lands in one place for the Prep tab.
+    init() {
+        let archive = QuestionArchive()
+        _archive = State(initialValue: archive)
+        _session = State(initialValue: DailySession(archive: archive))
+    }
 
     var body: some View {
         ZStack {
@@ -64,6 +73,12 @@ struct RootView: View {
                                 // under the slingshot and steal the drag.
                                 .novaHiddenTabBar()
                             }
+                    }
+                }
+
+                Tab("Prep", systemImage: "graduationcap", value: AppTab.prep) {
+                    NavigationStack {
+                        PrepView()
                     }
                 }
 
@@ -114,6 +129,7 @@ struct RootView: View {
         .environment(sound)
         .environment(history)
         .environment(voice)
+        .environment(archive)
         .tint(Nova.accent)
         .onChange(of: languageRaw) { voiceLanguageRaw = language.voice.rawValue }
         // Also on every later launch, not just the one that finished onboarding —

@@ -41,12 +41,17 @@ final class DailySession {
     private var loadedStories: [Story]
 
     private let roundID: RoundID
+    /// Where every answer is kept for revision. Optional so tests and previews that don't
+    /// care about revision don't write a file.
+    private let archive: QuestionArchive?
 
     init(
         stories: [Story] = MockNewsService.todayStories,
         questions: [Question] = MockNewsService.todayQuestions,
-        roundID: RoundID = RoundID("round-1")
+        roundID: RoundID = RoundID("round-1"),
+        archive: QuestionArchive? = nil
     ) {
+        self.archive = archive
         self.stories = stories
         self.loadedStories = stories
         self.questions = questions
@@ -161,7 +166,13 @@ final class DailySession {
 
     @discardableResult
     func submitAnswer(at answerIndex: Int) -> AnswerSubmission? {
-        engine.submitAnswer(at: answerIndex)
+        guard let submission = engine.submitAnswer(at: answerIndex) else { return nil }
+        // Recorded here, not in a view, so "views never compute scores" still holds and
+        // every way of answering — the shot, the VoiceOver path — is archived the same.
+        if let question = question(withID: submission.questionID), let story = story(for: question) {
+            archive?.record(question, story: story, correct: submission.isCorrect)
+        }
+        return submission
     }
 
     func advanceToNextQuestion() {

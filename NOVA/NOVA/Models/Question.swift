@@ -16,6 +16,10 @@ struct Question: Identifiable, Codable, Hashable, Sendable {
     /// the interaction does not belong in the model.
     let answers: [String]
     let correctAnswerIndex: Int
+    /// One sentence on why the story matters, written with the question. Optional because
+    /// the hand-written demo deck and answers archived before it existed have none.
+    /// Machine-written and unchecked, like the question itself.
+    var explanation: String? = nil
 
     var correctAnswer: String {
         answers.indices.contains(correctAnswerIndex) ? answers[correctAnswerIndex] : ""

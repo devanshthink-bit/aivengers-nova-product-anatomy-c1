@@ -3,11 +3,28 @@
 //  NOVATests
 //
 
+import Foundation
 import Testing
 @testable import NOVA
 
 @Suite("Daily session")
 struct DailySessionTests {
+
+    @Test("Answering records into the archive, and a reload keeps what was recorded")
+    func reloadKeepsArchive() async throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("archive-\(UUID()).json")
+        let archive = QuestionArchive(fileURL: url)
+        let session = DailySession(archive: archive)
+        let question = try #require(session.engine.currentQuestion)
+
+        session.submitAnswer(at: question.correctAnswerIndex)
+        #expect(archive.entries.count == 1)
+        #expect(archive.entries[0].firstAttemptCorrect)
+
+        await session.load(from: PreviewNewsService())
+        #expect(archive.entries.count == 1)
+    }
+
 
     @Test("The quiz is gated behind reading every story")
     func readingGatesTheQuiz() {

@@ -291,30 +291,6 @@ private struct TopicChip: View {
     }
 }
 
-private struct StatTile: View {
-    let value: String
-    let label: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(Nova.meta(.title2, weight: .bold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .contentTransition(.numericText())
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .profileSurface()
-        .accessibilityElement(children: .combine)
-    }
-}
-
 /// Wraps chips onto as many lines as they need. Five categories don't fit one line on a
 /// phone, and a fixed grid would leave uneven gaps between short and long names.
 private struct FlowChips: Layout {

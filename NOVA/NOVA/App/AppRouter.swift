@@ -27,6 +27,7 @@ enum HomeRoute: Hashable {
 enum AppTab: Hashable {
     case home
     case scroll
+    case prep
     case profile
 }
 
@@ -36,9 +37,9 @@ final class AppRouter {
     var tab: AppTab = AppRouter.initialTab
 
     /// DEBUG only, and read-only like the onboarding arguments: `-startTab home` opens
-    /// straight onto Home, `-startTab profile` onto Profile. Synthetic taps aren't
-    /// available from a shell and `simctl` has no `tap`, so this is the only way to
-    /// screenshot the other tabs.
+    /// straight onto Home, `-startTab prep` onto Prep, `-startTab profile` onto Profile.
+    /// Synthetic taps aren't available from a shell and `simctl` has no `tap`, so this is
+    /// the only way to screenshot the other tabs.
     ///
     /// Read-only matters — a launch argument lives in `NSArgumentDomain`, which outranks
     /// the app's own defaults for the whole process, so anything that also *writes* the
@@ -47,6 +48,7 @@ final class AppRouter {
         #if DEBUG
         switch UserDefaults.standard.string(forKey: "startTab") {
         case "home": return .home
+        case "prep": return .prep
         case "profile": return .profile
         default: break
         }

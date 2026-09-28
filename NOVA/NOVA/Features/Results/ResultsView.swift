@@ -195,6 +195,15 @@ struct ResultsView: View {
                     .novaMeta(.caption2)
                     .opacity(0.7)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // Why the story matters — the line that turns a quiz answer into something
+                // worth revising. Machine-written, like the question above it.
+                if let why = question?.explanation {
+                    Text(why)
+                        .font(.caption)
+                        .opacity(0.75)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             Spacer(minLength: 0)

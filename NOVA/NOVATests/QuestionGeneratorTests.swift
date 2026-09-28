@@ -75,6 +75,15 @@ struct QuestionGeneratorTests {
         #expect(deck.map(\.story.id) == stories.map(\.id))
     }
 
+    @Test("The prompt asks for exam-style facts and a context line, in both languages")
+    func examStylePrompt() {
+        for language in ContentLanguage.allCases {
+            let prompt = QuestionGenerator.systemPrompt(for: language)
+            #expect(prompt.contains("\"context\""))
+            #expect(prompt.contains("competitive exam"))
+        }
+    }
+
     @Test("No stories means no work and no crash")
     func handlesEmptyInput() async {
         let deck = await offlineGenerator.generate(for: [])

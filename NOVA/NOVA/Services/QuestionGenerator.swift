@@ -131,7 +131,10 @@ struct QuestionGenerator: Sendable {
             ChatRequest(
                 toolId: "mcqGenerator",
                 model: Self.model,
-                maxTokens: 400,
+                // 700, up from 400: the reply grew a context line, and Devanagari costs
+                // several times the tokens of English — a Hindi reply cut off mid-JSON
+                // reads as a parse failure and silently costs the story its question.
+                maxTokens: 700,
                 temperature: 0.3,
                 messages: [
                     .init(role: "system", content: Self.systemPrompt(for: language)),
@@ -183,7 +186,7 @@ struct QuestionGenerator: Sendable {
         Return STRICT JSON and nothing else. No markdown, no code fences, no preamble.
 
         Shape:
-        {"summary": string, "question": string, "answers": [string], "correctIndex": int}
+        {"summary": string, "question": string, "answers": [string], "correctIndex": int, "context": string}
 
         Rules:
         - "summary" retells the story in at most \(summaryWordLimit) words, plainly, \
@@ -194,6 +197,9 @@ struct QuestionGenerator: Sendable {
         kind as the right one — if the answer is a number, the others are numbers of a \
         similar size.
         - "correctIndex" is the 0-based index of the correct option.
+        - Prefer a factual question of the kind a competitive exam asks: who, which body \
+        or scheme, where, when, how much. Avoid opinion and prediction.
+        - "context" is one sentence on why the story matters, using only facts in the story.
         - Never invent facts that are not in the story you were given.
         """
 
@@ -247,6 +253,8 @@ private struct Generated: Decodable {
     let question: String
     let answers: [String]
     let correctIndex: Int
+    /// Optional in the decode: a model that drops it still gives a usable question.
+    let context: String?
 
     /// Models wrap JSON in ``` fences often enough that trimming to the outermost braces
     /// is cheaper than another round trip to ask for it again.
@@ -278,7 +286,8 @@ private struct Generated: Decodable {
             storyID: story.id,
             prompt: question,
             answers: answers,
-            correctAnswerIndex: correctIndex
+            correctAnswerIndex: correctIndex,
+            explanation: context?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
         )
     }
 }
@@ -305,4 +314,8 @@ private extension Story {
             artwork: artwork
         )
     }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }
