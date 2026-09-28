@@ -15,6 +15,7 @@ struct ProfileView: View {
     @Environment(DailySession.self) private var session
     @Environment(PlayHistory.self) private var history
     @Environment(AppRouter.self) private var router
+    @Environment(ReminderScheduler.self) private var reminders
 
     @AppStorage("readerName") private var readerName = ""
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
@@ -30,6 +31,7 @@ struct ProfileView: View {
                 languageSection
                 topicsSection
                 todaySection
+                reminderSection
                 #if DEBUG
                 debugSection
                 #endif
@@ -159,6 +161,49 @@ struct ProfileView: View {
                     .padding(.horizontal, 6)
                     .profileSurface()
             }
+        }
+    }
+
+    // MARK: - Reminder
+
+    private var reminderSection: some View {
+        ProfileSection(
+            title: "Daily reminder",
+            footnote: reminders.wasDenied
+                ? "Notifications are off for NOVA. Turn them on in Settings to get the reminder."
+                : "One a day, and none on a day you've already played."
+        ) {
+            VStack(spacing: 0) {
+                Toggle("Remind me to read", isOn: Binding(
+                    get: { reminders.isEnabled },
+                    set: { on in Task { on ? await reminders.enable() : await reminders.disable() } }
+                ))
+                .padding(16)
+
+                if reminders.isEnabled {
+                    Divider().overlay(Nova.hairline)
+                    DatePicker("Time", selection: Binding(
+                        get: {
+                            Calendar.current.date(
+                                bySettingHour: reminders.hour, minute: reminders.minute, second: 0, of: .now
+                            ) ?? .now
+                        },
+                        set: { date in
+                            let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+                            Task { await reminders.setTime(hour: parts.hour ?? 8, minute: parts.minute ?? 0) }
+                        }
+                    ), displayedComponents: .hourAndMinute)
+                    .padding(16)
+                }
+
+                if reminders.wasDenied {
+                    Divider().overlay(Nova.hairline)
+                    Button("Open Settings") { Nova.openAppSettings(using: openURL) }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                }
+            }
+            .profileSurface()
         }
     }
 
@@ -358,4 +403,5 @@ private extension View {
     .environment(DailySession())
     .environment(PlayHistory())
     .environment(AppRouter())
+    .environment(ReminderScheduler())
 }

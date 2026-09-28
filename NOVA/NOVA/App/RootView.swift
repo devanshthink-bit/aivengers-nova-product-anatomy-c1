@@ -13,6 +13,7 @@ struct RootView: View {
     @State private var sound = SoundPlayer()
     @State private var history = PlayHistory()
     @State private var voice = VoiceAssistant()
+    @State private var reminders = ReminderScheduler()
     @State private var showsVoicePanel = false
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
@@ -130,6 +131,7 @@ struct RootView: View {
         .environment(history)
         .environment(voice)
         .environment(archive)
+        .environment(reminders)
         .tint(Nova.accent)
         .onChange(of: languageRaw) { voiceLanguageRaw = language.voice.rawValue }
         // Also on every later launch, not just the one that finished onboarding —
@@ -163,6 +165,9 @@ struct RootView: View {
             // the other arguments.
             if UserDefaults.standard.bool(forKey: "openVoice") { showsVoicePanel = true }
             #endif
+            // Tops the week of reminders back up, in the news language, skipping today if
+            // it's already played. A no-op while reminders are off.
+            await reminders.refresh(todayDone: history.hasPlayed(on: .now), language: language)
         }
         #if DEBUG
         // Only over the deck. Home has a navigation bar now, and the button sat on top

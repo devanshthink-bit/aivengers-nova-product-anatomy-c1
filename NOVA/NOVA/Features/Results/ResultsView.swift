@@ -16,6 +16,11 @@ struct ResultsView: View {
     @Environment(DailySession.self) private var session
     @Environment(PlayHistory.self) private var history
     @Environment(AppRouter.self) private var router
+    @Environment(ReminderScheduler.self) private var reminders
+
+    /// Asked once, after the first finished round — the moment a reminder makes sense —
+    /// and never again whichever way the reader answers. Profile holds the switch after.
+    @AppStorage("reminderOffered") private var reminderOffered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var flooded = false
@@ -49,6 +54,9 @@ struct ResultsView: View {
                     WeekStrip(days: history.week(), dot: 28)
                         .padding(.horizontal, 4)
                     review
+                    if session.hasRound, engine.isComplete, !reminders.isEnabled, !reminderOffered {
+                        reminderOffer
+                    }
                     nextRound
                 }
                 .padding(.horizontal, Nova.screenPadding)
@@ -83,6 +91,7 @@ struct ResultsView: View {
                 history.record()
                 // After recording, so the card's streak includes today.
                 renderScorecard()
+                Task { await reminders.markTodayDone() }
             }
         }
     }
@@ -227,6 +236,35 @@ struct ResultsView: View {
         .padding(.vertical, 14)
     }
 
+    // MARK: - Reminder
+
+    private var reminderOffer: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Remind me tomorrow at \(reminderTime)?")
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 10) {
+                Button("Remind me") {
+                    reminderOffered = true
+                    Task { await reminders.enable() }
+                }
+                .buttonStyle(ResultsOutlineStyle(ink: ink))
+
+                Button("Not now") { reminderOffered = true }
+                    .novaMeta(.caption, weight: .semibold)
+                    .foregroundStyle(ink.opacity(0.75))
+                    .frame(minHeight: 44)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var reminderTime: String {
+        let date = Calendar.current.date(bySettingHour: reminders.hour, minute: reminders.minute, second: 0, of: .now) ?? .now
+        return date.formatted(date: .omitted, time: .shortened)
+    }
+
     // MARK: - Next round
 
     private var nextRound: some View {
@@ -320,4 +358,5 @@ private struct ResultsOutlineStyle: ButtonStyle {
     .environment(DailySession())
     .environment(PlayHistory())
     .environment(AppRouter())
+    .environment(ReminderScheduler())
 }
