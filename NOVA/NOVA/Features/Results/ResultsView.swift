@@ -23,6 +23,7 @@ struct ResultsView: View {
     @State private var mosaicCentre: CGPoint = .zero
     @State private var frame: CGRect = .zero
     @State private var shown = false
+    @State private var scorecard: Image?
 
     @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 96
 
@@ -78,7 +79,11 @@ struct ResultsView: View {
             flooded = true
         }
         .onChange(of: engine.isComplete, initial: true) {
-            if session.hasRound, engine.isComplete { history.record() }
+            if session.hasRound, engine.isComplete {
+                history.record()
+                // After recording, so the card's streak includes today.
+                renderScorecard()
+            }
         }
     }
 
@@ -175,42 +180,51 @@ struct ResultsView: View {
         let tint = question.flatMap { session.story(for: $0) }?.category.tint ?? ink
         let shape = RoundedRectangle(cornerRadius: 3, style: .continuous)
 
-        return HStack(alignment: .top, spacing: 14) {
-            Group {
-                if submission.isCorrect {
-                    shape.fill(tint)
-                } else {
-                    shape.strokeBorder(ink.opacity(0.4), lineWidth: 1.5)
+        // The share button sits beside the combined row, not inside it: a button inside a
+        // `.combine` element disappears into the row's single VoiceOver stop.
+        return HStack(alignment: .top, spacing: 4) {
+            HStack(alignment: .top, spacing: 14) {
+                Group {
+                    if submission.isCorrect {
+                        shape.fill(tint)
+                    } else {
+                        shape.strokeBorder(ink.opacity(0.4), lineWidth: 1.5)
+                    }
                 }
-            }
-            .frame(width: 14, height: 14)
-            .padding(.top, 3)
+                .frame(width: 14, height: 14)
+                .padding(.top, 3)
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text(question?.prompt ?? "Question \(number)")
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Text(submission.isCorrect ? "Sunk" : "Answer: \(question?.correctAnswer ?? "")")
-                    .novaMeta(.caption2)
-                    .opacity(0.7)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                // Why the story matters — the line that turns a quiz answer into something
-                // worth revising. Machine-written, like the question above it.
-                if let why = question?.explanation {
-                    Text(why)
-                        .font(.caption)
-                        .opacity(0.75)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(question?.prompt ?? "Question \(number)")
+                        .font(.subheadline.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
-                }
-            }
 
-            Spacer(minLength: 0)
+                    Text(submission.isCorrect ? "Sunk" : "Answer: \(question?.correctAnswer ?? "")")
+                        .novaMeta(.caption2)
+                        .opacity(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    // Why the story matters — the line that turns a quiz answer into something
+                    // worth revising. Machine-written, like the question above it.
+                    if let why = question?.explanation {
+                        Text(why)
+                            .font(.caption)
+                            .opacity(0.75)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                Spacer(minLength: 0)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Question \(number), \(submission.isCorrect ? "correct" : "incorrect"). \(question?.prompt ?? "")")
+
+            if let question {
+                QuestionShareButton(question: question, source: session.story(for: question)?.source ?? "", ink: ink)
+                    .padding(.top, -12)
+            }
         }
         .padding(.vertical, 14)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Question \(number), \(submission.isCorrect ? "correct" : "incorrect"). \(question?.prompt ?? "")")
     }
 
     // MARK: - Next round
@@ -231,8 +245,20 @@ struct ResultsView: View {
 
     private var actions: some View {
         HStack(spacing: 12) {
-            ShareLink(item: shareText) {
-                Text("Share")
+            Group {
+                if let scorecard {
+                    ShareLink(
+                        item: scorecard,
+                        message: Text(shareText),
+                        preview: SharePreview("NOVA", image: scorecard)
+                    ) {
+                        Text("Share")
+                    }
+                } else {
+                    ShareLink(item: shareText) {
+                        Text("Share")
+                    }
+                }
             }
             .buttonStyle(ResultsOutlineStyle(ink: ink))
 
@@ -243,9 +269,26 @@ struct ResultsView: View {
         .padding(.vertical, 12)
     }
 
-    /// A plain, factual line. No invented rank or percentile: there's no leaderboard.
+    /// One square per question and the streak — see `ShareGrid`. Travels with the image as
+    /// its message, and alone when the image couldn't be rendered.
     private var shareText: String {
-        "NOVA, \(Date.now.formatted(date: .abbreviated, time: .omitted)): \(engine.correctAnswers)/\(engine.questionCount) sunk, \(engine.score) points."
+        ShareGrid.text(outcomes: session.storyOutcomes, date: .now, streak: history.streak())
+    }
+
+    /// Rendered once the round is complete, not in `body`: this screen re-evaluates on
+    /// every geometry change while the flood runs, and an image per pass would stutter it.
+    private func renderScorecard() {
+        scorecard = ShareRenderer.image(
+            of: ScorecardCard(
+                mosaic: session.mosaic,
+                tints: session.stories.map(\.category.tint),
+                correct: engine.correctAnswers,
+                total: engine.questionCount,
+                streak: history.streak(),
+                date: .now
+            ),
+            size: ShareRenderer.cardSize
+        )
     }
 
 }

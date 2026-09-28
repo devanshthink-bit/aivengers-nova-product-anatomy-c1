@@ -109,10 +109,13 @@ struct RevisionView: View {
             }
             .transition(.opacity)
 
-            Button("Next") {
-                withAnimation(.snappy(duration: 0.25)) { self.engine?.advance() }
+            HStack(spacing: 8) {
+                QuestionShareButton(question: question, source: entry?.source ?? "", ink: Nova.ink)
+                Button("Next") {
+                    withAnimation(.snappy(duration: 0.25)) { self.engine?.advance() }
+                }
+                .buttonStyle(PaperButtonStyle())
             }
-            .buttonStyle(PaperButtonStyle())
         }
     }
 

@@ -151,6 +151,18 @@ final class DailySession {
     /// never read as "round done", score a perfect 0/0 or count toward the streak.
     var hasRound: Bool { engine.questionCount > 0 }
 
+    /// Each answered question's result, in the order its story sits in the deck — the
+    /// order the share grid draws its squares.
+    var storyOutcomes: [Bool] {
+        let byStory = Dictionary(
+            engine.submissions.compactMap { submission in
+                question(withID: submission.questionID).map { ($0.storyID, submission.isCorrect) }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return stories.compactMap { byStory[$0.id] }
+    }
+
     func story(for question: Question) -> Story? {
         stories.first { $0.id == question.storyID }
     }
