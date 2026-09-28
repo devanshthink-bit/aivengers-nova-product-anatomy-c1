@@ -19,6 +19,8 @@ colors:
   tint-business: "#1E9A72"
   tint-world: "#4DA3E8"
   tint-science: "#A64B9C"
+  tint-sports: "#138496"
+  tint-entertainment: "#D6457A"
   mosaic-sky: "#A9D3F5"
   mosaic-navy: "#23208F"
   feedback-right: "#3DDC97"
@@ -116,10 +118,13 @@ components:
     padding: "12pt"
   topic-tile:
     backgroundColor: "{colors.charcoal-raised}"
-    textColor: "#FFFFFF"
+    backgroundColorChosen: "#FFFFFF"
+    textColor: "secondary"
+    textColorChosen: "{colors.charcoal}"
+    border: "1pt {colors.charcoal-line} (unchosen only)"
     rounded: "{rounded.tile}"
-    padding: "16pt"
-    height: "112pt"
+    padding: "14pt 16pt"
+    height: "88pt"
   ribbon-badge:
     backgroundColor: "{colors.marigold}"
     textColor: "{colors.marigold-ink}"
@@ -150,14 +155,14 @@ The switch of ground is the mode change. A reader knows they have gone from read
 
 ## Colors
 
-A warm neutral pair (paper and charcoal), one earned accent, and a five-hue category family shared with the mosaic.
+A warm neutral pair (paper and charcoal), one earned accent, and a seven-hue category family shared with the mosaic.
 
 ### Primary
 - **Marigold** (`marigold`): the achievement colour. Full-screen floods on a correct shot and on a results screen with at least one hit, the ribbon badge, the live score once it is above zero, the underline under today in the week strip. Nothing else.
 - **Marigold Ink** (`marigold-ink`): the brown that sits on marigold. When a flood arrives, every white element on it turns this brown rather than black.
 
 ### Secondary (category family)
-- **Vermilion** (`tint-india`), **Cobalt** (`tint-technology`), **Jade** (`tint-business`), **Sky** (`tint-world`), **Plum** (`tint-science`): one per story category. They fill mosaic squares, progress pips, category-badge squares, source monograms, image placeholders (at 14 % with a 55 % asterisk) and the four hoop rims. The same hue family supplies the basket styles.
+- **Vermilion** (`tint-india`), **Cobalt** (`tint-technology`), **Jade** (`tint-business`), **Sky** (`tint-world`), **Plum** (`tint-science`), **Teal** (`tint-sports`), **Rose** (`tint-entertainment`): one per story category. They fill mosaic squares, progress pips, category-badge squares, source monograms, image placeholders (at 14 % with a 55 % asterisk) and the four hoop rims. The same hue family supplies the basket styles.
 - **Mosaic Sky** (`mosaic-sky`) and **Mosaic Navy** (`mosaic-navy`): only in the decorative pixel scatter, alongside Vermilion and one marigold square.
 
 ### Tertiary (feedback on charcoal)
@@ -225,6 +230,21 @@ Continuous-corner rectangles throughout, with radius growing with the size of th
 - **Chevron prominent:** a filled white chevron capsule with a charcoal mono-capital label and 36pt side padding. One per charcoal screen, and it is the way forward. The onboarding version is full width. Disabled, it becomes charcoal-raised with a secondary label, and the label says what is missing.
 - **Chevron outline:** a 1.5pt white stroke at 90 % with rounded joins, for everything else on charcoal (Share). On a flood, stroke and label turn marigold-ink.
 - **Press:** every button and tappable row scales to 0.97 over 0.14s ease-out with no bounce. Rows (`PressableStyle`) also dip to 85 % opacity.
+
+### Choice tiles (onboarding)
+Topic and language tiles on charcoal. Unchosen: charcoal-raised with a 1pt charcoal-line border, the symbol at 55 % white and the label in secondary mono capitals. Chosen: **inverted to solid white** with a charcoal symbol and label, a small charcoal check disc and the soft lift shadow. The category tint appears only as the 8pt square beside the label — tiles used to flood with their tint, which with several chosen made a second accent system. Seven topics sit in pairs at 88pt, the odd last one spanning both columns.
+
+### Category tabs (Home)
+A sideways row of `TopicChip`s — "All" then each category that actually arrived, chosen topics first — as the pinned header of the Headlines river, on opaque paper with a hairline under it (no material). Chips are ink when active, sheet plus hairline otherwise, with the 9pt tint square, 44pt tall.
+
+### Prep and revision
+Prep is a reading surface: paper, display headline, `StatTile`s, per-topic rows with a thin **ink** bar on a hairline track (never the tint as a bar or text), and the week as hairline-separated rows. Revision answers are full-width sheet rows with a lettered mono square; once judged, the right answer takes a 2pt Jade border and the wrong pick a 2pt Vermilion border, each with a symbol — the charcoal feedback colours fall below 3:1 on paper.
+
+### Share cards
+Fixed 360×450pt (1080×1350px) renders. The scorecard is charcoal, or marigold with marigold-ink when the round earned the flood, with the mosaic, a 88pt compressed score and the streak in mono. The question card is always charcoal: prompt in display weight, lettered options, source, and a "machine-written question" line — never the answer.
+
+### Hindi
+Devanagari has no mono or compressed face. `novaMeta` labels set proportional and untracked in Hindi, since tracked mono split conjuncts; poster and serif faces fall back to the system Devanagari cleanly. Uppercase is a no-op there.
 
 ### Cards / Containers
 - **Story sheet:** a white sheet with 28pt corners, a 1pt hairline and the one soft deck shadow. A 4:3 photo sits on top, falling back to a category-tint placeholder with a drawn asterisk that keeps the same shape so the card never resizes mid-swipe. It has no next button: you swipe up, and VoiceOver gets a named action.

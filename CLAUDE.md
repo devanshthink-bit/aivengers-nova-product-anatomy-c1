@@ -9,10 +9,17 @@ question about each story by slingshotting a paper ball into one of several movi
 The Xcode project lives in `NOVA/` (repo root holds only the README and this file).
 
 Multiplatform target: `SUPPORTED_PLATFORMS = iphoneos iphonesimulator macosx xros xrsimulator`,
-deployment target 27.0, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and
+deployment target 26.0, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and
 `SWIFT_APPROACHABLE_CONCURRENCY = YES`. Because macOS is a real destination, iOS-only APIs
-must be wrapped — see the `novaInlineTitle()` / `novaHiddenNavigationBar()` helpers in
-`NOVA/NOVA/DesignSystem/NovaTheme.swift` rather than adding raw `#if os(iOS)` at call sites.
+must be wrapped — see the `novaInlineTitle()` / `novaHiddenNavigationBar()` /
+`novaHiddenTabBar()` helpers in `NOVA/NOVA/DesignSystem/NovaTheme.swift` rather than adding
+raw `#if os(iOS)` at call sites. **The macOS build does not currently compile** (checked
+2026-09-28: `NamePage` uses `textInputAutocapitalization`, and there are likely more). That
+predates the India branch; new code must still not add to it.
+
+**Everything must stay free.** No SDKs, API keys, accounts, paid services, push server or
+CloudKit. The app runs on publisher RSS, ZeroAPI (keyless), local notifications, and
+on-device storage and rendering. A dependency that needs a key or a bill needs a decision first.
 
 ## Commands
 
@@ -60,13 +67,19 @@ almost all of the logic; the views are mostly rendering and gesture handling.
 - A day is meant to hold several `GameRound`s; only one ships today, and `DailySession.engine`
   is the seam where the rest get added.
 
+**Tabs (`App/RootView.swift`)** — Home (browse every feed, `NewsStore`), Scroll (the daily
+deck and round, `DailySession`), Prep (revision, `QuestionArchive`), Profile. `NewsStore` and
+`DailySession` are separate on purpose: reading in Home marks nothing read and unlocks no quiz.
+`-startTab home|prep|profile` (DEBUG) opens on that tab.
+
 **Navigation (`App/AppRouter.swift`)**
-- `StoryReaderView` is the *root*, not a route. Today's story index is a sheet over it.
+- `StoryReaderView` is the *root* of the Scroll tab, not a route. Today's story index is a
+  sheet over it.
 - Only `.quizIntro`, `.quiz`, `.results` are routes. Use `replace(with:)` when moving forward
   through finished steps so they can't be swiped back into.
 
 **Onboarding (`Features/Onboarding/`)**
-- Five pages — manifesto, ritual, name, topics, ready — overlaid by `RootView` while
+- Six pages — language, manifesto, ritual, name, topics, ready — overlaid by `RootView` while
   `@AppStorage("hasSeenWelcome")` is false. Not a route, and nothing may swipe back in.
 - **To restart it, use the Restart button** pinned top-left (DEBUG only; the full-width
   button owns the bottom edge). Do *not* add a
@@ -74,7 +87,7 @@ almost all of the logic; the views are mostly rendering and gesture handling.
   outranks the app's own defaults for the whole process, so the flow's write of `true` is
   real but every read after it still returns `false` and the hand-off looks broken.
 - Other DEBUG launch arguments, all read-only so they don't hit that trap:
-  `-onboardingPage N` opens straight onto page N; `-onboardingAutoPlay YES` walks the whole
+  `-onboardingPage N` opens straight onto page N (1 is the language, 5 the topics); `-onboardingAutoPlay YES` walks the whole
   journey by itself, which is the only way to record the transitions (synthetic taps aren't
   available from a shell, and `simctl` has no `tap`). For the round: `-openRoute
   quizIntro|quiz|results` opens that step, `-previewDeck YES` loads the hand-written deck
@@ -153,7 +166,11 @@ chosen 2026-09-27 as a blend of Artifact, (Not Boring) Habits and an editorial s
 content to previews and tests. `MockNewsService` itself is a case-less enum used as a namespace,
 which is why the preview conformance is a separate type rather than an extension on it.
 
-- **Feeds (`RSSFeed.swift`)** — nine publisher feeds, no API keys. A feed's category is pinned
+- **Feeds (`RSSFeed.swift`)** — English and Hindi publisher feeds, no API keys; `FeedLoader`
+  reads only the reader's `ContentLanguage`. Hindi feeds are publishers' *section* feeds (Live
+  Hindustan, News18 Hindi, Dainik Bhaskar), since their general feeds mix every category. No
+  Hindi science feed passed, so a Hindi day has six categories and `pick` tops up the deck.
+  Section feeds of one publisher share its logo (`Nova.logoAssetName`) and one Home channel. A feed's category is pinned
   per feed, not read from the item, because publishers' own `<category>` tags don't agree.
   **A feed only earns a category if everything in it belongs there**: CNBC's top-stories feed
   was pinned to `.business` and promptly labelled a Ukraine war story "Business". The comment
@@ -176,6 +193,46 @@ which is why the preview conformance is a separate type rather than an extension
   path working — it is the only thing between an outage and a dead deck.
 - **Generated question text is machine-written and unchecked.** Like `MockNewsService.isDemoContent`,
   it must not be presented to real readers as verified reporting.
+
+**Languages** — two separate things. *News language* (`ContentLanguage`,
+`@AppStorage("contentLanguage")`) is chosen on onboarding's first page or in Profile: it picks
+the feeds and tells `QuestionGenerator` to write in Devanagari, and `RootView`'s launch task is
+keyed on it so a change reloads Home and the deck. *App language* is iOS's per-app setting:
+the UI's words live in `Resources/Localizable.xcstrings` (en, hi). Any display text passed
+around as a `String` must be built with `String(localized:)` or it renders verbatim — this
+bit `sectionTitle`, `StatTile` and `StoryCategory.title`. `novaMeta` drops mono and tracking in
+Hindi (`Nova.metaStyle`), because tracked mono split Devanagari conjuncts apart. To refresh
+the catalog after adding strings:
+
+```bash
+xcodebuild … -derivedDataPath /tmp/dd SWIFT_EMIT_LOC_STRINGS=YES build
+find /tmp/dd -name "*.stringsdata" | grep -v Tests | grep iphonesimulator | tr '\n' '\0' \
+  | xargs -0 xcrun xcstringstool sync NOVA/Resources/Localizable.xcstrings --stringsdata
+```
+
+New keys arrive untranslated; give them a `hi` value (keep format specifiers, use positional
+`%1$lld` where Hindi reorders "X of Y"). The Hindi copy was machine-drafted — have a native
+speaker read changes.
+
+**Exam prep (`GameLogic/QuestionArchive.swift`, `Features/Prep/`)** — every answer is kept as
+JSON in Application Support. The *first* attempt is what counts (a re-asked question after a
+relaunch keeps its first result), revision updates only `lastCorrect`, and a corrupt file is
+moved aside as `.corrupt`, never overwritten. `RevisionPicker` puts wrong answers first, then
+the least recently revised. Revision is tap-to-answer on paper, uses `RoundEngine`, and never
+touches `PlayHistory` or the streak. Questions now ask for exam-style facts and carry an
+`explanation` ("context" in the generator's JSON) — machine-written like the question, and
+labelled so on Prep.
+
+**Sharing (`GameLogic/ShareGrid.swift`, `Features/Share/ShareCards.swift`)** — the round shares
+as a 1080×1350 scorecard (marigold only when earned) with a 🟨⬜ grid as the message; any
+question shares as a card *without* its answer. Images are rendered once into `@State`, never
+in `body` — Results re-evaluates on every geometry change while the flood runs. No links: no
+backend and no domain for universal links, and WhatsApp won't make `nova://` tappable.
+
+**Reminder (`Services/ReminderScheduler.swift`)** — local notifications only, off by default.
+Seven *non-repeating* requests (`reminder-YYYY-MM-DD`), topped up on launch, because a
+repeating trigger can't skip the one day the round is already done. Offered once after the
+first round (`reminderOffered`), then a switch in Profile.
 
 **Sound (`Services/SoundPlayer.swift`)** — preloaded `AVAudioPlayer`s on an `.ambient` session
 (respects the silent switch, never interrupts other audio). Failures are swallowed by design.
