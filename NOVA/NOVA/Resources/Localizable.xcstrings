@@ -955,6 +955,16 @@
         }
       }
     },
+    "Machine-written, not checked": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मशीन से लिखा, जाँचा नहीं गया"
+          }
+        }
+      }
+    },
     "Miss, or clip the rim, and you shoot again": {
       "localizations": {
         "hi": {

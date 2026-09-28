@@ -126,11 +126,30 @@ struct SessionLoadingTests {
     private struct StubService: NewsService {
         var deck: [(story: Story, question: Question?)]
         var error: Error?
+        var delay: Duration = .zero
 
         func todayDeck() async throws -> [(story: Story, question: Question?)] {
+            if delay > .zero { try? await Task.sleep(for: delay) }
             if let error { throw error }
             return deck
         }
+    }
+
+    @Test("A newer load wins over one still in flight")
+    func newerLoadSupersedes() async {
+        // The first-launch case: the launch load is still running when the reader picks
+        // Hindi on onboarding's first page, and the Hindi load must not be refused.
+        let session = DailySession()
+        let slow = StubService(deck: [(story("english", .world), nil)], delay: .milliseconds(300))
+        let fast = StubService(deck: [(story("hindi", .india), nil)])
+
+        async let first: Void = session.load(from: slow)
+        try? await Task.sleep(for: .milliseconds(50))
+        await session.load(from: fast)
+        await first
+
+        #expect(session.stories.map(\.id) == [StoryID("hindi")])
+        #expect(session.loadState == .loaded)
     }
 
     private func story(_ id: String, _ category: StoryCategory) -> Story {

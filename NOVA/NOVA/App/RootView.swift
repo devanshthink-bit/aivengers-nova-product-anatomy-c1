@@ -147,6 +147,10 @@ struct RootView: View {
         .task(id: languageRaw) {
             session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
             await store.setLanguage(language)
+            // A language change mid-launch cancels this task and starts another. Without these
+            // guards the stale one carried on — loading a deck from half-cleared stories,
+            // re-running the DEBUG round and refreshing reminders a second time.
+            guard !Task.isCancelled else { return }
             #if DEBUG
             // `-previewDeck YES`: the hand-written deck, whose questions always exist, so
             // the round can be exercised on a day the question service is down.
@@ -158,6 +162,7 @@ struct RootView: View {
             #else
             await session.load(from: liveService)
             #endif
+            guard !Task.isCancelled else { return }
             #if DEBUG
             simulateRoundIfAsked()
             // `-openVoice YES` opens the briefing on launch. Synthetic taps aren't available

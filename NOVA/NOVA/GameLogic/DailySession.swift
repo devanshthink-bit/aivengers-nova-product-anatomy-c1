@@ -41,6 +41,8 @@ final class DailySession {
     private var loadedStories: [Story]
 
     private let roundID: RoundID
+    /// The load whose result counts. Only the newest one lands.
+    private var currentLoad = UUID()
     /// Where every answer is kept for revision. Optional so tests and previews that don't
     /// care about revision don't write a file.
     private let archive: QuestionArchive?
@@ -72,12 +74,20 @@ final class DailySession {
     ///
     /// Keeps the existing deck on failure rather than emptying it — a reader who already
     /// has stories on screen should not lose them because a refresh timed out.
+    ///
+    /// The newest call wins. It used to refuse a call while one was in flight, which lost the
+    /// case that matters most: on first launch the English load is still running when a
+    /// Hindi reader picks Hindi on onboarding's first page, and the Hindi load was turned
+    /// away — the reader got an English deck with no questions. Now a superseded load's
+    /// result is simply dropped.
     func load(from service: NewsService) async {
-        guard loadState != .loading else { return }
+        let token = UUID()
+        currentLoad = token
         loadState = .loading
 
         do {
             let deck = try await service.todayDeck()
+            guard currentLoad == token else { return }
             guard !deck.isEmpty else {
                 loadState = .failed
                 return
@@ -90,6 +100,7 @@ final class DailySession {
             rebuildEngine()
             loadState = .loaded
         } catch {
+            guard currentLoad == token else { return }
             loadState = .failed
         }
     }

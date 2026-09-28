@@ -220,6 +220,11 @@ struct ResultsView: View {
                             .font(.caption)
                             .opacity(0.75)
                             .fixedSize(horizontal: false, vertical: true)
+                        // Labelled right where it sits: "why it matters" reads like reporting,
+                        // and it is a model's sentence nobody has checked.
+                        Text("Machine-written, not checked")
+                            .novaMeta(.caption2)
+                            .opacity(0.5)
                     }
                 }
 

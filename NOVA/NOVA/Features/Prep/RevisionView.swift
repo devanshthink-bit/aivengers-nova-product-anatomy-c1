@@ -99,6 +99,11 @@ struct RevisionView: View {
                     Text(why)
                         .font(Nova.reading(.body))
                         .fixedSize(horizontal: false, vertical: true)
+                    // The revision sheet covers Prep's footnote, so the label travels with
+                    // the sentence it describes.
+                    Text("Machine-written, not checked")
+                        .novaMeta(.caption2)
+                        .foregroundStyle(.secondary)
                 }
                 if let entry {
                     Text("\(entry.source) · \(entry.storyTitle)")

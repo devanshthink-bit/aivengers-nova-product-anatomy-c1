@@ -6,6 +6,15 @@
 import Foundation
 import Observation
 
+/// What the store needs from a generator: a batch of rewrites, and whether it was
+/// rate-limited. A protocol so tests can count calls and hold a batch mid-flight.
+protocol SummaryGenerating: Sendable {
+    var language: ContentLanguage { get set }
+    func generateReporting(for stories: [Story]) async -> QuestionGenerator.BatchResult
+}
+
+extension QuestionGenerator: SummaryGenerating {}
+
 /// Everything the Home tab browses: all stories from all feeds, grouped by source, plus
 /// the cache of generated summaries.
 ///
@@ -54,11 +63,17 @@ final class NewsStore {
     /// came back unusable.
     private var pending: [Story] = []
     private var worker: Task<Void, Never>?
+    /// Which worker `worker` is. A cancelled worker's `defer` must not clear the handle of
+    /// the one that replaced it, or a third would start beside the second.
+    private var workerID = UUID()
 
     private var loader: FeedLoader
-    private var generator: QuestionGenerator
+    private var generator: any SummaryGenerating
 
-    init(loader: FeedLoader = FeedLoader(), generator: QuestionGenerator = QuestionGenerator()) {
+    /// Whether a rewrite worker is running.
+    var isGenerating: Bool { worker != nil }
+
+    init(loader: FeedLoader = FeedLoader(), generator: any SummaryGenerating = QuestionGenerator()) {
         self.loader = loader
         self.generator = generator
     }
@@ -70,6 +85,13 @@ final class NewsStore {
         loadState = .loading
 
         let fetched = await loader.fetchAll().sorted { $0.publishedAt > $1.publishedAt }
+        // A load cancelled by a language switch fetched nothing because it was cancelled,
+        // not because the feeds are down; reporting `.failed` would flash the error screen
+        // under the load that replaced it.
+        guard !Task.isCancelled else {
+            loadState = .idle
+            return
+        }
         guard !fetched.isEmpty else {
             loadState = .failed
             return
@@ -138,6 +160,15 @@ final class NewsStore {
             .map { $0.applying(summary: generatedSummaries[$0.id]) }
     }
 
+    /// The tab actually in force: the chosen one if it is still offered, All otherwise.
+    ///
+    /// Computed wherever it is read, rather than reset by an `onChange`: the reset used to
+    /// live in the pinned tab header, which isn't alive while Home is off-screen, so a
+    /// language switch from Profile could leave Home on an empty "Science" river.
+    static func resolvedCategory(_ selection: StoryCategory?, among available: [StoryCategory]) -> StoryCategory? {
+        selection.flatMap { available.contains($0) ? $0 : nil }
+    }
+
     /// The categories Home can offer a tab for: only those some feed actually returned —
     /// Science has no Hindi feed, and any feed can be down — in the reader's topic order.
     func categories(ordered topics: TopicSelection) -> [StoryCategory] {
@@ -196,14 +227,23 @@ final class NewsStore {
     private func startWorkerIfNeeded() {
         guard worker == nil else { return }
 
+        let id = UUID()
+        workerID = id
         worker = Task { [weak self] in
-            defer { self?.worker = nil }
+            defer {
+                if self?.workerID == id { self?.worker = nil }
+            }
 
             var backoff = Self.batchPause
 
-            while let batch = self?.nextBatch(), !batch.isEmpty {
+            // Cancellation is checked by hand. A cancelled task's requests fail at once and
+            // read as a rate limit, which put the batch back; `Task.sleep` then returned
+            // immediately, so a worker cancelled mid-batch by a language switch spun
+            // forever — thousands of calls a second, some reaching ZeroAPI for real.
+            while !Task.isCancelled, let batch = self?.nextBatch(), !batch.isEmpty {
                 guard let self else { return }
                 let result = await generator.generateReporting(for: batch)
+                guard !Task.isCancelled else { return }
 
                 for entry in result.deck where entry.question != nil {
                     // Only cache a usable object. A failed generation hands back the

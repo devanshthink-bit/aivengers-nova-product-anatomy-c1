@@ -17,8 +17,17 @@ struct HomeView: View {
     @Environment(AppRouter.self) private var router
 
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
-    /// Nil is "All".
+    /// What the reader tapped. Nil is "All". Read through `activeCategory`, never directly:
+    /// a tapped category can stop arriving (a language switch, a feed down).
     @State private var category: StoryCategory?
+
+    private var availableCategories: [StoryCategory] {
+        store.categories(ordered: TopicSelection(rawValue: pickedTopicsRaw))
+    }
+
+    private var activeCategory: StoryCategory? {
+        NewsStore.resolvedCategory(category, among: availableCategories)
+    }
 
     init(initialCategory: StoryCategory? = nil) {
         _category = State(initialValue: initialCategory)
@@ -111,7 +120,8 @@ struct HomeView: View {
     /// no material behind the chips, per the Opaque Ground Rule. Chips follow the reader's
     /// topic order and only offer categories that actually arrived.
     private var categoryTabs: some View {
-        let categories = store.categories(ordered: TopicSelection(rawValue: pickedTopicsRaw))
+        let categories = availableCategories
+        let active = activeCategory
 
         return VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Headlines")
@@ -119,11 +129,11 @@ struct HomeView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    TopicChip(title: String(localized: "All"), tint: nil, isOn: category == nil) {
+                    TopicChip(title: String(localized: "All"), tint: nil, isOn: active == nil) {
                         select(nil)
                     }
                     ForEach(categories, id: \.self) { item in
-                        TopicChip(title: item.title, tint: item.tint, isOn: category == item) {
+                        TopicChip(title: item.title, tint: item.tint, isOn: active == item) {
                             select(item)
                         }
                     }
@@ -142,11 +152,6 @@ struct HomeView: View {
         .overlay(alignment: .bottom) {
             Rectangle().fill(Nova.hairline).frame(height: 1)
         }
-        .onChange(of: categories) {
-            // A category that stopped arriving — a language switch, a feed down — can't
-            // stay selected over an empty river.
-            if let category, !categories.contains(category) { self.category = nil }
-        }
     }
 
     private func select(_ next: StoryCategory?) {
@@ -158,10 +163,11 @@ struct HomeView: View {
 
     @ViewBuilder
     private var latestStories: some View {
-        let stories = store.latest(limit: Self.riverLimit, category: category)
+        let active = activeCategory
+        let stories = store.latest(limit: Self.riverLimit, category: active)
 
         VStack(alignment: .leading, spacing: 4) {
-            if stories.isEmpty, let category, store.loadState == .loaded {
+            if stories.isEmpty, let category = active, store.loadState == .loaded {
                 Text("Nothing in \(category.title) right now. The feeds for it may be down.")
                     .font(Nova.reading(.body))
                     .foregroundStyle(.secondary)
