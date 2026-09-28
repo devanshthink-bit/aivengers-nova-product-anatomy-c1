@@ -10,7 +10,7 @@ import Foundation
 /// The category is fixed per feed rather than read from the item, because the `<category>`
 /// tags real feeds emit don't agree with each other: Guardian sends eight free-text
 /// categories per item, News18 sends one, and BBC sends none. Pinning it to the feed is
-/// the only way `StoryCategory` stays meaningful across nine publishers.
+/// the only way `StoryCategory` stays meaningful across every publisher.
 struct RSSFeed: Identifiable, Hashable, Sendable {
     let source: String
     let category: StoryCategory
@@ -39,6 +39,11 @@ extension RSSFeed {
             source: "News18",
             category: .india,
             url: URL(string: "https://www.news18.com/rss/india.xml")!
+        ),
+        RSSFeed(
+            source: "Indian Express",
+            category: .india,
+            url: URL(string: "https://indianexpress.com/section/india/feed/")!
         ),
 
         // World
@@ -69,6 +74,11 @@ extension RSSFeed {
             category: .technology,
             url: URL(string: "https://feeds.arstechnica.com/arstechnica/index")!
         ),
+        RSSFeed(
+            source: "Inc42",
+            category: .technology,
+            url: URL(string: "https://inc42.com/feed/")!
+        ),
 
         // Business
         RSSFeed(
@@ -81,12 +91,47 @@ extension RSSFeed {
             category: .business,
             url: URL(string: "https://www.livemint.com/rss/money")!
         ),
+        RSSFeed(
+            source: "Business Standard",
+            category: .business,
+            url: URL(string: "https://www.business-standard.com/rss/markets-106.rss")!
+        ),
 
         // Science
         RSSFeed(
             source: "BBC Science",
             category: .science,
             url: URL(string: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml")!
+        ),
+        RSSFeed(
+            source: "The Hindu Science",
+            category: .science,
+            url: URL(string: "https://www.thehindu.com/sci-tech/science/feeder/default.rss")!
+        ),
+
+        // Sports — cricket first, because that is what an Indian reader opens a sports
+        // page for; Indian Express covers the rest of the Indian sporting calendar.
+        RSSFeed(
+            source: "The Hindu Cricket",
+            category: .sports,
+            url: URL(string: "https://www.thehindu.com/sport/cricket/feeder/default.rss")!
+        ),
+        RSSFeed(
+            source: "Indian Express Sports",
+            category: .sports,
+            url: URL(string: "https://indianexpress.com/section/sports/feed/")!
+        ),
+
+        // Entertainment
+        RSSFeed(
+            source: "The Hindu Entertainment",
+            category: .entertainment,
+            url: URL(string: "https://www.thehindu.com/entertainment/feeder/default.rss")!
+        ),
+        RSSFeed(
+            source: "Bollywood Hungama",
+            category: .entertainment,
+            url: URL(string: "https://www.bollywoodhungama.com/rss/news.xml")!
         )
     ]
 
@@ -100,4 +145,16 @@ extension RSSFeed {
     //     .business labelled a Ukraine war story "Business" on the very first run.
     //     A feed only earns a category if everything in it belongs there.
     //   Nature, ScienceDaily — good science, but neither returns a single image.
+    //
+    // Checked on 2026-09-28, looking for Indian and Hindi sources:
+    //   BBC Hindi — every section URL (india, international, science-technology) serves
+    //     the same mixed feed, so no category can be pinned to it.
+    //   NDTV India, ABP Live Hindi — one feed mixing politics, Bollywood and cricket.
+    //   Aaj Tak, Amar Ujala, Moneycontrol, PIB — work, but return no images.
+    //   Jagran, Navbharat Times, Down To Earth, The Hindu explainers — 404.
+    //   ThePrint — /feed returns an HTML page.  DD News — timed out.
+    //   YourStory — personal-finance advice mixed in with startup news.
+    //   MediaNama — one image in ten items.  IE Explained — mixes every category.
+    //   ESPNcricinfo — works, but mostly English county cricket.
+    //   BBC Tamil, Bengali, Marathi, Telugu — all work; kept for a regional-language pass.
 }

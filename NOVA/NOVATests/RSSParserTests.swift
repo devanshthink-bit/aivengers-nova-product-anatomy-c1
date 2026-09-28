@@ -240,6 +240,40 @@ struct RSSParserTests {
         #expect(stories.count == 1)
         #expect(stories[0].publishedAt >= before)
     }
+
+    // MARK: - WordPress
+
+    @Test("A WordPress feed's picture is read from the <img> in its description")
+    func imageFromDescriptionHTML() {
+        // Inc42 (and most WordPress sites) send no media tag at all: the featured image is
+        // the first <img> inside the description's HTML.
+        let xml = """
+            <rss><channel><item><title>Ola raises funds</title><guid>w1</guid>
+            <description><![CDATA[<p><img width="1360" height="1020" \
+            src="https://asset.inc42.com/2026/08/ola.jpg" class="wp-post-image" alt="x" /></p>\
+            <p>Ola Electric's board approved a rights issue.</p>]]></description>
+            </item></channel></rss>
+            """
+
+        let stories = RSSParser(feed: Self.bbc).parse(Data(xml.utf8))
+
+        #expect(stories[0].artwork == .remote(URL(string: "https://asset.inc42.com/2026/08/ola.jpg")!))
+        #expect(stories[0].summary == "Ola Electric's board approved a rights issue.")
+    }
+
+    @Test("A media tag still wins over an <img> in the description")
+    func mediaTagWinsOverHTML() {
+        let xml = """
+            <rss xmlns:media="http://search.yahoo.com/mrss/"><channel><item><title>T</title><guid>w2</guid>
+            <description><![CDATA[<img src="https://a.example/small.jpg"/>Text]]></description>
+            <media:content url="https://a.example/big.jpg" width="1200"/>
+            </item></channel></rss>
+            """
+
+        let stories = RSSParser(feed: Self.bbc).parse(Data(xml.utf8))
+
+        #expect(stories[0].artwork == .remote(URL(string: "https://a.example/big.jpg")!))
+    }
 }
 
 // MARK: - Word truncation
@@ -259,5 +293,38 @@ struct SummaryTruncationTests {
 
         #expect(cut.split(separator: " ").count == 50)
         #expect(cut.hasSuffix("…"))
+    }
+}
+
+/// Each publisher added on 2026-09-28, parsed from a trimmed copy of what its feed really
+/// returned (the first two items, verbatim). One case per *format*, not per URL: The
+/// Hindu's cricket, science and entertainment feeds share one template.
+@Suite("Indian publisher samples")
+struct IndianPublisherSampleTests {
+    private final class Token {}
+
+    static let samples: [(file: String, category: StoryCategory)] = [
+        ("indianexpress", .india),
+        ("thehindu-sport", .sports),
+        ("bollywoodhungama", .entertainment),
+        ("businessstandard", .business),
+        ("inc42", .technology)
+    ]
+
+    @Test("Every sample yields stories with a title, a date and a picture", arguments: samples)
+    func parses(sample: (file: String, category: StoryCategory)) throws {
+        let url = try #require(Bundle(for: Token.self).url(forResource: sample.file, withExtension: "xml"))
+        let feed = RSSFeed(source: sample.file, category: sample.category, url: url)
+
+        let stories = RSSParser(feed: feed).parse(try Data(contentsOf: url))
+
+        #expect(stories.count == 2)
+        #expect(stories.allSatisfy { !$0.title.isEmpty })
+        #expect(stories.allSatisfy { $0.category == sample.category })
+        // Any real date from this decade — a failed parse falls back to something else.
+        #expect(stories.allSatisfy { $0.publishedAt > Date(timeIntervalSince1970: 1_700_000_000) })
+        // At least one, not all: The Hindu leaves the picture off some items, and `.none`
+        // is a normal state the cards render.
+        #expect(stories.contains { if case .remote = $0.artwork { true } else { false } })
     }
 }

@@ -31,11 +31,18 @@ struct VoiceIntent: Equatable, Sendable {
 
     /// Narrow topics first, so "India's tech sector" is technology and "world markets" is
     /// business. India and world are the broadest, so they only win when nothing else does.
-    private static let categoryOrder: [StoryCategory] = [.technology, .science, .business, .india, .world]
+    /// Sports and entertainment are the narrowest of all — "India's cricket team" is sport.
+    private static let categoryOrder: [StoryCategory] = [
+        .sports, .entertainment, .technology, .science, .business, .india, .world
+    ]
 
     /// Hindi recognition often writes English loanwords in Devanagari ("टेक", "बिज़नेस"),
     /// so both scripts are listed.
     private static let keywords: [StoryCategory: [String]] = [
+        .sports: ["sport", "sports", "cricket", "ipl", "football", "hockey", "tennis", "olympics",
+                  "खेल", "क्रिकेट", "स्पोर्ट्स", "मैच", "आईपीएल"],
+        .entertainment: ["entertainment", "bollywood", "film", "films", "movie", "movies", "cinema", "celebrity",
+                         "मनोरंजन", "बॉलीवुड", "फिल्म", "फिल्मों", "फ़िल्म", "सिनेमा"],
         .technology: ["tech", "technology", "technologies", "ai", "artificial intelligence", "gadget", "gadgets",
                       "software", "internet", "cyber", "टेक", "तकनीक", "तकनीकी", "प्रौद्योगिकी", "टेक्नोलॉजी"],
         .science: ["science", "scientific", "space", "research", "climate", "health", "medicine",

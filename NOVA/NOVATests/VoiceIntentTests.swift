@@ -45,7 +45,10 @@ struct VoiceIntentTests {
         ("any science stories today", .science),
         ("news from India", .india),
         ("international news please", .world),
-        ("India's tech sector", .technology)
+        ("India's tech sector", .technology),
+        ("latest cricket news", .sports),
+        ("any Bollywood news", .entertainment),
+        ("India's cricket team", .sports)
     ])
     func englishCategories(transcript: String, expected: StoryCategory) {
         #expect(VoiceIntent.parse(transcript).category == expected)
@@ -56,7 +59,9 @@ struct VoiceIntentTests {
         ("भारत की खबरें सुनाओ", .india),
         ("बिज़नेस न्यूज़", .business),
         ("दुनिया में क्या हो रहा है", .world),
-        ("विज्ञान की खबरें", .science)
+        ("विज्ञान की खबरें", .science),
+        ("क्रिकेट की खबरें", .sports),
+        ("फिल्मों की खबरें", .entertainment)
     ])
     func hindiCategories(transcript: String, expected: StoryCategory) {
         #expect(VoiceIntent.parse(transcript).category == expected)

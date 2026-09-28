@@ -113,6 +113,9 @@ extension StoryCategory {
     ///
     /// Used for fills and squares only. None of these reach 4.5:1 as small text on paper,
     /// which is why category labels are ink next to a coloured square, never coloured text.
+    ///
+    /// Teal and Rose joined when sports and entertainment did (2026-09-28), picked to sit
+    /// clear of Jade and Sky, and of Vermilion and Plum, as mosaic squares side by side.
     var tint: Color {
         switch self {
         case .india: Color(hex: 0xE0592A)
@@ -120,6 +123,8 @@ extension StoryCategory {
         case .business: Color(hex: 0x1E9A72)
         case .world: Color(hex: 0x4DA3E8)
         case .science: Color(hex: 0xA64B9C)
+        case .sports: Color(hex: 0x138496)
+        case .entertainment: Color(hex: 0xD6457A)
         }
     }
 }

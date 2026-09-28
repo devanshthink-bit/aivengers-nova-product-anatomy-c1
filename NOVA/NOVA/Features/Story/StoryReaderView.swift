@@ -93,7 +93,7 @@ struct StoryReaderView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             Button("Try again") {
-                Task { await session.load(from: LiveNewsService()) }
+                Task { await session.load(from: LiveNewsService(topics: session.topics)) }
             }
             .buttonStyle(PaperButtonStyle())
             .padding(.top, 10)

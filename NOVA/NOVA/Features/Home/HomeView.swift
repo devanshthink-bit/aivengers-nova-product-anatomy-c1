@@ -138,7 +138,7 @@ struct HomeView: View {
         default:
             HStack(spacing: 14) {
                 PixelLoader(size: 10)
-                Text("Reading nine feeds")
+                Text("Reading the feeds")
                     .novaMeta(.caption)
                     .foregroundStyle(.secondary)
             }

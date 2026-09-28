@@ -82,7 +82,7 @@ final class NewsStore {
     /// Seeds the store with known stories, skipping the network.
     ///
     /// The seam tests and previews use. The app always goes through `load()`; this exists
-    /// so grouping, ordering and capping can be tested without nine live feeds deciding
+    /// so grouping, ordering and capping can be tested without live feeds deciding
     /// what the assertions see.
     func adopt(_ stories: [Story]) {
         allStories = stories.sorted { $0.publishedAt > $1.publishedAt }

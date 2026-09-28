@@ -83,6 +83,8 @@ enum VoiceLanguage: String, CaseIterable, Sendable {
             case .business: return "बिज़नेस"
             case .world: return "दुनिया"
             case .science: return "विज्ञान"
+            case .sports: return "खेल"
+            case .entertainment: return "मनोरंजन"
             }
         }
     }

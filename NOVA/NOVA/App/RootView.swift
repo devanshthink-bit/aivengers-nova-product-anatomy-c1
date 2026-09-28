@@ -114,7 +114,7 @@ struct RootView: View {
         //
         // Topics are applied first so the ordering is already in place when the deck
         // lands, and `load` re-applies them itself once the stories arrive.
-        // One network pass for both tabs: the store reads all nine feeds, then the round
+        // One network pass for both tabs: the store reads every feed, then the round
         // is built from those same stories instead of fetching them again.
         .task {
             session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
@@ -125,10 +125,16 @@ struct RootView: View {
             if UserDefaults.standard.bool(forKey: "previewDeck") {
                 await session.load(from: PreviewNewsService())
             } else {
-                await session.load(from: LiveNewsService(prefetched: store.allStories))
+                await session.load(from: LiveNewsService(
+                    prefetched: store.allStories,
+                    topics: TopicSelection(rawValue: pickedTopicsRaw)
+                ))
             }
             #else
-            await session.load(from: LiveNewsService(prefetched: store.allStories))
+            await session.load(from: LiveNewsService(
+                    prefetched: store.allStories,
+                    topics: TopicSelection(rawValue: pickedTopicsRaw)
+                ))
             #endif
             #if DEBUG
             simulateRoundIfAsked()
