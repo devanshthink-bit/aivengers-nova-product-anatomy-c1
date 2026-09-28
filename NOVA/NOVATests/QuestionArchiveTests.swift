@@ -78,16 +78,20 @@ struct QuestionArchiveTests {
         #expect(FileManager.default.fileExists(atPath: url.appendingPathExtension("corrupt").path))
     }
 
-    @Test("The archive keeps only the newest thousand")
+    @Test("The archive keeps only the newest, up to its capacity")
     func capped() {
-        let archive = QuestionArchive(fileURL: tempURL())
-        for index in 0..<(QuestionArchive.capacity + 5) {
+        // A small capacity rather than the real thousand: every record rewrites the file,
+        // and a thousand rewrites held the main actor for four seconds — long enough to
+        // starve the briefing writer's 200 ms timeout test running alongside.
+        let archive = QuestionArchive(fileURL: tempURL(), capacity: 5)
+        for index in 0..<8 {
             let (q, s) = question("q\(index)")
             archive.record(q, story: s, correct: true, at: Date(timeIntervalSince1970: Double(1_800_000_000 + index)))
         }
 
-        #expect(archive.entries.count == QuestionArchive.capacity)
-        #expect(archive.entries.first?.id == QuestionID("q\(QuestionArchive.capacity + 4)"))
+        #expect(archive.entries.count == 5)
+        #expect(archive.entries.first?.id == QuestionID("q7"))
+        #expect(QuestionArchive.defaultCapacity == 1000)
     }
 
     @Test("Accuracy is by first attempt, per category, and nil before any answer")

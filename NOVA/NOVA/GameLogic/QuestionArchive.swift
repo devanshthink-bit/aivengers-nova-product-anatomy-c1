@@ -32,7 +32,9 @@ struct ArchivedAnswer: Codable, Identifiable, Hashable, Sendable {
 /// streak counts days the reader did the daily round, and revising isn't that.
 @Observable
 final class QuestionArchive {
-    static let capacity = 1000
+    /// A thousand is months of daily rounds — plenty to revise from, and small enough that
+    /// rewriting the whole file per answer stays instant.
+    static let defaultCapacity = 1000
 
     static var defaultURL: URL {
         URL.applicationSupportDirectory
@@ -44,10 +46,16 @@ final class QuestionArchive {
 
     private let fileURL: URL
     private let calendar: Calendar
+    private let capacity: Int
 
-    init(fileURL: URL = QuestionArchive.defaultURL, calendar: Calendar = .current) {
+    init(
+        fileURL: URL = QuestionArchive.defaultURL,
+        calendar: Calendar = .current,
+        capacity: Int = QuestionArchive.defaultCapacity
+    ) {
         self.fileURL = fileURL
         self.calendar = calendar
+        self.capacity = capacity
         load()
     }
 
@@ -75,8 +83,8 @@ final class QuestionArchive {
             ),
             at: 0
         )
-        if entries.count > Self.capacity {
-            entries.removeLast(entries.count - Self.capacity)
+        if entries.count > capacity {
+            entries.removeLast(entries.count - capacity)
         }
         save()
     }
