@@ -216,6 +216,65 @@ Prep reads `QuestionArchive` from the environment, the way the other stores are 
   function.
 - On macOS and visionOS it compiles and works through the same API. Nothing here is iOS-only.
 
+## 6. Onboarding topic tiles, brought back into the system
+
+*Added after review, 2026-09-28, designed with the impeccable skill (refinement: the charcoal
+onboarding world is kept).*
+
+The chosen tiles flooded with their category tint. With seven categories, a typical choice of
+two or three turned the page into a patchwork, and it broke two DESIGN.md rules: tints are
+fills and small squares only, and there is no second accent. The fix is the move Profile's
+chips and the white chevron already make: **chosen = inverted white**.
+- Unchosen: `charcoal-raised`, a 1pt `charcoal-line` border, the SF Symbol in white at 55%,
+  and the label in mono capitals at secondary opacity. It recedes, as the rule "surfaces a step
+  up so chosen tiles are the only thing on the page" intends.
+- Chosen: a solid white fill, the symbol and label in `charcoal`, and a small charcoal
+  checkmark disc top-right. The shadow lift stays.
+- Category colour survives only as an 8pt tinted square beside the label, on both states. It is
+  the Coloured Square Rule, and it is how the tile still links to the mosaic.
+- Seven tiles in two columns at 112pt would push the grid under the button, so tiles drop to
+  **88pt**, and the grid's last tile spans both columns only when the count is odd (seven). A
+  lone half-width tile under a full row reads as a leftover.
+- Motion is unchanged (snappy 0.3s toggle and staggered entry), and Reduce Motion is honoured
+  as today. DESIGN.md's `topic-tile` component is updated to match.
+
+## 7. Category tabs on Home
+
+The Headlines river has no way to narrow by category. A **pinned chip row** is added as the
+section header of the river: `All`, then each `StoryCategory` in the reader's topic order
+(chosen first), each chip in Profile's `TopicChip` style (ink capsule when active, sheet and
+hairline otherwise, 9pt tint square, 44pt hit height). It scrolls sideways and pins to the top
+of the screen once the river reaches it, on an opaque `paper` strip with a hairline underneath
+(no material, per the Opaque Ground Rule). Choosing a chip:
+- filters `NewsStore.latest(limit:category:)`, a new parameter defaulting to all, so the
+  existing call and tests are unchanged;
+- keeps the lead-story treatment for the first story of that category;
+- shows a one-line empty state when no feed returned that category ("No sport in the feeds
+  right now");
+- queues summaries for the newly visible stories through the existing single worker, so a tab
+  switch can't break the rate-limit design.
+
+The chip row lists only categories present in the loaded stories (Science is missing in Hindi),
+and resets to `All` when the content language changes. `TopicChip` moves out of `ProfileView`
+into `Components/` so both screens use one component. The selected chip is announced by
+VoiceOver as selected, and the row is a single accessibility container labelled "Categories".
+
+## Cost: everything stays free
+
+A requirement of this branch, from the user: nothing added may cost the reader or the project
+money. Everything in it runs on:
+- publisher RSS feeds, all free and keyless;
+- ZeroAPI for generation, free with no key, already the app's dependency, and falling back to
+  feed text;
+- local notifications only (`UNUserNotificationCenter`), so no push server and no APNs
+  certificate is needed;
+- `ImageRenderer` and `ShareLink` for sharing, on the device with no service;
+- JSON in Application Support for the archive, with no CloudKit, database or account;
+- a String Catalog for Hindi, written into the repo, with no translation service at runtime.
+
+No SDKs, analytics, paid APIs or accounts are added. A dependency that needs a key or a bill is
+out of scope for this branch.
+
 ## Architecture summary
 
 | New / changed | Kind | Tested by |
@@ -266,4 +325,5 @@ generated-text principle.
 4. `Question.explanation`, `QuestionArchive`, and the Prep tab with revision.
 5. Sharing: the text grid, the scorecard image and the question card.
 6. The daily reminder.
-7. CLAUDE.md, DESIGN.md and PRODUCT.md updates, a full test run, and simulator screenshots.
+7. The onboarding topic tiles redesign and the Home category tabs.
+8. CLAUDE.md, DESIGN.md and PRODUCT.md updates, a full test run, and simulator screenshots.
