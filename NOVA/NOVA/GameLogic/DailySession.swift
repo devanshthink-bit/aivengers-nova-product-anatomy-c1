@@ -41,12 +41,19 @@ final class DailySession {
     private var loadedStories: [Story]
 
     private let roundID: RoundID
+    /// The load whose result counts. Only the newest one lands.
+    private var currentLoad = UUID()
+    /// Where every answer is kept for revision. Optional so tests and previews that don't
+    /// care about revision don't write a file.
+    private let archive: QuestionArchive?
 
     init(
         stories: [Story] = MockNewsService.todayStories,
         questions: [Question] = MockNewsService.todayQuestions,
-        roundID: RoundID = RoundID("round-1")
+        roundID: RoundID = RoundID("round-1"),
+        archive: QuestionArchive? = nil
     ) {
+        self.archive = archive
         self.stories = stories
         self.loadedStories = stories
         self.questions = questions
@@ -67,12 +74,20 @@ final class DailySession {
     ///
     /// Keeps the existing deck on failure rather than emptying it — a reader who already
     /// has stories on screen should not lose them because a refresh timed out.
+    ///
+    /// The newest call wins. It used to refuse a call while one was in flight, which lost the
+    /// case that matters most: on first launch the English load is still running when a
+    /// Hindi reader picks Hindi on onboarding's first page, and the Hindi load was turned
+    /// away — the reader got an English deck with no questions. Now a superseded load's
+    /// result is simply dropped.
     func load(from service: NewsService) async {
-        guard loadState != .loading else { return }
+        let token = UUID()
+        currentLoad = token
         loadState = .loading
 
         do {
             let deck = try await service.todayDeck()
+            guard currentLoad == token else { return }
             guard !deck.isEmpty else {
                 loadState = .failed
                 return
@@ -85,6 +100,7 @@ final class DailySession {
             rebuildEngine()
             loadState = .loaded
         } catch {
+            guard currentLoad == token else { return }
             loadState = .failed
         }
     }
@@ -146,6 +162,18 @@ final class DailySession {
     /// never read as "round done", score a perfect 0/0 or count toward the streak.
     var hasRound: Bool { engine.questionCount > 0 }
 
+    /// Each answered question's result, in the order its story sits in the deck — the
+    /// order the share grid draws its squares.
+    var storyOutcomes: [Bool] {
+        let byStory = Dictionary(
+            engine.submissions.compactMap { submission in
+                question(withID: submission.questionID).map { ($0.storyID, submission.isCorrect) }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return stories.compactMap { byStory[$0.id] }
+    }
+
     func story(for question: Question) -> Story? {
         stories.first { $0.id == question.storyID }
     }
@@ -161,7 +189,13 @@ final class DailySession {
 
     @discardableResult
     func submitAnswer(at answerIndex: Int) -> AnswerSubmission? {
-        engine.submitAnswer(at: answerIndex)
+        guard let submission = engine.submitAnswer(at: answerIndex) else { return nil }
+        // Recorded here, not in a view, so "views never compute scores" still holds and
+        // every way of answering — the shot, the VoiceOver path — is archived the same.
+        if let question = question(withID: submission.questionID), let story = story(for: question) {
+            archive?.record(question, story: story, correct: submission.isCorrect)
+        }
+        return submission
     }
 
     func advanceToNextQuestion() {

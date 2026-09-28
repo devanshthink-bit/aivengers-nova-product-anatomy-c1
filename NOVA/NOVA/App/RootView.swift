@@ -6,16 +6,32 @@
 import SwiftUI
 
 struct RootView: View {
-    @State private var session = DailySession()
+    @State private var archive: QuestionArchive
+    @State private var session: DailySession
     @State private var store = NewsStore()
     @State private var router = AppRouter()
     @State private var sound = SoundPlayer()
     @State private var history = PlayHistory()
     @State private var voice = VoiceAssistant()
+    @State private var reminders = ReminderScheduler()
     @State private var showsVoicePanel = false
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
+    /// The voice panel keeps its own choice; it only follows the news language when that
+    /// changes, so a reader who picked the other chip keeps it across launches.
+    @AppStorage("voiceLanguage") private var voiceLanguageRaw = VoiceLanguage.preferred().rawValue
+
+    private var language: ContentLanguage { ContentLanguage(rawValue: languageRaw) ?? .english }
+
+    /// The archive is made first because the session records into it: every answer, from
+    /// either way of answering, lands in one place for the Prep tab.
+    init() {
+        let archive = QuestionArchive()
+        _archive = State(initialValue: archive)
+        _session = State(initialValue: DailySession(archive: archive))
+    }
 
     var body: some View {
         ZStack {
@@ -56,8 +72,14 @@ struct RootView: View {
                                 // A round owns the screen. The shot is aimed near the
                                 // bottom edge, so a floating tab bar would sit directly
                                 // under the slingshot and steal the drag.
-                                .toolbar(.hidden, for: .tabBar)
+                                .novaHiddenTabBar()
                             }
+                    }
+                }
+
+                Tab("Prep", systemImage: "graduationcap", value: AppTab.prep) {
+                    NavigationStack {
+                        PrepView()
                     }
                 }
 
@@ -108,28 +130,39 @@ struct RootView: View {
         .environment(sound)
         .environment(history)
         .environment(voice)
+        .environment(archive)
+        .environment(reminders)
         .tint(Nova.accent)
+        .onChange(of: languageRaw) { voiceLanguageRaw = language.voice.rawValue }
         // Also on every later launch, not just the one that finished onboarding —
         // otherwise a stored preference silently stops applying the next morning.
         //
         // Topics are applied first so the ordering is already in place when the deck
         // lands, and `load` re-applies them itself once the stories arrive.
-        // One network pass for both tabs: the store reads all nine feeds, then the round
+        // One network pass for both tabs: the store reads every feed, then the round
         // is built from those same stories instead of fetching them again.
-        .task {
+        //
+        // Keyed on the news language, so choosing the other one in Profile or onboarding
+        // reloads Home and rebuilds the day's deck in it.
+        .task(id: languageRaw) {
             session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
-            await store.load()
+            await store.setLanguage(language)
+            // A language change mid-launch cancels this task and starts another. Without these
+            // guards the stale one carried on — loading a deck from half-cleared stories,
+            // re-running the DEBUG round and refreshing reminders a second time.
+            guard !Task.isCancelled else { return }
             #if DEBUG
             // `-previewDeck YES`: the hand-written deck, whose questions always exist, so
             // the round can be exercised on a day the question service is down.
             if UserDefaults.standard.bool(forKey: "previewDeck") {
                 await session.load(from: PreviewNewsService())
             } else {
-                await session.load(from: LiveNewsService(prefetched: store.allStories))
+                await session.load(from: liveService)
             }
             #else
-            await session.load(from: LiveNewsService(prefetched: store.allStories))
+            await session.load(from: liveService)
             #endif
+            guard !Task.isCancelled else { return }
             #if DEBUG
             simulateRoundIfAsked()
             // `-openVoice YES` opens the briefing on launch. Synthetic taps aren't available
@@ -137,6 +170,9 @@ struct RootView: View {
             // the other arguments.
             if UserDefaults.standard.bool(forKey: "openVoice") { showsVoicePanel = true }
             #endif
+            // Tops the week of reminders back up, in the news language, skipping today if
+            // it's already played. A no-op while reminders are off.
+            await reminders.refresh(todayDone: history.hasPlayed(on: .now), language: language)
         }
         #if DEBUG
         // Only over the deck. Home has a navigation bar now, and the button sat on top
@@ -148,6 +184,15 @@ struct RootView: View {
             }
         }
         #endif
+    }
+
+    private var liveService: LiveNewsService {
+        LiveNewsService(
+            loader: FeedLoader(language: language),
+            generator: QuestionGenerator(language: language),
+            prefetched: store.allStories,
+            topics: TopicSelection(rawValue: pickedTopicsRaw)
+        )
     }
 
     /// The mic stays off the charcoal round: the slingshot is aimed near the bottom edge,

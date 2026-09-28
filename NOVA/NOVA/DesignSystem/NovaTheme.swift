@@ -113,6 +113,9 @@ extension StoryCategory {
     ///
     /// Used for fills and squares only. None of these reach 4.5:1 as small text on paper,
     /// which is why category labels are ink next to a coloured square, never coloured text.
+    ///
+    /// Teal and Rose joined when sports and entertainment did (2026-09-28), picked to sit
+    /// clear of Jade and Sky, and of Vermilion and Plum, as mosaic squares side by side.
     var tint: Color {
         switch self {
         case .india: Color(hex: 0xE0592A)
@@ -120,6 +123,8 @@ extension StoryCategory {
         case .business: Color(hex: 0x1E9A72)
         case .world: Color(hex: 0x4DA3E8)
         case .science: Color(hex: 0xA64B9C)
+        case .sports: Color(hex: 0x138496)
+        case .entertainment: Color(hex: 0xD6457A)
         }
     }
 }
@@ -218,11 +223,17 @@ extension View {
         #endif
     }
 
-    /// Mono capitals with the wide tracking the Habits labels use.
+    /// Mono capitals with the wide tracking the Habits labels use — in Latin script.
+    ///
+    /// In Hindi the same treatment pulled Devanagari apart: SF Mono has no Devanagari, so
+    /// the fallback face was set on a monospaced grid and then tracked, which split every
+    /// conjunct and made "लगातार" read as "ल गा ता र". There the labels keep their weight
+    /// and size but set proportionally, untracked. Uppercase is a no-op on Devanagari.
     func novaMeta(_ style: Font.TextStyle = .caption, weight: Font.Weight = .medium) -> some View {
-        font(Nova.meta(style, weight: weight))
+        let meta = Nova.metaStyle(forLocalization: Bundle.main.preferredLocalizations.first)
+        return font(meta.monospaced ? Nova.meta(style, weight: weight) : .system(style).weight(weight))
             .textCase(.uppercase)
-            .tracking(1.2)
+            .tracking(meta.tracking)
     }
 
     /// `navigationBarTitleDisplayMode` doesn't exist on macOS, and the target builds
@@ -253,5 +264,42 @@ extension View {
         #else
         self
         #endif
+    }
+
+    /// The tab bar placement is iOS-only too. On macOS the tabs are a sidebar or a
+    /// segmented toolbar item that never sits under the slingshot, so there is nothing
+    /// to hide there.
+    func novaHiddenTabBar() -> some View {
+        #if os(iOS) || os(visionOS)
+        toolbar(.hidden, for: .tabBar)
+        #else
+        self
+        #endif
+    }
+}
+
+extension Nova {
+    /// Opens NOVA's own page in Settings (per-app language, notifications). Wrapped here
+    /// because `UIApplication.openSettingsURLString` doesn't exist on macOS.
+    static func openAppSettings(using openURL: OpenURLAction) {
+        #if canImport(UIKit)
+        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        #endif
+    }
+}
+
+extension Nova {
+    struct MetaStyle: Equatable {
+        let monospaced: Bool
+        let tracking: CGFloat
+    }
+
+    /// How `novaMeta` labels are set for the UI's language. Keyed on the bundle's resolved
+    /// localization rather than `Locale.current`, because that is the language the strings
+    /// themselves come out in.
+    static func metaStyle(forLocalization localization: String?) -> MetaStyle {
+        localization?.hasPrefix("hi") == true
+            ? MetaStyle(monospaced: false, tracking: 0)
+            : MetaStyle(monospaced: true, tracking: 1.2)
     }
 }

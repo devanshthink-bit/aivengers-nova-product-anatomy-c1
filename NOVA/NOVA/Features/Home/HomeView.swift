@@ -8,20 +8,44 @@ import SwiftUI
 /// Browsing, as opposed to playing.
 ///
 /// A masthead with today's round pinned under it, the rail of sources, then the newest
-/// stories from every feed as an Artifact-style river. Nothing here touches the round:
+/// stories from every feed as an Artifact-style river, narrowed by the category tabs that
+/// pin over it once it scrolls up. Nothing here touches the round:
 /// reading from Home marks nothing read and unlocks no quiz — that all lives in the
 /// Scroll tab. The round card only *reports* on it and offers the way in.
 struct HomeView: View {
     @Environment(NewsStore.self) private var store
     @Environment(AppRouter.self) private var router
 
+    @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    /// What the reader tapped. Nil is "All". Read through `activeCategory`, never directly:
+    /// a tapped category can stop arriving (a language switch, a feed down).
+    @State private var category: StoryCategory?
+
+    private var availableCategories: [StoryCategory] {
+        store.categories(ordered: TopicSelection(rawValue: pickedTopicsRaw))
+    }
+
+    private var activeCategory: StoryCategory? {
+        NewsStore.resolvedCategory(category, among: availableCategories)
+    }
+
+    init(initialCategory: StoryCategory? = nil) {
+        _category = State(initialValue: initialCategory)
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
+            // Lazy only because pinned section headers need a lazy stack: the tabs have to
+            // stay reachable while the reader is forty rows down.
+            LazyVStack(alignment: .leading, spacing: 30, pinnedViews: [.sectionHeaders]) {
                 masthead
                 TodayRoundCard()
                 channelRail
-                latestStories
+                Section {
+                    latestStories
+                } header: {
+                    categoryTabs
+                }
             }
             .padding(.bottom, 32)
         }
@@ -90,17 +114,65 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Category tabs
+
+    /// Pinned over the river once it scrolls up, on opaque paper with a hairline under it —
+    /// no material behind the chips, per the Opaque Ground Rule. Chips follow the reader's
+    /// topic order and only offer categories that actually arrived.
+    private var categoryTabs: some View {
+        let categories = availableCategories
+        let active = activeCategory
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Headlines")
+                .padding(.horizontal, Nova.screenPadding)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    TopicChip(title: String(localized: "All"), tint: nil, isOn: active == nil) {
+                        select(nil)
+                    }
+                    ForEach(categories, id: \.self) { item in
+                        TopicChip(title: item.title, tint: item.tint, isOn: active == item) {
+                            select(item)
+                        }
+                    }
+                }
+                .padding(.horizontal, Nova.screenPadding)
+            }
+            .scrollClipDisabled()
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Categories")
+        }
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+        .frame(maxWidth: Nova.readingMaxWidth, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Nova.paper)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Nova.hairline).frame(height: 1)
+        }
+    }
+
+    private func select(_ next: StoryCategory?) {
+        withAnimation(.snappy(duration: 0.25)) { category = next }
+        store.generateSummaries(forLatest: NewsStore.riverGenerationLimit, category: next)
+    }
+
     // MARK: - Latest
 
     @ViewBuilder
     private var latestStories: some View {
-        let stories = store.latest(limit: Self.riverLimit)
+        let active = activeCategory
+        let stories = store.latest(limit: Self.riverLimit, category: active)
 
         VStack(alignment: .leading, spacing: 4) {
-            sectionTitle("Headlines")
-                .padding(.bottom, 8)
-
-            if stories.isEmpty {
+            if stories.isEmpty, let category = active, store.loadState == .loaded {
+                Text("Nothing in \(category.title) right now. The feeds for it may be down.")
+                    .font(Nova.reading(.body))
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 20)
+            } else if stories.isEmpty {
                 riverPlaceholder
             } else if let lead = stories.first {
                 LeadStory(story: lead) { router.pushHome(.story(lead.id)) }
@@ -138,7 +210,7 @@ struct HomeView: View {
         default:
             HStack(spacing: 14) {
                 PixelLoader(size: 10)
-                Text("Reading nine feeds")
+                Text("Reading the feeds")
                     .novaMeta(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -148,7 +220,7 @@ struct HomeView: View {
         }
     }
 
-    private func sectionTitle(_ title: String) -> some View {
+    private func sectionTitle(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(Nova.display(.title2))
             .tracking(-0.4)
@@ -288,34 +360,44 @@ private struct TodayRoundCard: View {
         let read = session.storiesReadCount
         let engine = session.engine
         let streak = history.streak()
-        let streakText = streak > 0 ? "\(streak)-day streak" : "Round 1 of today"
+        let streakText = streak > 0 ? String(localized: "\(streak)-day streak") : String(localized: "Round 1 of today")
 
         if !session.hasRound {
             let left = total - read
             return Status(
-                headline: left == 0 ? "All \(total) read." : "\(left) \(left == 1 ? "story" : "stories") to read.",
-                detail: "No questions could be written today",
-                action: read == 0 ? "Start reading" : "Keep reading"
+                headline: left == 0
+                    ? String(localized: "All \(total) read.")
+                    : left == 1 ? String(localized: "1 story to read.") : String(localized: "\(left) stories to read."),
+                detail: String(localized: "No questions could be written today"),
+                action: read == 0 ? String(localized: "Start reading") : String(localized: "Keep reading")
             )
         }
         if engine.isComplete {
             return Status(
-                headline: "Round done. \(engine.correctAnswers) of \(engine.questionCount) sunk.",
+                headline: String(localized: "Round done. \(engine.correctAnswers) of \(engine.questionCount) sunk."),
                 detail: streakText,
-                action: "See your round"
+                action: String(localized: "See your round")
             )
         }
         if session.hasReadAllStories {
-            return Status(headline: "All \(total) read. Your shots are waiting.", detail: streakText, action: "Take your shots")
+            return Status(
+                headline: String(localized: "All \(total) read. Your shots are waiting."),
+                detail: streakText,
+                action: String(localized: "Take your shots")
+            )
         }
         if read == 0 {
-            return Status(headline: "Today's \(total) are waiting.", detail: streakText, action: "Start reading")
+            return Status(
+                headline: String(localized: "Today's \(total) are waiting."),
+                detail: streakText,
+                action: String(localized: "Start reading")
+            )
         }
         let left = total - read
         return Status(
-            headline: "\(left) \(left == 1 ? "story" : "stories") to go.",
-            detail: "\(read) / \(total) read · \(streakText)",
-            action: "Keep reading"
+            headline: left == 1 ? String(localized: "1 story to go.") : String(localized: "\(left) stories to go."),
+            detail: String(localized: "\(read) / \(total) read · \(streakText)"),
+            action: String(localized: "Keep reading")
         )
     }
 

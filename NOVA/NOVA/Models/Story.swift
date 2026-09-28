@@ -38,14 +38,18 @@ enum StoryCategory: String, Codable, CaseIterable, Sendable {
     case business
     case world
     case science
+    case sports
+    case entertainment
 
     var title: String {
         switch self {
-        case .india: "India"
-        case .technology: "Technology"
-        case .business: "Business"
-        case .world: "World"
-        case .science: "Science"
+        case .india: String(localized: "India")
+        case .technology: String(localized: "Technology")
+        case .business: String(localized: "Business")
+        case .world: String(localized: "World")
+        case .science: String(localized: "Science")
+        case .sports: String(localized: "Sports")
+        case .entertainment: String(localized: "Entertainment")
         }
     }
 
@@ -56,6 +60,8 @@ enum StoryCategory: String, Codable, CaseIterable, Sendable {
         case .business: "chart.line.uptrend.xyaxis"
         case .world: "globe"
         case .science: "atom"
+        case .sports: "cricket.ball"
+        case .entertainment: "film"
         }
     }
 }

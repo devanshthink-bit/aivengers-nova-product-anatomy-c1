@@ -73,9 +73,11 @@ extension Nova {
     /// Derived from the source name rather than stored, so adding a feed needs no second
     /// edit — drop in a matching asset and every mark picks it up.
     static func logoAssetName(for source: String) -> String {
-        // The four BBC section feeds are one publisher and share one mark, so they all
-        // resolve to the same asset rather than needing four identical copies.
-        if source.hasPrefix("BBC") { return "logo-bbc" }
+        // Section feeds are one publisher and share one mark, so they all resolve to the
+        // same asset rather than needing identical copies: the BBC's four, The Hindu's
+        // cricket, science and entertainment feeds, and News18's Hindi edition.
+        let publishers = ["BBC": "logo-bbc", "The Hindu": "logo-the-hindu", "News18": "logo-news18"]
+        if let match = publishers.first(where: { source.hasPrefix($0.key) }) { return match.value }
         return "logo-" + source.lowercased().replacingOccurrences(of: " ", with: "-")
     }
 

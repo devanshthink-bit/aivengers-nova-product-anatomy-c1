@@ -12,7 +12,7 @@ import SwiftUI
 struct ProgressPips: View {
     let completed: Int
     let total: Int
-    var label: String
+    var label: LocalizedStringResource
     /// Tint per position. Falls back to `.primary` when a caller has no stories to hand.
     var tints: [Color] = []
 
@@ -28,7 +28,7 @@ struct ProgressPips: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(completed) of \(total) \(label)")
+        .accessibilityLabel(Text("\(completed) of \(total) \(String(localized: label))"))
     }
 
     private func tint(at index: Int) -> Color {

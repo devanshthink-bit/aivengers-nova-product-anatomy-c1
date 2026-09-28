@@ -21,18 +21,23 @@ protocol NewsService: Sendable {
 /// Reads the feeds in `RSSFeed.all`, picks the day's stories, and has
 /// `QuestionGenerator` write the summary and question for each.
 /// Fetches and parses the feeds. Split out from `LiveNewsService` because both the round
-/// and the Home tab need the same stories, and fetching nine feeds twice on launch would
+/// and the Home tab need the same stories, and fetching every feed twice on launch would
 /// be eighteen requests for one screenful of news.
 struct FeedLoader: Sendable {
-    var feeds: [RSSFeed] = RSSFeed.all
+    var language: ContentLanguage = .english
+    /// Overridable for tests. Nil means the reader's language only, so a Hindi reader
+    /// doesn't pay for the English feeds they will never see (and the other way round).
+    var feeds: [RSSFeed]? = nil
     var session: URLSession = .shared
 
+    var activeFeeds: [RSSFeed] { feeds ?? RSSFeed.feeds(for: language) }
+
     /// Fetches every feed at once. A feed that fails contributes nothing and is not an
-    /// error — with nine publishers, one being down is routine, and waiting on it or
+    /// error — with this many publishers, one being down is routine, and waiting on it or
     /// failing the whole load because of it would be the wrong trade.
     func fetchAll() async -> [Story] {
         await withTaskGroup(of: [Story].self) { group in
-            for feed in feeds {
+            for feed in activeFeeds {
                 group.addTask {
                     do {
                         var request = URLRequest(url: feed.url)
@@ -62,16 +67,20 @@ struct FeedLoader: Sendable {
 }
 
 struct LiveNewsService: NewsService {
-    /// One per category, so the onboarding topic reorder has something to reorder and
+    /// Five slots across seven categories — see `pick` for which win. One per category, so
+    /// the onboarding topic reorder has something to reorder and
     /// `StoryCategory` stays represented. Matches the five the round already expects.
     static let storyCount = 5
 
     var loader = FeedLoader()
     var generator = QuestionGenerator()
 
-    /// Stories already fetched by `NewsStore`, so the round doesn't refetch the same nine
+    /// Stories already fetched by `NewsStore`, so the round doesn't refetch the same
     /// feeds the Home tab just read. Nil means fetch them here.
     var prefetched: [Story]?
+
+    /// The reader's chosen categories, which fill the deck's slots first.
+    var topics = TopicSelection()
 
     func todayDeck() async throws -> [(story: Story, question: Question?)] {
         // Not `prefetched ?? await …`: `??` autocloses its right side, which can't be
@@ -83,15 +92,25 @@ struct LiveNewsService: NewsService {
             fetched = await loader.fetchAll()
         }
         guard !fetched.isEmpty else { throw NewsServiceError.noStories }
-        return await generator.generate(for: Self.pick(from: fetched))
+        // The questions are written in the language the feeds were read in, whatever the
+        // generator was built with — a Hindi story asked about in English tests translation.
+        var generator = generator
+        generator.language = loader.language
+        return await generator.generate(for: Self.pick(from: fetched, topics: topics))
     }
 
-    /// Newest first, deduplicated, at most one per category.
+    /// Newest first, deduplicated, at most one per category — the reader's chosen
+    /// categories filled first.
     ///
     /// Deduplication is by title rather than by id: the same wire story runs under
     /// different guids at different publishers, and two cards about the same event would
     /// make the deck feel broken.
-    static func pick(from stories: [Story]) -> [Story] {
+    ///
+    /// Chosen-first became necessary at seven categories: with five slots, "newest per
+    /// category" let whichever two published last drop out, and that was sometimes the
+    /// category the reader asked for. The deck still never filters — unchosen categories
+    /// fill the remaining slots.
+    static func pick(from stories: [Story], topics: TopicSelection = TopicSelection()) -> [Story] {
         var seenTitles: Set<String> = []
         let unique = stories
             .sorted { $0.publishedAt > $1.publishedAt }
@@ -103,17 +122,23 @@ struct LiveNewsService: NewsService {
         var chosen: [Story] = []
         var usedCategories: Set<StoryCategory> = []
 
-        for story in unique where !usedCategories.contains(story.category) {
-            chosen.append(story)
-            usedCategories.insert(story.category)
-            if chosen.count == storyCount { return chosen }
+        func take(where include: (Story) -> Bool) {
+            for story in unique where chosen.count < storyCount
+                && !usedCategories.contains(story.category)
+                && include(story) {
+                chosen.append(story)
+                usedCategories.insert(story.category)
+            }
         }
+
+        take { topics.contains($0.category) }
+        take { _ in true }
 
         // Fewer categories came back than the deck needs — top up with the next newest
         // rather than shipping a short round.
-        for story in unique where !chosen.contains(where: { $0.id == story.id }) {
+        for story in unique where chosen.count < storyCount
+            && !chosen.contains(where: { $0.id == story.id }) {
             chosen.append(story)
-            if chosen.count == storyCount { break }
         }
 
         return chosen

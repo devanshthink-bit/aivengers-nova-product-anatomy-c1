@@ -135,13 +135,13 @@ struct VoiceBriefingPanel: View {
 
     private var statusTitle: String {
         switch voice.phase {
-        case .idle: "Ready"
-        case .greeting: "Speaking"
-        case .listening: "Listening"
-        case .thinking: "Finding stories"
-        case .speaking: "Briefing"
-        case .done: "Done"
-        case .failed: "Couldn't brief you"
+        case .idle: String(localized: "Ready")
+        case .greeting: String(localized: "Speaking")
+        case .listening: String(localized: "Listening")
+        case .thinking: String(localized: "Finding stories")
+        case .speaking: String(localized: "Briefing")
+        case .done: String(localized: "Done")
+        case .failed: String(localized: "Couldn't brief you")
         }
     }
 

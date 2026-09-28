@@ -57,6 +57,71 @@ struct NewsStoreTests {
         #expect(store.stories(from: "BBC News").count == NewsStore.storiesPerSource)
     }
 
+    @Test("A publisher with several section feeds is one channel on the rail")
+    func sectionFeedsAreOneChannel() async {
+        let store = await store(with: [
+            story("a", source: "Live Hindustan", category: .india),
+            story("b", source: "Live Hindustan", category: .sports)
+        ])
+
+        #expect(store.sources.map(\.source) == ["Live Hindustan"])
+    }
+
+    @Test("Switching to the language already loaded keeps the stories")
+    func sameLanguageIsANoOp() async {
+        let store = await store(with: [story("a", source: "BBC News")])
+
+        await store.setLanguage(.english)
+
+        #expect(store.allStories.map(\.id) == [StoryID("a")])
+    }
+
+    @Test("Switching language drops the other language's stories")
+    func languageSwitchClears() async {
+        let store = await store(with: [story("a", source: "BBC News")])
+
+        await store.setLanguage(.hindi)
+
+        // Loader points at no feeds, so the reload finds nothing — what matters is that no
+        // English story survives into a Hindi day.
+        #expect(store.allStories.isEmpty)
+    }
+
+    @Test("Filtering by category keeps newest-first and the limit")
+    func latestByCategory() async {
+        let store = await store(with: [
+            story("a", source: "S", category: .sports, hoursAgo: 1),
+            story("b", source: "S", category: .india, hoursAgo: 2),
+            story("c", source: "S", category: .sports, hoursAgo: 3)
+        ])
+
+        #expect(store.latest(category: .sports).map(\.id.rawValue) == ["a", "c"])
+        #expect(store.latest(limit: 1, category: .sports).count == 1)
+        #expect(store.latest().count == 3)
+    }
+
+    @Test("Only categories that arrived are listed, chosen ones first")
+    func categoriesListOnlyPresent() async {
+        let store = await store(with: [
+            story("a", source: "S", category: .world),
+            story("b", source: "S", category: .sports),
+            story("c", source: "S", category: .india)
+        ])
+
+        let listed = store.categories(ordered: TopicSelection(categories: [.sports]))
+
+        #expect(listed.first == .sports)
+        #expect(Set(listed) == [.world, .sports, .india])
+        #expect(!listed.contains(.science))
+    }
+
+    @Test("A chosen tab that stopped arriving resolves to All, whenever it is read")
+    func selectionFallsBackToAll() {
+        #expect(NewsStore.resolvedCategory(.science, among: [.india, .sports]) == nil)
+        #expect(NewsStore.resolvedCategory(.sports, among: [.india, .sports]) == .sports)
+        #expect(NewsStore.resolvedCategory(nil, among: [.india]) == nil)
+    }
+
     @Test("The rail lists only sources that actually returned stories")
     func railSkipsEmptySources() async {
         let store = await store(with: [
@@ -155,5 +220,68 @@ struct ChunkingTests {
     @Test("An empty list produces no batches")
     func emptyProducesNothing() {
         #expect([Int]().chunked(into: 5).isEmpty)
+    }
+}
+
+// MARK: - Worker cancellation
+
+@Suite("News store worker")
+struct NewsStoreWorkerTests {
+    /// Counts calls and always reports a rate limit, so a healthy worker backs off for
+    /// seconds between batches — and a worker that ignores cancellation spins instead.
+    ///
+    /// Each batch takes 200 ms in a cancellable sleep, the way a real request in a
+    /// cancelled task fails early: that is what lets the test cancel *mid-batch*, which is
+    /// the case that spun. Cancelling during the back-off sleep always exited cleanly.
+    final class CountingGenerator: SummaryGenerating, @unchecked Sendable {
+        var language: ContentLanguage = .english
+        var calls = 0
+
+        func generateReporting(for stories: [Story]) async -> QuestionGenerator.BatchResult {
+            calls += 1
+            try? await Task.sleep(for: .milliseconds(200))
+            return QuestionGenerator.BatchResult(
+                deck: stories.map { ($0, nil) },
+                wasRateLimited: true,
+                retryAfter: nil
+            )
+        }
+    }
+
+    @Test("Switching language stops the summary worker instead of leaving it spinning")
+    func languageSwitchStopsWorker() async throws {
+        let generator = CountingGenerator()
+        let store = NewsStore(loader: FeedLoader(feeds: []), generator: generator)
+        store.adopt((1...5).map { index in
+            Story(id: StoryID("s\(index)"), title: "T\(index)", summary: "S", source: "BBC News",
+                  category: .world, publishedAt: .now, artwork: .none)
+        })
+
+        store.generateSummaries()
+        for _ in 0..<50 where generator.calls == 0 {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(generator.calls >= 1)
+
+        await store.setLanguage(.hindi)
+        try await Task.sleep(for: .milliseconds(100))
+        let settled = generator.calls
+        try await Task.sleep(for: .milliseconds(300))
+
+        // A cancelled worker whose `Task.sleep` returns at once would have called the
+        // generator hundreds of times in 300 ms.
+        #expect(generator.calls == settled)
+        #expect(store.isGenerating == false)
+    }
+
+    @Test("A cancelled load leaves the store idle rather than failed")
+    func cancelledLoadIsNotAFailure() async {
+        let store = NewsStore(loader: FeedLoader(feeds: []), generator: CountingGenerator())
+
+        let task = Task { await store.load() }
+        task.cancel()
+        await task.value
+
+        #expect(store.loadState != .failed)
     }
 }

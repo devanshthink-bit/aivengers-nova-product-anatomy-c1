@@ -1,0 +1,2411 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "": {
+      "shouldTranslate": false
+    },
+    " the world and ": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " दुनिया और "
+          }
+        }
+      }
+    },
+    " updates quick and smooth ": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " की खबरें, तेज़ और सहज, "
+          }
+        }
+      }
+    },
+    "%@ / %@": {
+      "shouldTranslate": false
+    },
+    "%@ shot.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ निशाना।"
+          }
+        }
+      }
+    },
+    "%@ shots.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ निशाने।"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "shouldTranslate": false
+    },
+    "%@. %@, %@": {
+      "shouldTranslate": false
+    },
+    "%@: %lld of %lld right first time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$lld of %3$lld right first time"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %3$lld में से %2$lld पहली बार में सही"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "shouldTranslate": false
+    },
+    "%lld / %lld": {
+      "shouldTranslate": false
+    },
+    "%lld / %lld read": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld read"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld पढ़ीं"
+          }
+        }
+      }
+    },
+    "%lld / %lld read · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld read · %3$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld पढ़ीं · %3$@"
+          }
+        }
+      }
+    },
+    "%lld of %lld %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld %3$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से %1$lld %3$@"
+          }
+        }
+      }
+    },
+    "%lld of %lld correct": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld correct"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से %1$lld सही"
+          }
+        }
+      }
+    },
+    "%lld of %lld right.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld right."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से %1$lld सही।"
+          }
+        }
+      }
+    },
+    "%lld of %lld squares earned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld squares earned"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से %1$lld खाने भरे"
+          }
+        }
+      }
+    },
+    "%lld points for every right answer sunk": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निशाने पर लगे हर सही जवाब के %lld अंक"
+          }
+        }
+      }
+    },
+    "%lld points · %@ accuracy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld points · %2$@ accuracy"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld अंक · %2$@ सटीकता"
+          }
+        }
+      }
+    },
+    "%lld pts": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld अंक"
+          }
+        }
+      }
+    },
+    "%lld questions, %lld paper balls": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld questions, %2$lld paper balls"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld सवाल, %2$lld कागज़ की गेंदें"
+          }
+        }
+      }
+    },
+    "%lld recent %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld recent %2$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld ताज़ा %2$@"
+          }
+        }
+      }
+    },
+    "%lld stories to go.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld खबरें बाकी।"
+          }
+        }
+      }
+    },
+    "%lld stories to read.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld खबरें पढ़नी बाकी हैं।"
+          }
+        }
+      }
+    },
+    "%lld-day streak": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "लगातार %lld दिन"
+          }
+        }
+      }
+    },
+    "%lld/%lld": {
+      "shouldTranslate": false
+    },
+    "+%lld": {
+      "shouldTranslate": false
+    },
+    ",\n%@.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ",\n%@।"
+          }
+        }
+      }
+    },
+    ".": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "।"
+          }
+        }
+      }
+    },
+    "1 question, 1 paper ball": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 सवाल, 1 कागज़ की गेंद"
+          }
+        }
+      }
+    },
+    "1 story to go.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बस 1 खबर बाकी।"
+          }
+        }
+      }
+    },
+    "1 story to read.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 खबर पढ़नी बाकी है।"
+          }
+        }
+      }
+    },
+    "AI-written · unchecked": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI से लिखा · बिना जाँच"
+          }
+        }
+      }
+    },
+    "Accuracy": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सटीकता"
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सभी"
+          }
+        }
+      }
+    },
+    "All %lld read.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सभी %lld पढ़ ली गईं।"
+          }
+        }
+      }
+    },
+    "All %lld read. Your shots are waiting.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सभी %lld पढ़ ली गईं। अब निशाना लगाइए।"
+          }
+        }
+      }
+    },
+    "Answer in NOVA · machine-written question": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब NOVA में दें · मशीन से लिखा सवाल"
+          }
+        }
+      }
+    },
+    "Answer: %@": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब: %@"
+          }
+        }
+      }
+    },
+    "App language": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऐप की भाषा"
+          }
+        }
+      }
+    },
+    "Ask NOVA": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOVA से पूछें"
+          }
+        }
+      }
+    },
+    "Ask NOVA for a news briefing": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOVA से खबरों का सार सुनें"
+          }
+        }
+      }
+    },
+    "Ask again": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फिर पूछें"
+          }
+        }
+      }
+    },
+    "At least %lld topics stay chosen.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कम से कम %lld विषय चुने रहते हैं।"
+          }
+        }
+      }
+    },
+    "Back to the stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरों पर लौटें"
+          }
+        }
+      }
+    },
+    "Badge, %@": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बैज, %@"
+          }
+        }
+      }
+    },
+    "Band %lld pt": {
+      "shouldTranslate": false
+    },
+    "Basket %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Basket %1$@. %2$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "घेरा %1$@. %2$@"
+          }
+        }
+      }
+    },
+    "Bend %lld pt": {
+      "shouldTranslate": false
+    },
+    "Briefing": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सार सुना रहा है"
+          }
+        }
+      }
+    },
+    "Business": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बिज़नेस"
+          }
+        }
+      }
+    },
+    "By topic": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "विषय के हिसाब से"
+          }
+        }
+      }
+    },
+    "Can you answer this?": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्या आप जवाब दे सकते हैं?"
+          }
+        }
+      }
+    },
+    "Can you answer this? — NOVA": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्या आप इसका जवाब दे सकते हैं? — NOVA"
+          }
+        }
+      }
+    },
+    "Categories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "श्रेणियाँ"
+          }
+        }
+      }
+    },
+    "Category, %@": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "श्रेणी, %@"
+          }
+        }
+      }
+    },
+    "Changes today's stories. Your answers so far are kept.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की खबरें बदल जाएँगी। अब तक के जवाब सहेजे रहेंगे।"
+          }
+        }
+      }
+    },
+    "Channels": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चैनल"
+          }
+        }
+      }
+    },
+    "Check your connection. Headlines will appear here as soon as one feed comes back.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अपना कनेक्शन देखिए। कोई भी फ़ीड लौटते ही सुर्खियाँ यहाँ दिखेंगी।"
+          }
+        }
+      }
+    },
+    "Chosen": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चुना गया"
+          }
+        }
+      }
+    },
+    "Chosen topics lead the deck. You'll still see everything, and at least %lld stay on.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चुने गए विषय पहले आते हैं। बाकी सब भी दिखेगा, और कम से कम %lld चुने रहते हैं।"
+          }
+        }
+      }
+    },
+    "Clears your name and topics and returns to the first page.": {
+      "shouldTranslate": false
+    },
+    "Come back tomorrow, and five more are waiting.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कल लौटिए, पाँच नई खबरें इंतज़ार में होंगी।"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आगे बढ़ें"
+          }
+        }
+      }
+    },
+    "Correct": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सही"
+          }
+        }
+      }
+    },
+    "Correct answer": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सही जवाब"
+          }
+        }
+      }
+    },
+    "Couldn't brief you": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सार नहीं सुना पाया"
+          }
+        }
+      }
+    },
+    "Daily reminder": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "रोज़ का रिमाइंडर"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "shouldTranslate": false
+    },
+    "Debug only. Clears your name and topics and returns to the first page.": {
+      "shouldTranslate": false
+    },
+    "Done": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हो गया"
+          }
+        }
+      }
+    },
+    "Drop the ball in": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गेंद डालिए"
+          }
+        }
+      }
+    },
+    "Duration %@ s": {
+      "shouldTranslate": false
+    },
+    "English": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अंग्रेज़ी"
+          }
+        }
+      }
+    },
+    "Entertainment": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मनोरंजन"
+          }
+        }
+      }
+    },
+    "Every day.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर दिन।"
+          }
+        }
+      }
+    },
+    "Every question you answer lands here, ready to revise.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपका हर जवाब यहाँ आता है, दोहराने के लिए तैयार।"
+          }
+        }
+      }
+    },
+    "Finding stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें ढूँढ रहा है"
+          }
+        }
+      }
+    },
+    "Finish reading": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़ना पूरा करें"
+          }
+        }
+      }
+    },
+    "First-try right": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पहली बार में सही"
+          }
+        }
+      }
+    },
+    "Five stories a day, swiped through like cards.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "रोज़ पाँच खबरें, कार्ड की तरह स्वाइप करते हुए।"
+          }
+        }
+      }
+    },
+    "Five stories.\nFive shots.\n": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पाँच खबरें।\nपाँच निशाने।\n"
+          }
+        }
+      }
+    },
+    "Flood": {
+      "shouldTranslate": false
+    },
+    "Gathering today's stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की खबरें जुटाई जा रही हैं"
+          }
+        }
+      }
+    },
+    "Get started": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शुरू करें"
+          }
+        }
+      }
+    },
+    "Glow %@": {
+      "shouldTranslate": false
+    },
+    "Go to today's stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की खबरों पर जाएँ"
+          }
+        }
+      }
+    },
+    "Headlines": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुर्खियाँ"
+          }
+        }
+      }
+    },
+    "Hindi": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हिन्दी"
+          }
+        }
+      }
+    },
+    "Home": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "होम"
+          }
+        }
+      }
+    },
+    "I couldn't put a briefing together. Try again in a moment.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सार तैयार नहीं हो पाया। थोड़ी देर में फिर कोशिश करें।"
+          }
+        }
+      }
+    },
+    "I didn't catch that. Tap Ask again and say a topic, like “tech news”.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मैं समझ नहीं पाया। फिर पूछें दबाइए और कोई विषय बोलिए, जैसे “टेक की खबरें”।"
+          }
+        }
+      }
+    },
+    "India": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "भारत"
+          }
+        }
+      }
+    },
+    "It may have dropped off the feed since you opened the list.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सूची खोलने के बाद यह शायद फ़ीड से हट गई।"
+          }
+        }
+      }
+    },
+    "Keep reading": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़ना जारी रखें"
+          }
+        }
+      }
+    },
+    "Know": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जानिए"
+          }
+        }
+      }
+    },
+    "Leave the round": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "राउंड छोड़ें"
+          }
+        }
+      }
+    },
+    "Listening": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुन रहा है"
+          }
+        }
+      }
+    },
+    "Loading headlines": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुर्खियाँ लोड हो रही हैं"
+          }
+        }
+      }
+    },
+    "Machine-written from news feeds and not checked.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरों की फ़ीड से मशीन द्वारा लिखा, जाँचा नहीं गया।"
+          }
+        }
+      }
+    },
+    "Machine-written, not checked": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मशीन से लिखा, जाँचा नहीं गया"
+          }
+        }
+      }
+    },
+    "Miss, or clip the rim, and you shoot again": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चूके या किनारे से टकराए, तो फिर से फेंकिए"
+          }
+        }
+      }
+    },
+    "NOVA": {
+      "shouldTranslate": false
+    },
+    "NOVA needs the microphone and speech recognition to hear your question.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपका सवाल सुनने के लिए NOVA को माइक्रोफ़ोन और स्पीच रिकग्निशन की ज़रूरत है।"
+          }
+        }
+      }
+    },
+    "NOVA · this week's questions": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOVA · इस हफ़्ते के सवाल"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नाम"
+          }
+        }
+      }
+    },
+    "News in\n": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें\n"
+          }
+        }
+      }
+    },
+    "News language": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरों की भाषा"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अगला"
+          }
+        }
+      }
+    },
+    "Next story": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अगली खबर"
+          }
+        }
+      }
+    },
+    "No questions could be written today": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज सवाल नहीं बन पाए"
+          }
+        }
+      }
+    },
+    "No questions could be written today.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज सवाल नहीं बन पाए।"
+          }
+        }
+      }
+    },
+    "No shots today.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज कोई निशाना नहीं।"
+          }
+        }
+      }
+    },
+    "Not chosen": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नहीं चुना"
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी नहीं"
+          }
+        }
+      }
+    },
+    "Not quite": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "थोड़ा चूके"
+          }
+        }
+      }
+    },
+    "Not read yet": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी नहीं पढ़ी"
+          }
+        }
+      }
+    },
+    "Not this one": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "यह नहीं"
+          }
+        }
+      }
+    },
+    "Nothing from %@ yet.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ से अभी कुछ नहीं आया।"
+          }
+        }
+      }
+    },
+    "Nothing in %@ right now. The feeds for it may be down.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी %@ में कुछ नहीं है। इसकी फ़ीड शायद बंद हैं।"
+          }
+        }
+      }
+    },
+    "Nothing to revise yet.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी दोहराने को कुछ नहीं।"
+          }
+        }
+      }
+    },
+    "Notifications are off for NOVA. Turn them on in Settings to get the reminder.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOVA के नोटिफ़िकेशन बंद हैं। रिमाइंडर पाने के लिए Settings में इन्हें चालू करें।"
+          }
+        }
+      }
+    },
+    "Off the rim. So close.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "किनारे से लौटी। बस थोड़ा सा।"
+          }
+        }
+      }
+    },
+    "On the board": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खाता खुला"
+          }
+        }
+      }
+    },
+    "One a day, and none on a day you've already played.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "दिन में एक, और जिस दिन आप खेल चुके हों उस दिन नहीं।"
+          }
+        }
+      }
+    },
+    "One question on each. Sink your answer in the hoop.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर खबर पर एक सवाल। अपना जवाब घेरे में डालिए।"
+          }
+        }
+      }
+    },
+    "One question per story. Pull the paper ball back like a slingshot and sink it in the hoop holding your answer.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर खबर पर एक सवाल। कागज़ की गेंद को गुलेल की तरह पीछे खींचिए और उस घेरे में डालिए जिसमें आपका जवाब है।"
+          }
+        }
+      }
+    },
+    "Only used to greet you. It stays on this device.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिर्फ़ आपका स्वागत करने के लिए। यह इसी फ़ोन पर रहता है।"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings खोलें"
+          }
+        }
+      }
+    },
+    "Opens %@ stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ की खबरें खोलता है"
+          }
+        }
+      }
+    },
+    "Opens the story": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबर खोलता है"
+          }
+        }
+      }
+    },
+    "Perfect round. You read properly.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पूरे अंक। आपने ध्यान से पढ़ा।"
+          }
+        }
+      }
+    },
+    "Pick %lld more": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld और चुनें"
+          }
+        }
+      }
+    },
+    "Play": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खेलिए"
+          }
+        }
+      }
+    },
+    "Played %lld of the last %lld days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Played %1$lld of the last %2$lld days"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पिछले %2$lld दिनों में से %1$lld दिन खेले"
+          }
+        }
+      }
+    },
+    "Prep": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "तैयारी"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "प्रोफ़ाइल"
+          }
+        }
+      }
+    },
+    "Pull back, aim the arc, let go": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पीछे खींचिए, निशाना साधिए, छोड़िए"
+          }
+        }
+      }
+    },
+    "Question %lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Question %1$lld / %2$lld"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सवाल %1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "Question %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Question %1$lld of %2$lld"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से सवाल %1$lld"
+          }
+        }
+      }
+    },
+    "Question %lld, correct. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Question %1$lld, correct. %2$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सवाल %1$lld, सही। %2$@"
+          }
+        }
+      }
+    },
+    "Question %lld, incorrect. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Question %1$lld, incorrect. %2$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सवाल %1$lld, गलत। %2$@"
+          }
+        }
+      }
+    },
+    "Questions are machine-written from news feeds and not checked. Verify before relying on them for an exam.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सवाल खबरों की फ़ीड से मशीन द्वारा लिखे जाते हैं और जाँचे नहीं जाते। परीक्षा के लिए इन पर भरोसा करने से पहले पुष्टि कर लें।"
+          }
+        }
+      }
+    },
+    "Questions kept": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सहेजे सवाल"
+          }
+        }
+      }
+    },
+    "Quiz": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्विज़"
+          }
+        }
+      }
+    },
+    "Read": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़िए"
+          }
+        }
+      }
+    },
+    "Read five stories, then earn your five shots.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पाँच खबरें पढ़िए, फिर पाँच निशाने कमाइए।"
+          }
+        }
+      }
+    },
+    "Read five. Answer five.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पाँच पढ़ें। पाँच जवाब दें।"
+          }
+        }
+      }
+    },
+    "Read in English instead": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इसकी जगह अंग्रेज़ी में पढ़ें"
+          }
+        }
+      }
+    },
+    "Reader": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पाठक"
+          }
+        }
+      }
+    },
+    "Reading %@…": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ पढ़ी जा रही है…"
+          }
+        }
+      }
+    },
+    "Reading the feeds": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें पढ़ी जा रही हैं"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "तैयार"
+          }
+        }
+      }
+    },
+    "Remind me": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "याद दिलाएँ"
+          }
+        }
+      }
+    },
+    "Remind me to read": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़ने की याद दिलाएँ"
+          }
+        }
+      }
+    },
+    "Remind me tomorrow at %@?": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कल %@ बजे याद दिलाएँ?"
+          }
+        }
+      }
+    },
+    "Restart": {
+      "shouldTranslate": false
+    },
+    "Restart onboarding": {
+      "shouldTranslate": false
+    },
+    "Results": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नतीजे"
+          }
+        }
+      }
+    },
+    "Revise": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "दोहराएँ"
+          }
+        }
+      }
+    },
+    "Revise %lld questions": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld सवाल दोहराएँ"
+          }
+        }
+      }
+    },
+    "Revise what you read.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जो पढ़ा, उसे दोहराइए।"
+          }
+        }
+      }
+    },
+    "Right": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सही"
+          }
+        }
+      }
+    },
+    "Round 1 of today": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज का पहला राउंड"
+          }
+        }
+      }
+    },
+    "Round 2 · five more stories, five more shots · in a later build": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "राउंड 2 · पाँच और खबरें, पाँच और निशाने · अगले संस्करण में"
+          }
+        }
+      }
+    },
+    "Round done. %lld of %lld sunk.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Round done. %1$lld of %2$lld sunk."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "राउंड पूरा। %2$lld में से %1$lld निशाने पर।"
+          }
+        }
+      }
+    },
+    "Science": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "विज्ञान"
+          }
+        }
+      }
+    },
+    "Score": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्कोर"
+          }
+        }
+      }
+    },
+    "Score, %lld points": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्कोर, %lld अंक"
+          }
+        }
+      }
+    },
+    "Scroll": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्क्रॉल"
+          }
+        }
+      }
+    },
+    "See your round": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अपना राउंड देखें"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शेयर करें"
+          }
+        }
+      }
+    },
+    "Share this question": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "यह सवाल शेयर करें"
+          }
+        }
+      }
+    },
+    "Share this week": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस हफ़्ते के सवाल शेयर करें"
+          }
+        }
+      }
+    },
+    "Sharp eye": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पैनी नज़र"
+          }
+        }
+      }
+    },
+    "Sharpshooter": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अचूक निशानेबाज़"
+          }
+        }
+      }
+    },
+    "Shoots the paper ball into this basket": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कागज़ की गेंद इस घेरे में डालता है"
+          }
+        }
+      }
+    },
+    "Short. Throw it harder.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कम पड़ी। ज़ोर से फेंकिए।"
+          }
+        }
+      }
+    },
+    "Skip for now": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी छोड़ें"
+          }
+        }
+      }
+    },
+    "Sounds good": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ठीक है"
+          }
+        }
+      }
+    },
+    "Speaking": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बोल रहा है"
+          }
+        }
+      }
+    },
+    "Sports": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खेल"
+          }
+        }
+      }
+    },
+    "Start reading": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़ना शुरू करें"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Step %1$lld of %2$lld"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से चरण %1$lld"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "रोकें"
+          }
+        }
+      }
+    },
+    "Stories are still loading. Try again in a moment.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें अभी लोड हो रही हैं। थोड़ी देर में फिर कोशिश करें।"
+          }
+        }
+      }
+    },
+    "Stories read": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पढ़ी खबरें"
+          }
+        }
+      }
+    },
+    "Story %lld": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबर %lld"
+          }
+        }
+      }
+    },
+    "Story %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Story %1$lld of %2$lld"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से खबर %1$lld"
+          }
+        }
+      }
+    },
+    "Story %lld, %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Story %1$lld, %2$@. %3$@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबर %1$lld, %2$@. %3$@"
+          }
+        }
+      }
+    },
+    "Story unavailable": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबर उपलब्ध नहीं"
+          }
+        }
+      }
+    },
+    "Summaries and questions are generated automatically and aren't editorially checked.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सार और सवाल अपने-आप बनते हैं और संपादकीय तौर पर जाँचे नहीं जाते।"
+          }
+        }
+      }
+    },
+    "Summarised automatically from %@. Open the publisher for the full report.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ से अपने-आप सार बनाया गया। पूरी रिपोर्ट के लिए प्रकाशक की साइट खोलें।"
+          }
+        }
+      }
+    },
+    "Sunk": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निशाने पर"
+          }
+        }
+      }
+    },
+    "Sunk it": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निशाने पर!"
+          }
+        }
+      }
+    },
+    "Swipe up": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऊपर स्वाइप करें"
+          }
+        }
+      }
+    },
+    "Swipe up to finish": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पूरा करने के लिए ऊपर स्वाइप करें"
+          }
+        }
+      }
+    },
+    "Take the first shot": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पहला निशाना लगाइए"
+          }
+        }
+      }
+    },
+    "Take your shots": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निशाना लगाइए"
+          }
+        }
+      }
+    },
+    "Technology": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टेक्नोलॉजी"
+          }
+        }
+      }
+    },
+    "The answer": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सही जवाब"
+          }
+        }
+      }
+    },
+    "The app's own words follow your iPhone. To see them in Hindi, choose Hindi in Settings → NOVA → Language.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऐप के शब्द आपके iPhone की भाषा में दिखते हैं। इन्हें हिन्दी में देखने के लिए Settings → NOVA → Language में हिन्दी चुनें।"
+          }
+        }
+      }
+    },
+    "The feeds didn't answer.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फ़ीड से जवाब नहीं आया।"
+          }
+        }
+      }
+    },
+    "The feeds didn't answer. Check your connection and try again.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फ़ीड से जवाब नहीं आया। कनेक्शन देखकर फिर कोशिश करें।"
+          }
+        }
+      }
+    },
+    "This feed didn't return any stories on the last refresh.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पिछली बार इस फ़ीड से कोई खबर नहीं आई।"
+          }
+        }
+      }
+    },
+    "This week": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस हफ़्ते"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "समय"
+          }
+        }
+      }
+    },
+    "To revise": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "दोहराने को"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज"
+          }
+        }
+      }
+    },
+    "Today's %lld are waiting.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की %lld खबरें इंतज़ार में हैं।"
+          }
+        }
+      }
+    },
+    "Today's mosaic": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज का मोज़ेक"
+          }
+        }
+      }
+    },
+    "Today's questions couldn't be written. They're generated from the stories automatically, and that service didn't answer. Everything you read is still here.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज के सवाल नहीं बन पाए। ये खबरों से अपने-आप बनते हैं, और वह सेवा जवाब नहीं दे रही। आपने जो पढ़ा, वह सब यहीं है।"
+          }
+        }
+      }
+    },
+    "Today's stories": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की खबरें"
+          }
+        }
+      }
+    },
+    "Today's stories didn't arrive.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज की खबरें नहीं आईं।"
+          }
+        }
+      }
+    },
+    "Topics": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "विषय"
+          }
+        }
+      }
+    },
+    "Tough round. The stories are still there to re-read.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मुश्किल राउंड। खबरें दोबारा पढ़ने के लिए वहीं हैं।"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फिर कोशिश करें"
+          }
+        }
+      }
+    },
+    "Warm-up": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "वॉर्म-अप"
+          }
+        }
+      }
+    },
+    "We'll lead with these. You'll still see everything.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इन्हें पहले दिखाएँगे। बाकी सब भी दिखेगा।"
+          }
+        }
+      }
+    },
+    "What do you\n": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आप पहले\n"
+          }
+        }
+      }
+    },
+    "What should we\n": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हम आपको\n"
+          }
+        }
+      }
+    },
+    "World": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "दुनिया"
+          }
+        }
+      }
+    },
+    "Wrong answers come first.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गलत जवाब पहले आते हैं।"
+          }
+        }
+      }
+    },
+    "Wrong ones come back first next time.": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गलत वाले अगली बार पहले आएँगे।"
+          }
+        }
+      }
+    },
+    "You held on to %lld of %lld stories.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "You held on to %1$lld of %2$lld stories."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lld में से %1$lld खबरें आपको याद रहीं।"
+          }
+        }
+      }
+    },
+    "Your answer, incorrect": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपका जवाब, गलत"
+          }
+        }
+      }
+    },
+    "Your answers so far are kept": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अब तक के जवाब सहेजे रहेंगे"
+          }
+        }
+      }
+    },
+    "Your first five\n": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपकी पहली पाँच\n"
+          }
+        }
+      }
+    },
+    "Your name": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपका नाम"
+          }
+        }
+      }
+    },
+    "Your pick": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपका चुनाव"
+          }
+        }
+      }
+    },
+    "Your shots": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपके निशाने"
+          }
+        }
+      }
+    },
+    "are waiting": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें इंतज़ार में हैं"
+          }
+        }
+      }
+    },
+    "call you?": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्या कहें?"
+          }
+        }
+      }
+    },
+    "like water": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पानी की तरह"
+          }
+        }
+      }
+    },
+    "local": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आसपास"
+          }
+        }
+      }
+    },
+    "questions answered": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सवालों के जवाब दिए"
+          }
+        }
+      }
+    },
+    "stories read": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खबरें पढ़ीं"
+          }
+        }
+      }
+    },
+    "want first?": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्या पढ़ेंगे?"
+          }
+        }
+      }
+    },
+    "your language": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपकी भाषा में"
+          }
+        }
+      }
+    },
+    "खबरें हिन्दी में या अंग्रेज़ी में। You can change this later in Profile.": {
+      "shouldTranslate": false
+    },
+    "“%@”": {
+      "shouldTranslate": false
+    },
+    "…": {
+      "shouldTranslate": false
+    },
+    "→ %@": {
+      "shouldTranslate": false
+    },
+    "🔥 %lld-day streak": {
+      "localizations": {
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔥 लगातार %lld दिन"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

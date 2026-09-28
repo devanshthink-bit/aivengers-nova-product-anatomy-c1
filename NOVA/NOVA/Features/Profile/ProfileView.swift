@@ -15,17 +15,23 @@ struct ProfileView: View {
     @Environment(DailySession.self) private var session
     @Environment(PlayHistory.self) private var history
     @Environment(AppRouter.self) private var router
+    @Environment(ReminderScheduler.self) private var reminders
 
     @AppStorage("readerName") private var readerName = ""
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
+
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 ProfileHeader(name: readerName)
                 nameSection
+                languageSection
                 topicsSection
                 todaySection
+                reminderSection
                 #if DEBUG
                 debugSection
                 #endif
@@ -58,6 +64,42 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Language
+
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            ProfileSection(
+                title: "News language",
+                footnote: "Changes today's stories. Your answers so far are kept."
+            ) {
+                Picker("News language", selection: $languageRaw) {
+                    ForEach(ContentLanguage.allCases, id: \.self) { language in
+                        Text(language.nativeName).tag(language.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            // The app's own words follow iOS's per-app language, which the String Catalog
+            // makes appear in Settings. Linking there beats a second in-app switch that
+            // would miss every string not rendered through a view.
+            ProfileSection(
+                title: "App language",
+                footnote: "The app's own words follow your iPhone. To see them in Hindi, choose Hindi in Settings → NOVA → Language."
+            ) {
+                Button {
+                    Nova.openAppSettings(using: openURL)
+                } label: {
+                    Label("Open Settings", systemImage: "gear")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .profileSurface()
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     // MARK: - Topics
 
     private var topics: TopicSelection { TopicSelection(rawValue: pickedTopicsRaw) }
@@ -70,9 +112,11 @@ struct ProfileView: View {
             FlowChips(spacing: 8) {
                 ForEach(StoryCategory.allCases, id: \.self) { category in
                     TopicChip(
-                        category: category,
+                        title: category.title,
+                        tint: category.tint,
                         isOn: topics.contains(category),
-                        isLocked: !topics.canToggle(category)
+                        isLocked: !topics.canToggle(category),
+                        lockedHint: "At least \(TopicSelection.minimum) topics stay chosen."
                     ) {
                         toggle(category)
                     }
@@ -122,6 +166,49 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Reminder
+
+    private var reminderSection: some View {
+        ProfileSection(
+            title: "Daily reminder",
+            footnote: reminders.wasDenied
+                ? "Notifications are off for NOVA. Turn them on in Settings to get the reminder."
+                : "One a day, and none on a day you've already played."
+        ) {
+            VStack(spacing: 0) {
+                Toggle("Remind me to read", isOn: Binding(
+                    get: { reminders.isEnabled },
+                    set: { on in Task { on ? await reminders.enable() : await reminders.disable() } }
+                ))
+                .padding(16)
+
+                if reminders.isEnabled {
+                    Divider().overlay(Nova.hairline)
+                    DatePicker("Time", selection: Binding(
+                        get: {
+                            Calendar.current.date(
+                                bySettingHour: reminders.hour, minute: reminders.minute, second: 0, of: .now
+                            ) ?? .now
+                        },
+                        set: { date in
+                            let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+                            Task { await reminders.setTime(hour: parts.hour ?? 8, minute: parts.minute ?? 0) }
+                        }
+                    ), displayedComponents: .hourAndMinute)
+                    .padding(16)
+                }
+
+                if reminders.wasDenied {
+                    Divider().overlay(Nova.hairline)
+                    Button("Open Settings") { Nova.openAppSettings(using: openURL) }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                }
+            }
+            .profileSurface()
+        }
+    }
+
     // MARK: - Debug
 
     #if DEBUG
@@ -153,7 +240,7 @@ private struct ProfileHeader: View {
     let name: String
 
     private var trimmed: String { name.trimmingCharacters(in: .whitespaces) }
-    private var displayName: String { trimmed.isEmpty ? "Reader" : trimmed }
+    private var displayName: String { trimmed.isEmpty ? String(localized: "Reader") : trimmed }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -184,8 +271,8 @@ private struct ProfileHeader: View {
 }
 
 private struct ProfileSection<Content: View>: View {
-    let title: String
-    var footnote: String?
+    let title: LocalizedStringKey
+    var footnote: LocalizedStringKey?
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -203,75 +290,6 @@ private struct ProfileSection<Content: View>: View {
                     .foregroundStyle(.secondary)
             }
         }
-    }
-}
-
-/// The category's square and its name. Chosen chips go ink, the way Artifact marks a
-/// selected topic; the colour stays on the square because the tints fail contrast as text.
-///
-/// A locked chip is one of the last two chosen: it stays tappable-looking but dims a
-/// touch, and VoiceOver says why nothing happens instead of silently ignoring the tap.
-private struct TopicChip: View {
-    let category: StoryCategory
-    let isOn: Bool
-    let isLocked: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(category.tint)
-                    .frame(width: 9, height: 9)
-                Text(category.title)
-                    .font(.subheadline.weight(.semibold))
-                if isOn {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.heavy))
-                }
-            }
-            .foregroundStyle(isOn ? Nova.paper : Nova.ink)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background {
-                if isOn {
-                    Capsule().fill(Nova.ink)
-                } else {
-                    Capsule().fill(Nova.sheet)
-                    Capsule().strokeBorder(Nova.hairline, lineWidth: 1)
-                }
-            }
-            .opacity(isLocked ? 0.75 : 1)
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityLabel(category.title)
-        .accessibilityValue(isOn ? "Chosen" : "Not chosen")
-        .accessibilityHint(isLocked ? "At least \(TopicSelection.minimum) topics stay chosen." : "")
-        .accessibilityAddTraits(isOn ? [.isSelected, .isButton] : .isButton)
-    }
-}
-
-private struct StatTile: View {
-    let value: String
-    let label: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(Nova.meta(.title2, weight: .bold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .contentTransition(.numericText())
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .profileSurface()
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -342,4 +360,5 @@ private extension View {
     .environment(DailySession())
     .environment(PlayHistory())
     .environment(AppRouter())
+    .environment(ReminderScheduler())
 }

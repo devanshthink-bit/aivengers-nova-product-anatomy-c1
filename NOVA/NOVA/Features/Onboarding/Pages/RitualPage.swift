@@ -20,9 +20,9 @@ struct RitualPage: View {
     }
 
     private let beats: [Beat] = [
-        Beat(title: "Read", detail: "Five stories a day, swiped through like cards."),
-        Beat(title: "Play", detail: "One question on each. Sink your answer in the hoop."),
-        Beat(title: "Know", detail: "Come back tomorrow, and five more are waiting."),
+        Beat(title: String(localized: "Read"), detail: String(localized: "Five stories a day, swiped through like cards.")),
+        Beat(title: String(localized: "Play"), detail: String(localized: "One question on each. Sink your answer in the hoop.")),
+        Beat(title: String(localized: "Know"), detail: String(localized: "Come back tomorrow, and five more are waiting.")),
     ]
 
     var body: some View {

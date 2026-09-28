@@ -29,6 +29,10 @@ struct QuestionGenerator: Sendable {
 
     var endpoint: URL = QuestionGenerator.endpoint
     var session: URLSession = .shared
+    /// What the summary, question and answers are written in. Follows the feeds: a Hindi
+    /// reader's stories arrive in Hindi, and a question in English about a Hindi summary
+    /// would test translation rather than reading.
+    var language: ContentLanguage = .english
 
     /// Rewrites each story's summary and pairs it with a question.
     ///
@@ -127,10 +131,13 @@ struct QuestionGenerator: Sendable {
             ChatRequest(
                 toolId: "mcqGenerator",
                 model: Self.model,
-                maxTokens: 400,
+                // 700, up from 400: the reply grew a context line, and Devanagari costs
+                // several times the tokens of English — a Hindi reply cut off mid-JSON
+                // reads as a parse failure and silently costs the story its question.
+                maxTokens: 700,
                 temperature: 0.3,
                 messages: [
-                    .init(role: "system", content: Self.systemPrompt),
+                    .init(role: "system", content: Self.systemPrompt(for: language)),
                     .init(role: "user", content: Self.userPrompt(for: story))
                 ]
             )
@@ -160,13 +167,26 @@ struct QuestionGenerator: Sendable {
 
     // MARK: - Prompts
 
-    private static let systemPrompt = """
+    static func systemPrompt(for language: ContentLanguage) -> String {
+        switch language {
+        case .english: basePrompt
+        case .hindi: basePrompt + "\n" + hindiRule
+        }
+    }
+
+    private static let hindiRule = """
+        - Write "summary", "question" and every answer in Hindi, in Devanagari script. Keep \
+        people's names, numbers, dates and abbreviations (BJP, ISRO, IPL) as the story gives \
+        them. The JSON keys stay in English.
+        """
+
+    private static let basePrompt = """
         You write quiz questions for a news app.
 
         Return STRICT JSON and nothing else. No markdown, no code fences, no preamble.
 
         Shape:
-        {"summary": string, "question": string, "answers": [string], "correctIndex": int}
+        {"summary": string, "question": string, "answers": [string], "correctIndex": int, "context": string}
 
         Rules:
         - "summary" retells the story in at most \(summaryWordLimit) words, plainly, \
@@ -177,6 +197,9 @@ struct QuestionGenerator: Sendable {
         kind as the right one — if the answer is a number, the others are numbers of a \
         similar size.
         - "correctIndex" is the 0-based index of the correct option.
+        - Prefer a factual question of the kind a competitive exam asks: who, which body \
+        or scheme, where, when, how much. Avoid opinion and prediction.
+        - "context" is one sentence on why the story matters, using only facts in the story.
         - Never invent facts that are not in the story you were given.
         """
 
@@ -230,6 +253,8 @@ private struct Generated: Decodable {
     let question: String
     let answers: [String]
     let correctIndex: Int
+    /// Optional in the decode: a model that drops it still gives a usable question.
+    let context: String?
 
     /// Models wrap JSON in ``` fences often enough that trimming to the outermost braces
     /// is cheaper than another round trip to ask for it again.
@@ -261,7 +286,8 @@ private struct Generated: Decodable {
             storyID: story.id,
             prompt: question,
             answers: answers,
-            correctAnswerIndex: correctIndex
+            correctAnswerIndex: correctIndex,
+            explanation: context?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
         )
     }
 }
@@ -288,4 +314,8 @@ private extension Story {
             artwork: artwork
         )
     }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }

@@ -5,11 +5,13 @@
 
 import Foundation
 
-/// The five pages between first launch and the reader, in order.
+/// The six pages between first launch and the reader, in order.
 ///
-/// The loop is sold before anything is asked: the manifesto and the ritual come first,
-/// and only then does the flow ask for a name and some topics.
+/// The loop is sold before anything else is asked: the manifesto and the ritual come
+/// before the name and the topics. The one exception is the language, which comes first
+/// of all — a Hindi reader shouldn't have to get through two English pages to find it.
 enum OnboardingPage: Int, CaseIterable, Hashable, Sendable {
+    case language
     case manifesto
     case ritual
     case name

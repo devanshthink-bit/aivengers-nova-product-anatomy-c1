@@ -86,6 +86,35 @@ struct StorySelectionTests {
     func handlesEmptyPool() {
         #expect(LiveNewsService.pick(from: []).isEmpty)
     }
+
+    @Test("Chosen categories are picked before newer stories from the rest")
+    func chosenCategoriesWin() {
+        // Sports is the oldest story in the pool, so newest-per-category alone would
+        // leave it out of five slots across seven categories.
+        let pool = [
+            story("w", .world, hoursAgo: 1), story("t", .technology, hoursAgo: 1),
+            story("b", .business, hoursAgo: 1), story("i", .india, hoursAgo: 1),
+            story("sc", .science, hoursAgo: 1), story("en", .entertainment, hoursAgo: 1),
+            story("sp", .sports, hoursAgo: 20)
+        ]
+
+        let picked = LiveNewsService.pick(from: pool, topics: TopicSelection(categories: [.sports]))
+
+        #expect(picked.count == 5)
+        #expect(picked.contains { $0.category == .sports })
+    }
+
+    @Test("With no topics, seven categories still yield five distinct ones")
+    func sevenCategoriesNoTopics() {
+        let pool = StoryCategory.allCases.enumerated().map { index, category in
+            story("s\(index)", category, hoursAgo: Double(index))
+        }
+
+        let picked = LiveNewsService.pick(from: pool)
+
+        #expect(picked.count == 5)
+        #expect(Set(picked.map(\.category)).count == 5)
+    }
 }
 
 // MARK: - Loading into the session
@@ -97,11 +126,30 @@ struct SessionLoadingTests {
     private struct StubService: NewsService {
         var deck: [(story: Story, question: Question?)]
         var error: Error?
+        var delay: Duration = .zero
 
         func todayDeck() async throws -> [(story: Story, question: Question?)] {
+            if delay > .zero { try? await Task.sleep(for: delay) }
             if let error { throw error }
             return deck
         }
+    }
+
+    @Test("A newer load wins over one still in flight")
+    func newerLoadSupersedes() async {
+        // The first-launch case: the launch load is still running when the reader picks
+        // Hindi on onboarding's first page, and the Hindi load must not be refused.
+        let session = DailySession()
+        let slow = StubService(deck: [(story("english", .world), nil)], delay: .milliseconds(300))
+        let fast = StubService(deck: [(story("hindi", .india), nil)])
+
+        async let first: Void = session.load(from: slow)
+        try? await Task.sleep(for: .milliseconds(50))
+        await session.load(from: fast)
+        await first
+
+        #expect(session.stories.map(\.id) == [StoryID("hindi")])
+        #expect(session.loadState == .loaded)
     }
 
     private func story(_ id: String, _ category: StoryCategory) -> Story {
@@ -206,5 +254,21 @@ struct SessionLoadingTests {
         #expect(session.questions.count == 1)
         #expect(session.engine.round.questionIDs.count == 1)
         #expect(session.engine.round.storyIDs == [withQuestion.id])
+    }
+}
+
+// MARK: - Source marks
+
+@Suite("Source marks")
+struct SourceMarkTests {
+    @Test("Section feeds share their publisher's logo", arguments: [
+        ("BBC Technology", "logo-bbc"),
+        ("The Hindu Cricket", "logo-the-hindu"),
+        ("The Hindu Science", "logo-the-hindu"),
+        ("News18 Hindi", "logo-news18"),
+        ("Mint", "logo-mint")
+    ])
+    func sharedLogo(source: String, asset: String) {
+        #expect(Nova.logoAssetName(for: source) == asset)
     }
 }

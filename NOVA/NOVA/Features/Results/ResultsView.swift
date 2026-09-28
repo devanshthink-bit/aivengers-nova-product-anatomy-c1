@@ -16,6 +16,11 @@ struct ResultsView: View {
     @Environment(DailySession.self) private var session
     @Environment(PlayHistory.self) private var history
     @Environment(AppRouter.self) private var router
+    @Environment(ReminderScheduler.self) private var reminders
+
+    /// Asked once, after the first finished round — the moment a reminder makes sense —
+    /// and never again whichever way the reader answers. Profile holds the switch after.
+    @AppStorage("reminderOffered") private var reminderOffered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var flooded = false
@@ -23,6 +28,7 @@ struct ResultsView: View {
     @State private var mosaicCentre: CGPoint = .zero
     @State private var frame: CGRect = .zero
     @State private var shown = false
+    @State private var scorecard: Image?
 
     @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 96
 
@@ -48,6 +54,9 @@ struct ResultsView: View {
                     WeekStrip(days: history.week(), dot: 28)
                         .padding(.horizontal, 4)
                     review
+                    if session.hasRound, engine.isComplete, !reminders.isEnabled, !reminderOffered {
+                        reminderOffer
+                    }
                     nextRound
                 }
                 .padding(.horizontal, Nova.screenPadding)
@@ -78,7 +87,12 @@ struct ResultsView: View {
             flooded = true
         }
         .onChange(of: engine.isComplete, initial: true) {
-            if session.hasRound, engine.isComplete { history.record() }
+            if session.hasRound, engine.isComplete {
+                history.record()
+                // After recording, so the card's streak includes today.
+                renderScorecard()
+                Task { await reminders.markTodayDone() }
+            }
         }
     }
 
@@ -132,10 +146,10 @@ struct ResultsView: View {
     private var badge: String {
         let total = max(engine.questionCount, 1)
         switch engine.correctAnswers {
-        case total: return "Sharpshooter"
-        case 0: return "Warm-up"
-        case let hits where Double(hits) / Double(total) >= 0.6: return "Sharp eye"
-        default: return "On the board"
+        case total: return String(localized: "Sharpshooter")
+        case 0: return String(localized: "Warm-up")
+        case let hits where Double(hits) / Double(total) >= 0.6: return String(localized: "Sharp eye")
+        default: return String(localized: "On the board")
         }
     }
 
@@ -144,11 +158,11 @@ struct ResultsView: View {
     }
 
     private var headline: String {
-        guard session.hasRound else { return "No questions could be written today." }
+        guard session.hasRound else { return String(localized: "No questions could be written today.") }
         return switch engine.correctAnswers {
-        case engine.questionCount: "Perfect round. You read properly."
-        case 0: "Tough round. The stories are still there to re-read."
-        default: "You held on to \(engine.correctAnswers) of \(engine.questionCount) stories."
+        case engine.questionCount: String(localized: "Perfect round. You read properly.")
+        case 0: String(localized: "Tough round. The stories are still there to re-read.")
+        default: String(localized: "You held on to \(engine.correctAnswers) of \(engine.questionCount) stories.")
         }
     }
 
@@ -175,33 +189,87 @@ struct ResultsView: View {
         let tint = question.flatMap { session.story(for: $0) }?.category.tint ?? ink
         let shape = RoundedRectangle(cornerRadius: 3, style: .continuous)
 
-        return HStack(alignment: .top, spacing: 14) {
-            Group {
-                if submission.isCorrect {
-                    shape.fill(tint)
-                } else {
-                    shape.strokeBorder(ink.opacity(0.4), lineWidth: 1.5)
+        // The share button sits beside the combined row, not inside it: a button inside a
+        // `.combine` element disappears into the row's single VoiceOver stop.
+        return HStack(alignment: .top, spacing: 4) {
+            HStack(alignment: .top, spacing: 14) {
+                Group {
+                    if submission.isCorrect {
+                        shape.fill(tint)
+                    } else {
+                        shape.strokeBorder(ink.opacity(0.4), lineWidth: 1.5)
+                    }
                 }
+                .frame(width: 14, height: 14)
+                .padding(.top, 3)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(question?.prompt ?? "Question \(number)")
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(submission.isCorrect ? String(localized: "Sunk") : String(localized: "Answer: \(question?.correctAnswer ?? "")"))
+                        .novaMeta(.caption2)
+                        .opacity(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    // Why the story matters — the line that turns a quiz answer into something
+                    // worth revising. Machine-written, like the question above it.
+                    if let why = question?.explanation {
+                        Text(why)
+                            .font(.caption)
+                            .opacity(0.75)
+                            .fixedSize(horizontal: false, vertical: true)
+                        // Labelled right where it sits: "why it matters" reads like reporting,
+                        // and it is a model's sentence nobody has checked.
+                        Text("Machine-written, not checked")
+                            .novaMeta(.caption2)
+                            .opacity(0.5)
+                    }
+                }
+
+                Spacer(minLength: 0)
             }
-            .frame(width: 14, height: 14)
-            .padding(.top, 3)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(submission.isCorrect
+                ? String(localized: "Question \(number), correct. \(question?.prompt ?? "")")
+                : String(localized: "Question \(number), incorrect. \(question?.prompt ?? "")"))
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text(question?.prompt ?? "Question \(number)")
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Text(submission.isCorrect ? "Sunk" : "Answer: \(question?.correctAnswer ?? "")")
-                    .novaMeta(.caption2)
-                    .opacity(0.7)
-                    .fixedSize(horizontal: false, vertical: true)
+            if let question {
+                QuestionShareButton(question: question, source: session.story(for: question)?.source ?? "", ink: ink)
+                    .padding(.top, -12)
             }
-
-            Spacer(minLength: 0)
         }
         .padding(.vertical, 14)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Question \(number), \(submission.isCorrect ? "correct" : "incorrect"). \(question?.prompt ?? "")")
+    }
+
+    // MARK: - Reminder
+
+    private var reminderOffer: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Remind me tomorrow at \(reminderTime)?")
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 10) {
+                Button("Remind me") {
+                    reminderOffered = true
+                    Task { await reminders.enable() }
+                }
+                .buttonStyle(ResultsOutlineStyle(ink: ink))
+
+                Button("Not now") { reminderOffered = true }
+                    .novaMeta(.caption, weight: .semibold)
+                    .foregroundStyle(ink.opacity(0.75))
+                    .frame(minHeight: 44)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var reminderTime: String {
+        let date = Calendar.current.date(bySettingHour: reminders.hour, minute: reminders.minute, second: 0, of: .now) ?? .now
+        return date.formatted(date: .omitted, time: .shortened)
     }
 
     // MARK: - Next round
@@ -222,8 +290,20 @@ struct ResultsView: View {
 
     private var actions: some View {
         HStack(spacing: 12) {
-            ShareLink(item: shareText) {
-                Text("Share")
+            Group {
+                if let scorecard {
+                    ShareLink(
+                        item: scorecard,
+                        message: Text(shareText),
+                        preview: SharePreview("NOVA", image: scorecard)
+                    ) {
+                        Text("Share")
+                    }
+                } else {
+                    ShareLink(item: shareText) {
+                        Text("Share")
+                    }
+                }
             }
             .buttonStyle(ResultsOutlineStyle(ink: ink))
 
@@ -234,9 +314,26 @@ struct ResultsView: View {
         .padding(.vertical, 12)
     }
 
-    /// A plain, factual line. No invented rank or percentile: there's no leaderboard.
+    /// One square per question and the streak — see `ShareGrid`. Travels with the image as
+    /// its message, and alone when the image couldn't be rendered.
     private var shareText: String {
-        "NOVA, \(Date.now.formatted(date: .abbreviated, time: .omitted)): \(engine.correctAnswers)/\(engine.questionCount) sunk, \(engine.score) points."
+        ShareGrid.text(outcomes: session.storyOutcomes, date: .now, streak: history.streak())
+    }
+
+    /// Rendered once the round is complete, not in `body`: this screen re-evaluates on
+    /// every geometry change while the flood runs, and an image per pass would stutter it.
+    private func renderScorecard() {
+        scorecard = ShareRenderer.image(
+            of: ScorecardCard(
+                mosaic: session.mosaic,
+                tints: session.stories.map(\.category.tint),
+                correct: engine.correctAnswers,
+                total: engine.questionCount,
+                streak: history.streak(),
+                date: .now
+            ),
+            size: ShareRenderer.cardSize
+        )
     }
 
 }
@@ -268,4 +365,5 @@ private struct ResultsOutlineStyle: ButtonStyle {
     .environment(DailySession())
     .environment(PlayHistory())
     .environment(AppRouter())
+    .environment(ReminderScheduler())
 }

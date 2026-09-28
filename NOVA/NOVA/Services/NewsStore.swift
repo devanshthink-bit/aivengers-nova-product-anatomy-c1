@@ -6,6 +6,15 @@
 import Foundation
 import Observation
 
+/// What the store needs from a generator: a batch of rewrites, and whether it was
+/// rate-limited. A protocol so tests can count calls and hold a batch mid-flight.
+protocol SummaryGenerating: Sendable {
+    var language: ContentLanguage { get set }
+    func generateReporting(for stories: [Story]) async -> QuestionGenerator.BatchResult
+}
+
+extension QuestionGenerator: SummaryGenerating {}
+
 /// Everything the Home tab browses: all stories from all feeds, grouped by source, plus
 /// the cache of generated summaries.
 ///
@@ -54,11 +63,17 @@ final class NewsStore {
     /// came back unusable.
     private var pending: [Story] = []
     private var worker: Task<Void, Never>?
+    /// Which worker `worker` is. A cancelled worker's `defer` must not clear the handle of
+    /// the one that replaced it, or a third would start beside the second.
+    private var workerID = UUID()
 
-    private let loader: FeedLoader
-    private let generator: QuestionGenerator
+    private var loader: FeedLoader
+    private var generator: any SummaryGenerating
 
-    init(loader: FeedLoader = FeedLoader(), generator: QuestionGenerator = QuestionGenerator()) {
+    /// Whether a rewrite worker is running.
+    var isGenerating: Bool { worker != nil }
+
+    init(loader: FeedLoader = FeedLoader(), generator: any SummaryGenerating = QuestionGenerator()) {
         self.loader = loader
         self.generator = generator
     }
@@ -70,6 +85,13 @@ final class NewsStore {
         loadState = .loading
 
         let fetched = await loader.fetchAll().sorted { $0.publishedAt > $1.publishedAt }
+        // A load cancelled by a language switch fetched nothing because it was cancelled,
+        // not because the feeds are down; reporting `.failed` would flash the error screen
+        // under the load that replaced it.
+        guard !Task.isCancelled else {
+            loadState = .idle
+            return
+        }
         guard !fetched.isEmpty else {
             loadState = .failed
             return
@@ -79,10 +101,28 @@ final class NewsStore {
         loadState = .loaded
     }
 
+    /// Swaps the news language and reloads.
+    ///
+    /// Cached summaries and queued rewrites go with the stories they belonged to: a rewrite
+    /// of an English story must not land after the reader has moved to a Hindi day. The
+    /// same language twice is a no-op, since `RootView` calls this on every launch.
+    func setLanguage(_ language: ContentLanguage) async {
+        guard loader.language != language || allStories.isEmpty else { return }
+        loader.language = language
+        generator.language = language
+        worker?.cancel()
+        worker = nil
+        pending = []
+        generatedSummaries = [:]
+        allStories = []
+        loadState = .idle
+        await load()
+    }
+
     /// Seeds the store with known stories, skipping the network.
     ///
     /// The seam tests and previews use. The app always goes through `load()`; this exists
-    /// so grouping, ordering and capping can be tested without nine live feeds deciding
+    /// so grouping, ordering and capping can be tested without live feeds deciding
     /// what the assertions see.
     func adopt(_ stories: [Story]) {
         allStories = stories.sorted { $0.publishedAt > $1.publishedAt }
@@ -93,9 +133,13 @@ final class NewsStore {
 
     /// The sources that actually returned something, in the order `RSSFeed.all` lists
     /// them. A feed that was down contributes no channel rather than an empty one.
+    ///
+    /// One entry per source name: Live Hindustan, News18 Hindi and Dainik Bhaskar each
+    /// arrive as several section feeds, and a reader thinks of a publisher as one channel.
     var sources: [RSSFeed] {
         let present = Set(allStories.map(\.source))
-        return RSSFeed.all.filter { present.contains($0.source) }
+        var seen: Set<String> = []
+        return RSSFeed.all.filter { present.contains($0.source) && seen.insert($0.source).inserted }
     }
 
     /// One source's stories, newest first, capped at `storiesPerSource`.
@@ -107,10 +151,30 @@ final class NewsStore {
     }
 
     /// The merged river for Home, newest first across every source.
-    func latest(limit: Int = 40) -> [Story] {
+    ///
+    /// Optionally one category's, for Home's category tabs.
+    func latest(limit: Int = 40, category: StoryCategory? = nil) -> [Story] {
         allStories
+            .filter { category == nil || $0.category == category }
             .prefix(limit)
             .map { $0.applying(summary: generatedSummaries[$0.id]) }
+    }
+
+    /// The tab actually in force: the chosen one if it is still offered, All otherwise.
+    ///
+    /// Computed wherever it is read, rather than reset by an `onChange`: the reset used to
+    /// live in the pinned tab header, which isn't alive while Home is off-screen, so a
+    /// language switch from Profile could leave Home on an empty "Science" river.
+    static func resolvedCategory(_ selection: StoryCategory?, among available: [StoryCategory]) -> StoryCategory? {
+        selection.flatMap { available.contains($0) ? $0 : nil }
+    }
+
+    /// The categories Home can offer a tab for: only those some feed actually returned —
+    /// Science has no Hindi feed, and any feed can be down — in the reader's topic order.
+    func categories(ordered topics: TopicSelection) -> [StoryCategory] {
+        let present = Set(allStories.map(\.category))
+        let base = StoryCategory.allCases.filter(present.contains)
+        return base.filter(topics.contains) + base.filter { !topics.contains($0) }
     }
 
     func story(withID id: StoryID) -> Story? {
@@ -134,9 +198,14 @@ final class NewsStore {
         enqueue(Array(stories), front: true)
     }
 
-    /// Same, for the stories at the top of Home's river.
-    func generateSummaries(forLatest limit: Int = NewsStore.riverGenerationLimit) {
-        enqueue(Array(allStories.prefix(limit)), front: false)
+    /// Same, for the stories at the top of Home's river — or of one category tab, which
+    /// jumps the queue because it is what the reader just asked to see.
+    func generateSummaries(
+        forLatest limit: Int = NewsStore.riverGenerationLimit,
+        category: StoryCategory? = nil
+    ) {
+        let stories = allStories.filter { category == nil || $0.category == category }
+        enqueue(Array(stories.prefix(limit)), front: category != nil)
     }
 
     private func enqueue(_ stories: [Story], front: Bool) {
@@ -158,14 +227,23 @@ final class NewsStore {
     private func startWorkerIfNeeded() {
         guard worker == nil else { return }
 
+        let id = UUID()
+        workerID = id
         worker = Task { [weak self] in
-            defer { self?.worker = nil }
+            defer {
+                if self?.workerID == id { self?.worker = nil }
+            }
 
             var backoff = Self.batchPause
 
-            while let batch = self?.nextBatch(), !batch.isEmpty {
+            // Cancellation is checked by hand. A cancelled task's requests fail at once and
+            // read as a rate limit, which put the batch back; `Task.sleep` then returned
+            // immediately, so a worker cancelled mid-batch by a language switch spun
+            // forever — thousands of calls a second, some reaching ZeroAPI for real.
+            while !Task.isCancelled, let batch = self?.nextBatch(), !batch.isEmpty {
                 guard let self else { return }
                 let result = await generator.generateReporting(for: batch)
+                guard !Task.isCancelled else { return }
 
                 for entry in result.deck where entry.question != nil {
                     // Only cache a usable object. A failed generation hands back the

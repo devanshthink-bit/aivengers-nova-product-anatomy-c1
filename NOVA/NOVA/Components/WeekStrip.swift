@@ -60,7 +60,7 @@ struct WeekStrip: View {
 
     private var summary: String {
         let played = days.filter(\.played).count
-        return "Played \(played) of the last \(days.count) days"
+        return String(localized: "Played \(played) of the last \(days.count) days")
     }
 }
 

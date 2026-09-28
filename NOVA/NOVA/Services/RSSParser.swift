@@ -116,8 +116,12 @@ private final class Delegate: NSObject, XMLParserDelegate {
 
         switch name {
         case "title": item.title = value
-        case "description", "summary": item.summary = value
-        case "content:encoded": if item.summary.isEmpty { item.summary = value }
+        case "description", "summary":
+            item.summary = value
+            item.html += value
+        case "content:encoded":
+            if item.summary.isEmpty { item.summary = value }
+            item.html += value
         case "link": if item.link.isEmpty { item.link = value }
         case "guid", "id": item.guid = value
         case "pubdate", "published", "updated", "dc:date": item.date = value
@@ -138,6 +142,8 @@ private struct PartialItem {
     var date = ""
     var imageURL: URL?
     var imageWidth = -1
+    /// The item's raw description and content HTML, kept for the picture fallback below.
+    var html = ""
 
     func story(in feed: RSSFeed) -> Story? {
         let cleanTitle = title.strippingHTML
@@ -156,8 +162,23 @@ private struct PartialItem {
             source: feed.source,
             category: feed.category,
             publishedAt: Self.date(from: date) ?? .now,
-            artwork: Artwork(url: imageURL)
+            artwork: Artwork(url: imageURL ?? Self.firstImage(in: html))
         )
+    }
+
+    /// WordPress feeds (Inc42 among them) send no media tag at all: the featured image is
+    /// the first `<img>` inside the description's HTML. Only a fallback — a media tag, when
+    /// there is one, is the publisher's own choice of picture and wins.
+    static func firstImage(in html: String) -> URL? {
+        guard
+            let tag = html.range(of: #"<img\b[^>]*>"#, options: [.regularExpression, .caseInsensitive]),
+            let src = html[tag].range(of: #"src\s*=\s*["']([^"']+)["']"#, options: .regularExpression)
+        else { return nil }
+
+        let attribute = html[tag][src]
+        guard let open = attribute.firstIndex(where: { $0 == "\"" || $0 == "'" }) else { return nil }
+        let value = attribute[attribute.index(after: open)...].dropLast()
+        return URL(string: String(value).replacingOccurrences(of: "&amp;", with: "&"))
     }
 
     /// Real feeds disagree about dates: BBC sends `GMT`, The Hindu and NDTV `+0530`,

@@ -25,6 +25,9 @@ struct StoryReaderView: View {
     @Environment(DailySession.self) private var session
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
+
+    private var language: ContentLanguage { ContentLanguage(rawValue: languageRaw) ?? .english }
 
     @State private var topIndex = 0
     @State private var drag: CGSize = .zero
@@ -93,10 +96,24 @@ struct StoryReaderView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             Button("Try again") {
-                Task { await session.load(from: LiveNewsService()) }
+                Task {
+                    await session.load(from: LiveNewsService(
+                        loader: FeedLoader(language: language),
+                        generator: QuestionGenerator(language: language),
+                        topics: session.topics
+                    ))
+                }
             }
             .buttonStyle(PaperButtonStyle())
             .padding(.top, 10)
+
+            // Three Hindi publishers are fewer eggs than eleven English ones. If they are
+            // all down, the way out is one tap, not a trip to Profile.
+            if language == .hindi {
+                Button("Read in English instead") { languageRaw = ContentLanguage.english.rawValue }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.top, 4)
+            }
         }
         .padding(.horizontal, 32)
         .frame(maxWidth: Nova.readingMaxWidth)
