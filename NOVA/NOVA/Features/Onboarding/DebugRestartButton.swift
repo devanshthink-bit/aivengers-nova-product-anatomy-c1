@@ -52,6 +52,8 @@ enum OnboardingReset {
         let defaults = UserDefaults.standard
         defaults.set("", forKey: "readerName")
         defaults.set("", forKey: "pickedTopics")
+        // Back to the phone's own default, so the first page asks the question afresh.
+        defaults.removeObject(forKey: ContentLanguage.storageKey)
         session.applyTopics(TopicSelection())
         router.popToReader()
         // Finishing onboarding should land on the deck, not back on the tab that asked.

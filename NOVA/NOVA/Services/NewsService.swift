@@ -24,15 +24,20 @@ protocol NewsService: Sendable {
 /// and the Home tab need the same stories, and fetching every feed twice on launch would
 /// be eighteen requests for one screenful of news.
 struct FeedLoader: Sendable {
-    var feeds: [RSSFeed] = RSSFeed.all
+    var language: ContentLanguage = .english
+    /// Overridable for tests. Nil means the reader's language only, so a Hindi reader
+    /// doesn't pay for the English feeds they will never see (and the other way round).
+    var feeds: [RSSFeed]? = nil
     var session: URLSession = .shared
+
+    var activeFeeds: [RSSFeed] { feeds ?? RSSFeed.feeds(for: language) }
 
     /// Fetches every feed at once. A feed that fails contributes nothing and is not an
     /// error — with this many publishers, one being down is routine, and waiting on it or
     /// failing the whole load because of it would be the wrong trade.
     func fetchAll() async -> [Story] {
         await withTaskGroup(of: [Story].self) { group in
-            for feed in feeds {
+            for feed in activeFeeds {
                 group.addTask {
                     do {
                         var request = URLRequest(url: feed.url)
@@ -87,6 +92,10 @@ struct LiveNewsService: NewsService {
             fetched = await loader.fetchAll()
         }
         guard !fetched.isEmpty else { throw NewsServiceError.noStories }
+        // The questions are written in the language the feeds were read in, whatever the
+        // generator was built with — a Hindi story asked about in English tests translation.
+        var generator = generator
+        generator.language = loader.language
         return await generator.generate(for: Self.pick(from: fetched, topics: topics))
     }
 

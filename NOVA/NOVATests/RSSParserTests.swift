@@ -308,7 +308,10 @@ struct IndianPublisherSampleTests {
         ("thehindu-sport", .sports),
         ("bollywoodhungama", .entertainment),
         ("businessstandard", .business),
-        ("inc42", .technology)
+        ("inc42", .technology),
+        ("livehindustan", .india),
+        ("news18hindi", .india),
+        ("bhaskar", .india)
     ]
 
     @Test("Every sample yields stories with a title, a date and a picture", arguments: samples)

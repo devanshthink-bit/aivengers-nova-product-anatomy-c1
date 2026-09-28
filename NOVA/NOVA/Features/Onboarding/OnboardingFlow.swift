@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// The five pages, and the water that carries each one to the next.
+/// The six pages, and the water that carries each one to the next.
 ///
 /// The flow owns the ripple so it belongs to every transition rather than to one screen.
 /// Tapping the button drops a ring at its centre; the page underneath swaps at 45 % of
@@ -16,10 +16,11 @@ struct OnboardingFlow: View {
 
     @AppStorage("readerName") private var readerName = ""
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var page: OnboardingPage = .manifesto
+    @State private var page: OnboardingPage = .language
     @State private var isAdvancing = false
 
     /// The ring in flight, and when it started. Nil between transitions.
@@ -34,6 +35,13 @@ struct OnboardingFlow: View {
         Binding(
             get: { TopicSelection(rawValue: pickedTopicsRaw) },
             set: { pickedTopicsRaw = $0.rawValue }
+        )
+    }
+
+    private var language: Binding<ContentLanguage> {
+        Binding(
+            get: { ContentLanguage(rawValue: languageRaw) ?? .english },
+            set: { languageRaw = $0.rawValue }
         )
     }
 
@@ -59,7 +67,8 @@ struct OnboardingFlow: View {
     }
 
     #if DEBUG
-    /// `xcrun simctl launch … -onboardingPage 4` opens straight onto that page, so a
+    /// `xcrun simctl launch … -onboardingPage 5` opens straight onto that page (1 is the
+    /// language, 5 the topics), so a
     /// single screen can be iterated on without walking the whole journey each time.
     /// Reading a launch argument is safe; writing one back is not, which is why the
     /// restart button exists instead of a `-hasSeenWelcome` flag.
@@ -120,6 +129,8 @@ struct OnboardingFlow: View {
 
             Group {
                 switch page {
+                case .language:
+                    LanguagePage(language: language)
                 case .manifesto:
                     ManifestoPage()
                 case .ritual:
@@ -175,6 +186,7 @@ struct OnboardingFlow: View {
 
     private var buttonTitle: String {
         switch page {
+        case .language: "Continue"
         case .manifesto: "Get started"
         case .ritual: "Sounds good"
         case .name: readerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Skip for now" : "Continue"

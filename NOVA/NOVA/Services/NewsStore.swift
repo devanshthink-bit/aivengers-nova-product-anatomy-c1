@@ -55,8 +55,8 @@ final class NewsStore {
     private var pending: [Story] = []
     private var worker: Task<Void, Never>?
 
-    private let loader: FeedLoader
-    private let generator: QuestionGenerator
+    private var loader: FeedLoader
+    private var generator: QuestionGenerator
 
     init(loader: FeedLoader = FeedLoader(), generator: QuestionGenerator = QuestionGenerator()) {
         self.loader = loader
@@ -79,6 +79,24 @@ final class NewsStore {
         loadState = .loaded
     }
 
+    /// Swaps the news language and reloads.
+    ///
+    /// Cached summaries and queued rewrites go with the stories they belonged to: a rewrite
+    /// of an English story must not land after the reader has moved to a Hindi day. The
+    /// same language twice is a no-op, since `RootView` calls this on every launch.
+    func setLanguage(_ language: ContentLanguage) async {
+        guard loader.language != language || allStories.isEmpty else { return }
+        loader.language = language
+        generator.language = language
+        worker?.cancel()
+        worker = nil
+        pending = []
+        generatedSummaries = [:]
+        allStories = []
+        loadState = .idle
+        await load()
+    }
+
     /// Seeds the store with known stories, skipping the network.
     ///
     /// The seam tests and previews use. The app always goes through `load()`; this exists
@@ -93,9 +111,13 @@ final class NewsStore {
 
     /// The sources that actually returned something, in the order `RSSFeed.all` lists
     /// them. A feed that was down contributes no channel rather than an empty one.
+    ///
+    /// One entry per source name: Live Hindustan, News18 Hindi and Dainik Bhaskar each
+    /// arrive as several section feeds, and a reader thinks of a publisher as one channel.
     var sources: [RSSFeed] {
         let present = Set(allStories.map(\.source))
-        return RSSFeed.all.filter { present.contains($0.source) }
+        var seen: Set<String> = []
+        return RSSFeed.all.filter { present.contains($0.source) && seen.insert($0.source).inserted }
     }
 
     /// One source's stories, newest first, capped at `storiesPerSource`.

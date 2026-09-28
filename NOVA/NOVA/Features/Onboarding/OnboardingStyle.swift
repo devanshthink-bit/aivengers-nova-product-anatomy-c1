@@ -107,6 +107,77 @@ struct OnboardingButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Choice tile
+
+/// A choice on charcoal: a topic, or the news language.
+///
+/// Chosen inverts to white — the same move as the white chevron and Profile's ink chips —
+/// so the selection reads without colour. A category's tint stays only as the 8pt square
+/// (the Coloured Square Rule). It used to flood the whole tile, and with two or three
+/// chosen the page became a patchwork with a second accent system.
+struct ChoiceTile: View {
+    let title: String
+    let symbol: String?
+    let tint: Color?
+    let isOn: Bool
+    var height: CGFloat = Onboarding.tileHeight
+
+    private var ink: AnyShapeStyle {
+        isOn ? AnyShapeStyle(Nova.charcoal) : AnyShapeStyle(.secondary)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(isOn ? AnyShapeStyle(Nova.charcoal) : AnyShapeStyle(.white.opacity(0.55)))
+
+                Spacer(minLength: 8)
+            }
+
+            HStack(spacing: 8) {
+                if let tint {
+                    RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                        .fill(tint)
+                        .frame(width: 8, height: 8)
+                }
+                Text(title)
+                    .novaMeta(.subheadline, weight: .bold)
+                    .foregroundStyle(ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: symbol == nil ? .leading : .topLeading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, symbol == nil ? 0 : 14)
+        .frame(height: height)
+        .background {
+            RoundedRectangle(cornerRadius: Onboarding.tileRadius, style: .continuous)
+                .fill(isOn ? AnyShapeStyle(.white) : AnyShapeStyle(Onboarding.surface))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: Onboarding.tileRadius, style: .continuous)
+                .strokeBorder(Nova.charcoalLine, lineWidth: isOn ? 0 : 1)
+        }
+        .overlay(alignment: .topTrailing) {
+            if isOn {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(.white)
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(Nova.charcoal))
+                    .padding(12)
+                    .transition(.scale(scale: 0.4).combined(with: .opacity))
+            }
+        }
+        // The chosen tiles lift off the page; the rest stay flat against it.
+        .shadow(color: isOn ? .black.opacity(0.35) : .clear, radius: 14, y: 8)
+        .scaleEffect(isOn ? 1 : 0.98)
+    }
+}
+
 // MARK: - Step marker
 
 /// "01 / 05" in the top corner. The only chrome on the page, and small enough to ignore.

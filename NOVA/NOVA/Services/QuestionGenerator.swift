@@ -29,6 +29,10 @@ struct QuestionGenerator: Sendable {
 
     var endpoint: URL = QuestionGenerator.endpoint
     var session: URLSession = .shared
+    /// What the summary, question and answers are written in. Follows the feeds: a Hindi
+    /// reader's stories arrive in Hindi, and a question in English about a Hindi summary
+    /// would test translation rather than reading.
+    var language: ContentLanguage = .english
 
     /// Rewrites each story's summary and pairs it with a question.
     ///
@@ -130,7 +134,7 @@ struct QuestionGenerator: Sendable {
                 maxTokens: 400,
                 temperature: 0.3,
                 messages: [
-                    .init(role: "system", content: Self.systemPrompt),
+                    .init(role: "system", content: Self.systemPrompt(for: language)),
                     .init(role: "user", content: Self.userPrompt(for: story))
                 ]
             )
@@ -160,7 +164,20 @@ struct QuestionGenerator: Sendable {
 
     // MARK: - Prompts
 
-    private static let systemPrompt = """
+    static func systemPrompt(for language: ContentLanguage) -> String {
+        switch language {
+        case .english: basePrompt
+        case .hindi: basePrompt + "\n" + hindiRule
+        }
+    }
+
+    private static let hindiRule = """
+        - Write "summary", "question" and every answer in Hindi, in Devanagari script. Keep \
+        people's names, numbers, dates and abbreviations (BJP, ISRO, IPL) as the story gives \
+        them. The JSON keys stay in English.
+        """
+
+    private static let basePrompt = """
         You write quiz questions for a news app.
 
         Return STRICT JSON and nothing else. No markdown, no code fences, no preamble.

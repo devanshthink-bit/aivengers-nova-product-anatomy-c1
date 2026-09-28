@@ -259,4 +259,25 @@ extension View {
         self
         #endif
     }
+
+    /// The tab bar placement is iOS-only too. On macOS the tabs are a sidebar or a
+    /// segmented toolbar item that never sits under the slingshot, so there is nothing
+    /// to hide there.
+    func novaHiddenTabBar() -> some View {
+        #if os(iOS) || os(visionOS)
+        toolbar(.hidden, for: .tabBar)
+        #else
+        self
+        #endif
+    }
+}
+
+extension Nova {
+    /// Opens NOVA's own page in Settings (per-app language, notifications). Wrapped here
+    /// because `UIApplication.openSettingsURLString` doesn't exist on macOS.
+    static func openAppSettings(using openURL: OpenURLAction) {
+        #if canImport(UIKit)
+        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        #endif
+    }
 }

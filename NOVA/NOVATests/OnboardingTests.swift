@@ -153,17 +153,19 @@ struct OnboardingPageTests {
 
     @Test("The pages run in order and the last one has no next")
     func pagesRunInOrder() {
-        #expect(OnboardingPage.allCases.first == .manifesto)
+        #expect(OnboardingPage.allCases.first == .language)
         #expect(OnboardingPage.allCases.last == .ready)
+        #expect(OnboardingPage.count == 6)
         #expect(OnboardingPage.ready.next == nil)
         #expect(OnboardingPage.ready.isLast)
+        #expect(OnboardingPage.language.next == .manifesto)
         #expect(OnboardingPage.manifesto.next == .ritual)
         #expect(OnboardingPage.manifesto.isLast == false)
     }
 
     @Test("Walking next from the first page reaches the last one exactly once")
     func walkingReachesTheEnd() {
-        var page = OnboardingPage.manifesto
+        var page = OnboardingPage.language
         var visited = [page]
         while let next = page.next {
             page = next
@@ -175,7 +177,7 @@ struct OnboardingPageTests {
 
     @Test("Numbering is 1-based for the progress dots")
     func numbering() {
-        #expect(OnboardingPage.manifesto.number == 1)
+        #expect(OnboardingPage.language.number == 1)
         #expect(OnboardingPage.ready.number == OnboardingPage.count)
     }
 }

@@ -15,15 +15,31 @@ struct RSSFeed: Identifiable, Hashable, Sendable {
     let source: String
     let category: StoryCategory
     let url: URL
+    /// Which reader this feed is for. Pinned per feed like the category, and for the
+    /// same reason: nothing in an item says reliably what language it is in.
+    let language: ContentLanguage
 
     var id: URL { url }
+
+    init(source: String, category: StoryCategory, url: URL, language: ContentLanguage = .english) {
+        self.source = source
+        self.category = category
+        self.url = url
+        self.language = language
+    }
 }
 
 extension RSSFeed {
     /// The feeds NOVA reads. Every URL here was fetched and confirmed to return items
     /// before it was added — several widely-recommended feeds are quietly dead and are
     /// listed at the bottom so they don't get re-added.
-    static let all: [RSSFeed] = [
+    static func feeds(for language: ContentLanguage) -> [RSSFeed] {
+        all.filter { $0.language == language }
+    }
+
+    static let all: [RSSFeed] = english + hindi
+
+    private static let english: [RSSFeed] = [
         // India
         RSSFeed(
             source: "The Hindu",
@@ -132,6 +148,115 @@ extension RSSFeed {
             source: "Bollywood Hungama",
             category: .entertainment,
             url: URL(string: "https://www.bollywoodhungama.com/rss/news.xml")!
+        )
+    ]
+
+    /// Hindi: section feeds only, so each one's category is pure. The three publishers'
+    /// general feeds all mix politics, cricket and Bollywood in one list. No Hindi science
+    /// feed passed the checks below, so a Hindi deck runs on six categories and `pick`
+    /// tops up the fifth slot from whichever came back.
+    private static let hindi: [RSSFeed] = [
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .india,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/national/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .world,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/international/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .sports,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/cricket/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .business,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/business/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .entertainment,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/entertainment/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Live Hindustan",
+            category: .technology,
+            url: URL(string: "https://api.livehindustan.com/feeds/rss/gadgets/rssfeed.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .india,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/nation/nation.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .world,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/world/world.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .sports,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/sports/sports.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .business,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/business/business.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .entertainment,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/entertainment/entertainment.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "News18 Hindi",
+            category: .technology,
+            url: URL(string: "https://hindi.news18.com/rss/khabar/tech/tech.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Dainik Bhaskar",
+            category: .india,
+            url: URL(string: "https://www.bhaskar.com/rss-v1--category-1061.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Dainik Bhaskar",
+            category: .world,
+            url: URL(string: "https://www.bhaskar.com/rss-v1--category-1125.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Dainik Bhaskar",
+            category: .sports,
+            url: URL(string: "https://www.bhaskar.com/rss-v1--category-1053.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Dainik Bhaskar",
+            category: .business,
+            url: URL(string: "https://www.bhaskar.com/rss-v1--category-1051.xml")!,
+            language: .hindi
+        ),
+        RSSFeed(
+            source: "Dainik Bhaskar",
+            category: .entertainment,
+            url: URL(string: "https://www.bhaskar.com/rss-v1--category-3998.xml")!,
+            language: .hindi
         )
     ]
 

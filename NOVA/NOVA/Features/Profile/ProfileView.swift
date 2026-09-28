@@ -18,12 +18,16 @@ struct ProfileView: View {
 
     @AppStorage("readerName") private var readerName = ""
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
+
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 ProfileHeader(name: readerName)
                 nameSection
+                languageSection
                 topicsSection
                 todaySection
                 #if DEBUG
@@ -55,6 +59,42 @@ struct ProfileView: View {
                 // Trimmed only when the reader is done, so a space typed between two
                 // names isn't eaten mid-word.
                 .onSubmit { readerName = readerName.trimmingCharacters(in: .whitespaces) }
+        }
+    }
+
+    // MARK: - Language
+
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            ProfileSection(
+                title: "News language",
+                footnote: "Changes today's stories. Your answers so far are kept."
+            ) {
+                Picker("News language", selection: $languageRaw) {
+                    ForEach(ContentLanguage.allCases, id: \.self) { language in
+                        Text(language.nativeName).tag(language.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            // The app's own words follow iOS's per-app language, which the String Catalog
+            // makes appear in Settings. Linking there beats a second in-app switch that
+            // would miss every string not rendered through a view.
+            ProfileSection(
+                title: "App language",
+                footnote: "The app's own words follow your iPhone. To see them in Hindi, choose Hindi in Settings → NOVA → Language."
+            ) {
+                Button {
+                    Nova.openAppSettings(using: openURL)
+                } label: {
+                    Label("Open Settings", systemImage: "gear")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .profileSurface()
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 

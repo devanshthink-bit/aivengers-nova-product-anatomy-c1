@@ -57,6 +57,36 @@ struct NewsStoreTests {
         #expect(store.stories(from: "BBC News").count == NewsStore.storiesPerSource)
     }
 
+    @Test("A publisher with several section feeds is one channel on the rail")
+    func sectionFeedsAreOneChannel() async {
+        let store = await store(with: [
+            story("a", source: "Live Hindustan", category: .india),
+            story("b", source: "Live Hindustan", category: .sports)
+        ])
+
+        #expect(store.sources.map(\.source) == ["Live Hindustan"])
+    }
+
+    @Test("Switching to the language already loaded keeps the stories")
+    func sameLanguageIsANoOp() async {
+        let store = await store(with: [story("a", source: "BBC News")])
+
+        await store.setLanguage(.english)
+
+        #expect(store.allStories.map(\.id) == [StoryID("a")])
+    }
+
+    @Test("Switching language drops the other language's stories")
+    func languageSwitchClears() async {
+        let store = await store(with: [story("a", source: "BBC News")])
+
+        await store.setLanguage(.hindi)
+
+        // Loader points at no feeds, so the reload finds nothing — what matters is that no
+        // English story survives into a Hindi day.
+        #expect(store.allStories.isEmpty)
+    }
+
     @Test("The rail lists only sources that actually returned stories")
     func railSkipsEmptySources() async {
         let store = await store(with: [

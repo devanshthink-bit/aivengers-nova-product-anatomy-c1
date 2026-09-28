@@ -16,6 +16,12 @@ struct RootView: View {
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("pickedTopics") private var pickedTopicsRaw = ""
+    @AppStorage(ContentLanguage.storageKey) private var languageRaw = ContentLanguage.preferred().rawValue
+    /// The voice panel keeps its own choice; it only follows the news language when that
+    /// changes, so a reader who picked the other chip keeps it across launches.
+    @AppStorage("voiceLanguage") private var voiceLanguageRaw = VoiceLanguage.preferred().rawValue
+
+    private var language: ContentLanguage { ContentLanguage(rawValue: languageRaw) ?? .english }
 
     var body: some View {
         ZStack {
@@ -56,7 +62,7 @@ struct RootView: View {
                                 // A round owns the screen. The shot is aimed near the
                                 // bottom edge, so a floating tab bar would sit directly
                                 // under the slingshot and steal the drag.
-                                .toolbar(.hidden, for: .tabBar)
+                                .novaHiddenTabBar()
                             }
                     }
                 }
@@ -109,6 +115,7 @@ struct RootView: View {
         .environment(history)
         .environment(voice)
         .tint(Nova.accent)
+        .onChange(of: languageRaw) { voiceLanguageRaw = language.voice.rawValue }
         // Also on every later launch, not just the one that finished onboarding —
         // otherwise a stored preference silently stops applying the next morning.
         //
@@ -116,25 +123,22 @@ struct RootView: View {
         // lands, and `load` re-applies them itself once the stories arrive.
         // One network pass for both tabs: the store reads every feed, then the round
         // is built from those same stories instead of fetching them again.
-        .task {
+        //
+        // Keyed on the news language, so choosing the other one in Profile or onboarding
+        // reloads Home and rebuilds the day's deck in it.
+        .task(id: languageRaw) {
             session.applyTopics(TopicSelection(rawValue: pickedTopicsRaw))
-            await store.load()
+            await store.setLanguage(language)
             #if DEBUG
             // `-previewDeck YES`: the hand-written deck, whose questions always exist, so
             // the round can be exercised on a day the question service is down.
             if UserDefaults.standard.bool(forKey: "previewDeck") {
                 await session.load(from: PreviewNewsService())
             } else {
-                await session.load(from: LiveNewsService(
-                    prefetched: store.allStories,
-                    topics: TopicSelection(rawValue: pickedTopicsRaw)
-                ))
+                await session.load(from: liveService)
             }
             #else
-            await session.load(from: LiveNewsService(
-                    prefetched: store.allStories,
-                    topics: TopicSelection(rawValue: pickedTopicsRaw)
-                ))
+            await session.load(from: liveService)
             #endif
             #if DEBUG
             simulateRoundIfAsked()
@@ -154,6 +158,15 @@ struct RootView: View {
             }
         }
         #endif
+    }
+
+    private var liveService: LiveNewsService {
+        LiveNewsService(
+            loader: FeedLoader(language: language),
+            generator: QuestionGenerator(language: language),
+            prefetched: store.allStories,
+            topics: TopicSelection(rawValue: pickedTopicsRaw)
+        )
     }
 
     /// The mic stays off the charcoal round: the slingshot is aimed near the bottom edge,
